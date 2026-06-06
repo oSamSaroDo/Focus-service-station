@@ -1090,11 +1090,17 @@ function saveDate(silent = false) {
   // ฟังก์ชันอ่านค่า input ที่ทำงานได้ทั้ง iOS Safari และ browser อื่น
   function readNum(el) {
     if (!el) return '';
-    // iOS Safari: valueAsNumber แม่นกว่า .value สำหรับ type="number"
+    // ลอง .value ก่อน (ได้ string ที่ผู้ใช้พิมพ์จริงๆ)
+    const raw = String(el.value).trim().replace(',', '.');
+    if (raw !== '' && raw !== '0' && !isNaN(parseFloat(raw))) {
+      return parseFloat(raw);
+    }
+    // fallback: valueAsNumber
     const vn = el.valueAsNumber;
     if (!isNaN(vn)) return vn;
-    const raw = el.value.trim().replace(',', '.');
-    return raw === '' ? '' : (parseFloat(raw) || '');
+    // ถ้า raw เป็น '0' ให้คืน 0
+    if (raw === '0') return 0;
+    return '';
   }
 
   const entry = {};
@@ -1281,15 +1287,16 @@ function loadDate(dateKey) {
   // ฟังก์ชัน set ค่า input ที่ทำงานได้ทั้ง iOS Safari และ browser อื่น
   function setNum(el, val) {
     if (!el) return;
-    if (val === '' || val === undefined || val === null) {
+    if (val === '' || val === undefined || val === null || val === false) {
       el.value = '';
-    } else {
-      // iOS Safari: ใช้ valueAsNumber สำหรับ type="number"
-      if (el.type === 'number') {
-        el.valueAsNumber = parseFloat(val);
-      } else {
-        el.value = val;
-      }
+      return;
+    }
+    const num = parseFloat(val);
+    if (isNaN(num)) { el.value = ''; return; }
+    // set ทั้งสองวิธีให้ iOS Safari รับแน่นอน
+    el.value = String(num);
+    if (el.type === 'number') {
+      try { el.valueAsNumber = num; } catch(e) {}
     }
   }
 
