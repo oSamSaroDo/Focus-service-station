@@ -761,6 +761,7 @@
 
 <script>
 // =================== DATA FROM EXCEL ===================
+/*SHEETDATA_START*/
 const sheetData = {
   "26-5-69": { g95n_open:6823.22, g95n_close:6938.41, g95l_open:3391.36, g95l_close:3472.16, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:15973.99, dn_close:16346.04, dl_open:12149.06, dl_close:12449.01, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:0, change:3700, disc:0.5 },
   "28-5-69": { g95n_open:7181.4, g95n_close:7310.12, g95l_open:3610.36, g95l_close:3698.08, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:16722.75, dn_close:17073.7, dl_open:12983.35, dl_close:13211.35, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:100.12, change:3700, disc:0.5 },
@@ -770,6 +771,7 @@ const sheetData = {
   "3-6-69":  { g95n_open:8188.9, g95n_close:8310.17, g95l_open:4161.28, g95l_close:4216.26, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:19694.57, dn_close:20194.9, dl_open:15149.05, dl_close:15458.09, g95_price:45.86, g91_price:45.39, d_price:40.95, air_liter:105, change:3700, disc:0.5 },
   "5-6-69":  { g95n_open:8473.72, g95n_close:8573.68, g95l_open:4318.12, g95l_close:4400.77, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:20563.23, dn_close:21071.85, dl_open:15869.88, dl_close:16231.3, g95_price:46.95, g91_price:45.35, d_price:41.98, air_liter:150, change:3700, disc:0.5 },
 };
+/*SHEETDATA_END*/
 
 // =================== TRANSFER ROWS ===================
 let transferRows = [{ label:"พักยอด", amount:0 }];
@@ -1128,7 +1130,12 @@ function downloadHTML() {
   // แทนที่ sheetData ในไฟล์ด้วยข้อมูล RAM ล่าสุด
   let html = document.documentElement.outerHTML;
   const newSheetData = 'const sheetData = ' + JSON.stringify(sheetData, null, 2) + ';';
-  html = html.replace(/const sheetData\s*=\s*\{[\s\S]*?\n\};/, newSheetData);
+  // แทนที่ระหว่าง marker
+  const markerStart = html.indexOf('/*SHEETDATA_START*/');
+  const markerEnd   = html.indexOf('/*SHEETDATA_END*/') + '/*SHEETDATA_END*/'.length;
+  if (markerStart !== -1 && markerEnd > markerStart) {
+    html = html.slice(0, markerStart) + '/*SHEETDATA_START*/\n' + newSheetData + '\n/*SHEETDATA_END*/' + html.slice(markerEnd);
+  }
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
