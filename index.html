@@ -361,9 +361,6 @@
     .fuel-fields { flex-direction: column; }
   }
 </style>
-<template id="sheetdata-store">
-{}
-</template>
 </head>
 <body>
 
@@ -755,7 +752,6 @@
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearAll()">🗑 ล้างข้อมูล</button>
       <button class="btn btn-ghost" onclick="downloadHTML()" style="border-color:#58a6ff; color:#58a6ff;">⬇ ดาวน์โหลด HTML</button>
-      <button class="btn btn-primary" onclick="saveDate()" style="background:var(--accent3); min-width:120px;">💾 บันทึกข้อมูล</button>
       <button class="btn btn-primary" onclick="window.print()">🖨 พิมพ์ / บันทึก PDF</button>
     </div>
 
@@ -764,19 +760,15 @@
 
 <script>
 // =================== DATA FROM EXCEL ===================
-/*SHEETDATA_START*/
-// sheetData โหลดจาก <script id="sheetdata-store">
-const _raw = document.getElementById('sheetdata-store').innerHTML.trim();
-const sheetData = (_raw && _raw !== '{}') ? JSON.parse(_raw) : {
+const sheetData = {
   "26-5-69": { g95n_open:6823.22, g95n_close:6938.41, g95l_open:3391.36, g95l_close:3472.16, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:15973.99, dn_close:16346.04, dl_open:12149.06, dl_close:12449.01, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:0, change:3700, disc:0.5 },
   "28-5-69": { g95n_open:7181.4, g95n_close:7310.12, g95l_open:3610.36, g95l_close:3698.08, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:16722.75, dn_close:17073.7, dl_open:12983.35, dl_close:13211.35, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:100.12, change:3700, disc:0.5 },
   "30-5-69": { g95n_open:7548.12, g95n_close:7650.03, g95l_open:3806.29, g95l_close:3858.55, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:17793.97, dn_close:17916.23, dl_open:13827.35, dl_close:13927.45, g95_price:45.86, g91_price:45.35, d_price:40.99, air_liter:140.55, change:3700, disc:0.5 },
   "31-5-69": { g95n_open:7685.26, g95n_close:7793.11, g95l_open:3861.39, g95l_close:3952.84, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:17962.59, dn_close:18432.02, dl_open:13961.61, dl_close:14178.77, g95_price:45.86, g91_price:40.99, d_price:40.99, air_liter:0, change:3700, disc:0.5 },
   "1-6-69":  { g95n_open:7834.07, g95n_close:7933.16, g95l_open:3956.99, g95l_close:4023.77, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:18485.8, dn_close:18974.79, dl_open:14315.52, dl_close:14705.68, g95_price:45.86, g91_price:45.39, d_price:40.95, air_liter:150, change:3700, disc:0.5 },
   "3-6-69":  { g95n_open:8188.9, g95n_close:8310.17, g95l_open:4161.28, g95l_close:4216.26, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:19694.57, dn_close:20194.9, dl_open:15149.05, dl_close:15458.09, g95_price:45.86, g91_price:45.39, d_price:40.95, air_liter:105, change:3700, disc:0.5 },
-  "5-6-69":  { g95n_open:8473.72, g95n_close:8573.68, g95l_open:4318.12, g95l_close:4400.77, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:20563.23, dn_close:21071.85, dl_open:15869.88, dl_close:16231.3, g95_price:46.95, g91_price:45.35, d_price:41.98, air_liter:150, change:3700, disc:0.5 }
+  "5-6-69":  { g95n_open:8473.72, g95n_close:8573.68, g95l_open:4318.12, g95l_close:4400.77, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:20563.23, dn_close:21071.85, dl_open:15869.88, dl_close:16231.3, g95_price:46.95, g91_price:45.35, d_price:41.98, air_liter:150, change:3700, disc:0.5 },
 };
-/*SHEETDATA_END*/
 
 // =================== TRANSFER ROWS ===================
 let transferRows = [{ label:"พักยอด", amount:0 }];
@@ -1070,104 +1062,15 @@ document.getElementById('addDateModal').addEventListener('click', function(e) {
   if (e.target === this) closeAddDate();
 });
 
-// =================== SAVE DATE ===================
-function saveDate(silent = false) {
-  const activeTab = document.querySelector('.date-tab.active');
-  if (!activeTab) {
-    if (!silent) alert('⚠️ กรุณาเลือกวันที่ก่อนบันทึก');
-    return;
-  }
-  const dateKey = activeTab.dataset.date;
-
-  // รวบรวม fields มิเตอร์ + ราคา
-  const fields = ['g95n_open','g95n_close','g95l_open','g95l_close',
-    'g91n_open','g91n_close','g91l_open','g91l_close',
-    'dn_open','dn_close','dl_open','dl_close',
-    'd4n_open','d4n_close','d4l_open','d4l_close',
-    'g95_price','g91_price','d_price','d4_price',
-    'air_liter','air_price_custom','air_disc_custom','must_send_input'];
-
-  const entry = {};
-  fields.forEach(f => {
-    const el = document.getElementById(f);
-    const raw = el ? el.value.trim() : '';
-    // เก็บตัวเลขจริง ถ้าว่างเก็บเป็น '' เพื่อให้ load กลับมาแสดงว่างเหมือนเดิม
-    entry[f] = raw === '' ? '' : parseFloat(raw);
-  });
-
-  // ตั้งค่าทั่วไป
-  entry.change = parseFloat(document.getElementById('g_change').value) || 3700;
-  entry.disc   = parseFloat(document.getElementById('g_discount_per_liter').value) || 0.5;
-
-  // บันทึก cash — ใช้ key เป็น string เสมอเพื่อให้ JSON ไม่สับสน
-  const cashData = {};
-  DENOMS.forEach(d => {
-    const el = document.getElementById('cash_' + d.value);
-    const raw = el ? el.value.trim() : '';
-    cashData[String(d.value)] = raw === '' ? 0 : (parseFloat(raw) || 0);
-  });
-  entry.cash = cashData;
-
-  // บันทึก transfer rows
-  entry.transfer = transferRows.map(r => ({ label: r.label, amount: r.amount || 0 }));
-
-  // เขียนกลับ sheetData
-  sheetData[dateKey] = entry;
-
-  // แสดง feedback
-  const btn = document.querySelector('[onclick="saveDate()"]');
-  if (btn) {
-    const orig = btn.textContent;
-    btn.textContent = '✅ บันทึกแล้ว!';
-    btn.style.background = 'var(--green)';
-    setTimeout(() => {
-      btn.textContent = orig;
-      btn.style.background = '';
-    }, 1800);
-  }
-}
-
 // =================== DOWNLOAD HTML ===================
 function downloadHTML() {
-  // บันทึกข้อมูลหน้าจอก่อนเสมอ
-  saveDate(true);
-
-  // อ่านไฟล์ HTML ต้นฉบับ แล้วแทนที่ JSON store ด้วยข้อมูลปัจจุบัน
-  fetch(location.href)
-    .then(r => r.text())
-    .then(html => {
-      const json = JSON.stringify(sheetData, null, 2);
-
-      // แทนที่ระหว่าง <script id="sheetdata-store"...> ... </script>
-      html = html.replace(
-        /(<template[^>]*id="sheetdata-store"[^>]*>)([\s\S]*?)(<\/template>)/,
-        '$1\n' + json + '\n$3'
-      );
-
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
-      a.download = `บันทึก_${dateLabel}.html`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    })
-    .catch(() => {
-      // fallback: ถ้า fetch ไม่ได้ (เปิดจาก file://) ใช้ outerHTML พร้อม inject JSON
-      const storeEl = document.getElementById('sheetdata-store');
-      const oldHTML = storeEl.innerHTML;
-      storeEl.innerHTML = '\n' + JSON.stringify(sheetData, null, 2) + '\n';
-      const html = document.documentElement.outerHTML;
-      storeEl.innerHTML = oldHTML;
-
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
-      a.download = `บันทึก_${dateLabel}.html`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
+  const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
+  a.download = `บันทึก_${dateLabel}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // =================== DATE TABS WITH MONTH GROUPS ===================
@@ -1292,42 +1195,23 @@ function loadDate(dateKey) {
 
   fields.forEach(f => {
     const el = document.getElementById(f);
-    if (!el) return;
-    const val = d[f];
-    // '' → แสดงว่าง, 0 → แสดง 0, ตัวเลขอื่น → แสดงค่าจริง
-    el.value = (val === '' || val === undefined || val === null) ? '' : val;
+    if(el) el.value = d[f] || '';
   });
   document.getElementById('g_change').value = d.change || 3700;
   document.getElementById('g_discount_per_liter').value = d.disc || 0.5;
 
-  // โหลด cash (ถ้ามีข้อมูล ให้คืนค่า ถ้าไม่มีให้ reset)
+  // reset cash
   DENOMS.forEach(denom => {
-    const el  = document.getElementById('cash_' + denom.value);
-    const sub = document.getElementById('csub_' + denom.value);
-    // key อาจเป็น string หรือ number ขึ้นกับแหล่งที่มา ลอง both
-    const qty = d.cash
-      ? (d.cash[String(denom.value)] ?? d.cash[denom.value] ?? 0)
-      : 0;
-    if (el)  el.value = qty > 0 ? qty : '';
-    if (sub) sub.textContent = qty > 0 ? fmt(qty * denom.value) : '0';
+    const el = document.getElementById('cash_'+denom.value);
+    if(el) el.value = '';
+    const sub = document.getElementById('csub_'+denom.value);
+    if(sub) sub.textContent = '0';
   });
-  let loadedCash = 0;
-  DENOMS.forEach(d2 => {
-    const qty = d.cash
-      ? (d.cash[String(d2.value)] ?? d.cash[d2.value] ?? 0)
-      : 0;
-    loadedCash += qty * d2.value;
-  });
-  document.getElementById('total_cash').textContent = fmt(loadedCash) + ' ฿';
+  document.getElementById('total_cash').textContent = '0 ฿';
 
-  // โหลด transfer rows (ถ้ามีข้อมูล ให้คืนค่า ถ้าไม่มีให้ reset)
-  if (d.transfer && d.transfer.length > 0) {
-    transferRows = d.transfer.map(r => ({ label: r.label, amount: r.amount || 0 }));
-    transferCount = transferRows.length;
-  } else {
-    transferRows = [{ label:"พักยอด", amount:0 }];
-    transferCount = 1;
-  }
+  // reset transfer
+  transferRows = [{ label:"พักยอด", amount:0 }];
+  transferCount = 1;
   renderTransfer();
 
   calc();
