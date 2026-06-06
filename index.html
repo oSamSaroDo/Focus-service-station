@@ -1200,8 +1200,6 @@ function saveDate(silent = false) {
   if (!activeTab) {
     if (!silent) alert('⚠️ กรุณาเลือกวันที่ก่อนบันทึก');
     return;
-    if (window._fbReady && typeof window.fbSave === 'function') {
-    window.fbSave();
   }
   const dateKey = activeTab.dataset.date;
 
