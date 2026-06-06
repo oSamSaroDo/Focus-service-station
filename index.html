@@ -1064,10 +1064,10 @@ document.getElementById('addDateModal').addEventListener('click', function(e) {
 });
 
 // =================== SAVE DATE ===================
-function saveDate() {
+function saveDate(silent = false) {
   const activeTab = document.querySelector('.date-tab.active');
   if (!activeTab) {
-    alert('⚠️ กรุณาเลือกวันที่ก่อนบันทึก');
+    if (!silent) alert('⚠️ กรุณาเลือกวันที่ก่อนบันทึก');
     return;
   }
   const dateKey = activeTab.dataset.date;
@@ -1122,13 +1122,12 @@ function saveDate() {
 
 // =================== DOWNLOAD HTML ===================
 function downloadHTML() {
-  // ดึง HTML ปัจจุบันเป็น string
-  let html = document.documentElement.outerHTML;
+  // บันทึกข้อมูลหน้าจอปัจจุบันเข้า sheetData ก่อนเสมอ (silent = ไม่แสดง alert)
+  saveDate(true);
 
-  // แทนที่บล็อก sheetData เดิมด้วยข้อมูลใน RAM ที่อัปเดตล่าสุด
-  // ใช้ marker comment เพื่อให้ replace ถูกจุดเสมอ
+  // แทนที่ sheetData ในไฟล์ด้วยข้อมูล RAM ล่าสุด
+  let html = document.documentElement.outerHTML;
   const newSheetData = 'const sheetData = ' + JSON.stringify(sheetData, null, 2) + ';';
-  // จับตั้งแต่ "const sheetData = {" จนถึง "};" ที่อยู่ต้นบรรทัด (ปิด object)
   html = html.replace(/const sheetData\s*=\s*\{[\s\S]*?\n\};/, newSheetData);
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
