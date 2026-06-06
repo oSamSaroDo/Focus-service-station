@@ -361,6 +361,76 @@
     .fuel-fields { flex-direction: column; }
   }
 </style>
+<script type="module">
+// ===== FIREBASE REAL-TIME SYNC =====
+import { initializeApp }          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, setDoc, onSnapshot, getDoc }
+                                   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+window._fbReady = false;
+window._db      = null;
+window._unsub   = null;
+
+window.fbInit = function(cfg) {
+  try {
+    const app = initializeApp(JSON.parse(cfg), 'gas-'+Date.now());
+    window._db = getFirestore(app);
+    window._fbReady = true;
+    fbStatus('✅ เชื่อมต่อสำเร็จ! กำลังโหลดข้อมูล...', '#3fb950');
+    fbStartSync();
+  } catch(e) {
+    fbStatus('❌ Config ผิด: ' + e.message, '#f85149');
+  }
+};
+
+window.fbStartSync = async function() {
+  if (!window._db) return;
+  const docRef = doc(window._db, 'gas_station', 'daily_records');
+
+  // โหลดครั้งแรก
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    const loaded = snap.data().records || {};
+    Object.keys(sheetData).forEach(k => delete sheetData[k]);
+    Object.assign(sheetData, loaded);
+    if (typeof renderAllGroups === 'function') renderAllGroups();
+    const keys = Object.keys(loaded);
+    if (keys.length > 0 && typeof loadDate === 'function') loadDate(keys[keys.length-1]);
+    fbStatus('✅ โหลดแล้ว ' + keys.length + ' วัน — Real-time เปิดอยู่ 🟢', '#3fb950');
+  } else {
+    fbStatus('🆕 Firestore ว่าง — จะสร้างใหม่ตอนบันทึก', '#f0a500');
+  }
+
+  // Real-time listener
+  if (window._unsub) window._unsub();
+  window._unsub = onSnapshot(docRef, (snap) => {
+    if (!snap.exists()) return;
+    const loaded = snap.data().records || {};
+    Object.keys(sheetData).forEach(k => delete sheetData[k]);
+    Object.assign(sheetData, loaded);
+    if (typeof renderAllGroups === 'function') renderAllGroups();
+    document.getElementById('fb_live_dot').style.display = 'inline';
+  });
+};
+
+window.fbSave = async function() {
+  if (!window._db) { fbStatus('❌ ยังไม่ได้เชื่อมต่อ Firebase', '#f85149'); return; }
+  if (typeof saveDate === 'function') saveDate(true);
+  fbStatus('⏳ กำลังบันทึก...', '#58a6ff');
+  try {
+    const docRef = doc(window._db, 'gas_station', 'daily_records');
+    await setDoc(docRef, { records: sheetData, updated: new Date().toISOString() });
+    fbStatus('✅ บันทึกขึ้น Firestore แล้ว ' + new Date().toLocaleString('th-TH'), '#3fb950');
+  } catch(e) {
+    fbStatus('❌ ' + e.message, '#f85149');
+  }
+};
+
+function fbStatus(msg, color) {
+  const el = document.getElementById('fb_status');
+  if (el) { el.style.display='block'; el.style.color=color; el.innerHTML=msg; }
+}
+</script>
 </head>
 <body>
 <div id="sheetdata-store" hidden>
@@ -377,7 +447,12 @@
   </div>
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <div class="header-date" id="header-date">—</div>
-    <button class="btn btn-ghost" onclick="openGistModal()" style="padding:6px 14px; font-size:12px; border-color:#8b949e; display:flex; align-items:center; gap:6px;">
+    <button class="btn btn-ghost" onclick="
+  const saved = localStorage.getItem('fb_config');
+  if(saved) document.getElementById('fb_config').value = saved;
+  document.getElementById('fbModal').style.display='flex';
+" style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">🔥 Firebase</button>
+<button class="btn btn-ghost" onclick="openGistModal()" style="padding:6px 14px; font-size:12px; border-color:#8b949e; display:flex; align-items:center; gap:6px;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
       GitHub Sync
     </button>
@@ -385,6 +460,55 @@
 </header>
 
 <!-- GITHUB GIST MODAL -->
+
+<!-- ===== FIREBASE MODAL ===== -->
+<div id="fbModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
+  <div style="background:#161b22; border:1px solid #f0a500; border-radius:16px; padding:28px; width:460px; max-width:94vw; box-shadow:0 24px 64px rgba(0,0,0,0.7);">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+      <span style="font-size:22px;">🔥</span>
+      <span style="font-size:17px; font-weight:700; color:#e6edf3;">Firebase Real-time Sync</span>
+      <span id="fb_live_dot" style="display:none; width:8px; height:8px; background:#3fb950; border-radius:50%; margin-left:4px;"></span>
+    </div>
+    <div style="font-size:12px; color:#8b949e; margin-bottom:16px; line-height:1.6;">
+      ข้อมูลอัปเดตทุกเครื่องอัตโนมัติทันที ไม่ต้องกด sync<br>
+      <a href="https://console.firebase.google.com" target="_blank" style="color:#58a6ff;">สร้าง Firebase Project ฟรี →</a>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <div style="font-size:11px; color:#8b949e; margin-bottom:4px;">วาง Firebase Config (JSON) จาก Project Settings:</div>
+      <textarea id="fb_config" rows="6" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' style="width:100%; background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:10px; color:#e6edf3; font-size:11px; font-family:monospace; resize:vertical; box-sizing:border-box;"></textarea>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+      <button onclick="
+        const cfg = document.getElementById('fb_config').value.trim();
+        if(!cfg){document.getElementById('fb_status').style.display='block';document.getElementById('fb_status').style.color='#f85149';document.getElementById('fb_status').textContent='❌ กรุณาวาง Config';return;}
+        localStorage.setItem('fb_config',cfg);
+        window.fbInit(cfg);
+      " style="background:#f0a500; border:none; border-radius:8px; padding:9px 18px; color:#000; font-weight:700; cursor:pointer;">🔥 เชื่อมต่อ</button>
+
+      <button onclick="window.fbSave()" style="background:#238636; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">💾 บันทึกขึ้น Cloud</button>
+
+      <button onclick="window.fbStartSync()" style="background:#1f6feb; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">🔄 โหลดจาก Cloud</button>
+
+      <button onclick="document.getElementById('fbModal').style.display='none'" style="background:#21262d; border:1px solid #30363d; border-radius:8px; padding:9px 18px; color:#e6edf3; cursor:pointer;">ปิด</button>
+    </div>
+
+    <div id="fb_status" style="display:none; font-size:12px; padding:10px; background:#0d1117; border-radius:8px; line-height:1.6;"></div>
+
+    <details style="margin-top:14px;">
+      <summary style="color:#8b949e; font-size:11px; cursor:pointer;">📋 วิธีสร้าง Firebase Project (คลิกดู)</summary>
+      <div style="color:#8b949e; font-size:11px; line-height:1.8; margin-top:8px; padding-left:8px;">
+        1. ไป <a href="https://console.firebase.google.com" target="_blank" style="color:#58a6ff;">console.firebase.google.com</a><br>
+        2. คลิก <b style="color:#e6edf3;">Add project</b> → ตั้งชื่อ → Create<br>
+        3. เมนูซ้าย → <b style="color:#e6edf3;">Firestore Database</b> → Create database → Start in test mode<br>
+        4. Project Settings (⚙️) → Your apps → คลิก &lt;/&gt; → Register<br>
+        5. คัดลอก <b style="color:#e6edf3;">firebaseConfig</b> (เฉพาะ JSON ข้างใน { }) มาวางด้านบน
+      </div>
+    </details>
+  </div>
+</div>
+
 <div id="gistModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
   <div style="background:#161b22; border:1px solid #30363d; border-radius:16px; padding:28px; width:420px; max-width:92vw; box-shadow:0 24px 64px rgba(0,0,0,0.6);">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
@@ -1511,6 +1635,14 @@ function init() {
 }
 
 init();
+
+  // Auto-reconnect Firebase ถ้าเคยตั้งค่าไว้
+  const _savedFbCfg = localStorage.getItem('fb_config');
+  if (_savedFbCfg) {
+    setTimeout(() => {
+      if (window.fbInit) window.fbInit(_savedFbCfg);
+    }, 800);
+  }
 </script>
 </body>
 </html>
