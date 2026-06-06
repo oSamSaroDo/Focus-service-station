@@ -9,6 +9,7 @@
   :root {
     --bg: #0d1117;
     --surface: #161b22;
+    --surface2: #1c2330;
     --border: #30363d;
     --accent: #f0a500;
     --accent2: #e05c2a;
@@ -21,71 +22,113 @@
     --g95-color: #f85149;
     --g91-color: #3fb950;
     --diesel-color: #58a6ff;
+    --diesel2-color: #58a6ff;
   }
+
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', sans-serif; }
-  body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
-  .container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-  header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 15px 20px; border-radius: 8px; border: 1px solid var(--border); }
-  h1 { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
-  .header-controls { display: flex; align-items: center; gap: 15px; }
-  input[type="date"] { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 15px; outline: none; }
-  .btn { background: var(--border); color: var(--text); border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-  .btn:hover { opacity: 0.9; }
+  body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; font-size: 14px; }
+  .container { max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+
+  header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); }
+  h1 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; color: var(--text); }
+  .header-date-wrap { display: flex; align-items: center; gap: 12px; }
+  #header-date { font-weight: 500; color: var(--accent); font-size: 15px; cursor: pointer; border-bottom: 1px dashed var(--accent); }
+  input[type="date"] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 14px; outline: none; }
+
+  .btn { background: var(--border); color: var(--text); border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
+  .btn:hover { background: #3c444d; }
   .btn-accent { background: var(--accent); color: #000; font-weight: 600; }
-  .btn-orange { background: var(--accent2); color: #fff; }
-  .grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-  @media (max-width: 1100px) { .grid-main { grid-template-columns: 1fr; } }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-  .card-title { font-size: 16px; font-weight: 600; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .table-responsive { overflow-x: auto; }
+  .btn-accent:hover { background: #d49200; }
+  .btn-orange { background: var(--accent2); color: #fff; font-weight: 500; }
+  .btn-orange:hover { background: #c54f22; }
+  .btn-success { background: var(--accent3); color: #fff; font-weight: 500; }
+  .btn-success:hover { background: #268540; }
+  .btn-danger-text { background: transparent; color: var(--red); padding: 4px; border-radius: 4px; font-size: 12px; }
+  .btn-danger-text:hover { background: rgba(248,81,73,0.1); }
+
+  .grid-main { display: grid; grid-template-columns: 2.2fr 1fr; gap: 20px; }
+  @media (max-width: 1200px) { .grid-main { grid-template-columns: 1fr; } }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 15px; position: relative; }
+  .card-title { font-size: 15px; font-weight: 600; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text); }
+  .card-title span { display: flex; align-items: center; gap: 8px; }
+
+  .table-responsive { overflow-x: auto; margin: 0 -10px; padding: 0 10px; }
   table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-  th, td { padding: 10px; border-bottom: 1px solid var(--border); }
-  th { color: var(--text-muted); font-weight: 500; font-size: 13px; }
-  .input-table { background: transparent; border: 1px solid transparent; color: var(--text); width: 100%; padding: 4px 8px; border-radius: 4px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: right; }
-  .input-table:focus { background: var(--bg); border-color: var(--accent); outline: none; }
-  .read-only-num { font-family: 'IBM Plex Mono', monospace; text-align: right; font-weight: 500; }
-  .total-row { background: rgba(255,255,255,0.02); font-weight: 600; }
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-  .sum-box { background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 15px; border-radius: 6px; display: flex; flex-direction: column; gap: 5px; }
-  .sum-label { font-size: 13px; color: var(--text-muted); }
-  .sum-val { font-size: 22px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; }
-  .text-green { color: var(--green); }
-  .text-red { color: var(--red); }
-  .flex-col { display: flex; flex-direction: column; gap: 10px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  th { color: var(--text-muted); font-weight: 500; font-size: 13px; white-space: nowrap; }
+
+  .tag-dispenser { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tag-g95 { background: var(--g95-color); }
+  .tag-g91 { background: var(--g91-color); color: #000; }
+  .tag-diesel { background: var(--diesel-color); }
+  .tag-diesel2 { background: var(--diesel2-color); }
+
+  .input-table { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 100%; padding: 6px 10px; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: right; outline: none; transition: border-color 0.15s; }
+  .input-table:focus { border-color: var(--accent); }
+  .input-table::placeholder { color: #484f58; }
+  .input-table[readonly] { background: transparent; border-color: transparent; padding-right: 0; cursor: default; }
+  
+  .text-num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: right; }
+  .text-num-bold { font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: right; font-weight: 600; }
+  .total-row { background: rgba(255,255,255,0.01); font-weight: 600; }
+  .total-row td { border-top: 1px solid var(--border); border-bottom: 2px double var(--border); }
+
+  .flex-col { display: flex; flex-direction: column; gap: 15px; }
   .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .btn-sm { padding: 4px 8px; font-size: 12px; border-radius: 4px; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+  .sum-box { background: var(--surface); border: 1px solid var(--border); padding: 15px 20px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
+  .sum-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .sum-val { font-size: 24px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; color: var(--text); }
+  .sum-box-highlight { background: rgba(46,160,79,0.08); border-color: rgba(46,160,79,0.3); }
+  .sum-box-highlight .sum-val { color: #56d364; }
+
+  .text-green { color: var(--green); }
+  .text-red { color: var(--red); }
+  .text-blue { color: var(--blue); }
+
+  /* Gist Sync Panel Styles */
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
+  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 480px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+  .modal-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  #gist-status-text { font-size: 13px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-family: 'IBM Plex Mono', monospace; min-height: 38px; word-break: break-all; white-space: pre-wrap; }
+  .live-dot { width: 8px; height: 8px; background-color: #8b949e; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px rgba(139,148,158,0.2); transition: background-color 0.3s; }
   
-  /* Modal Style */
-  .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center; }
-  .modal-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; width:90%; max-width:500px; padding:20px; display:flex; flex-direction:column; gap:15px; }
-  #fb-status-text { font-size:13px; padding:8px; background:rgba(0,0,0,0.2); border-radius:4px; font-family:'IBM Plex Mono', monospace; min-height:34px; word-break:break-all; }
-  .live-dot { width: 8px; height: 8px; background-color: #8b949e; border-radius: 50%; display: inline-block; transition: 0.3s; }
+  /* Loading Overlay */
+  .loading-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22,27,34,0.7); border-radius: 8px; z-index: 5; justify-content: center; align-items: center; font-weight: 500; font-size: 14px; color: var(--accent); }
 </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>⛽ บันทึกยอดน้ำมันประจำวัน <span id="fb-live-dot" class="live-dot" title="Firebase Status"></span></h1>
-    <div class="header-controls">
-      <input type="date" id="main-date">
-      <button class="btn btn-orange" onclick="openFirebaseModal()">🔥 Firebase Cloud</button>
+    <h1>⛽ บันทึกยอดน้ำมันประจำวัน <span id="gist-live-dot" class="live-dot" title="Firebase Real-time Sync Status"></span></h1>
+    <div class="header-date-wrap">
+      <span id="header-date" onclick="triggerDatePicker()">เลือกวันที่...</span>
+      <input type="date" id="main-date" style="display:none;" onchange="handleDateChange(this.value)">
+      <button class="btn btn-orange" onclick="openGistModal()">🔥 Firebase Cloud</button>
     </div>
   </header>
 
   <div class="grid-main">
-    <div class="card">
+    <div class="card" id="card-oil">
+      <div class="loading-overlay" id="loading-oil">⏳ กำลังโหลดข้อมูล...</div>
       <div class="card-title">📊 ยอดขายและมิเตอร์แยกตามตู้จ่าย</div>
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
-              <th>ตู้จ่าย / ชนิดน้ำมัน</th>
-              <th style="text-align:right; width:140px;">มิเตอร์เปิด (เช้า)</th>
-              <th style="text-align:right; width:140px;">มิเตอร์ปิด (ค่ำ)</th>
-              <th style="text-align:right; width:110px;">ขายได้ (ลิตร)</th>
-              <th style="text-align:right; width:100px;">ราคา/ลิตร</th>
-              <th style="text-align:right; width:140px;">รวมเป็นเงิน (บาท)</th>
+              <th style="width: 200px;">ตู้จ่าย / ชนิดน้ำมัน</th>
+              <th style="text-align: right; width: 140px;">มิเตอร์เปิด (เช้า)</th>
+              <th style="text-align: right; width: 140px;">มิเตอร์ปิด (ค่ำ)</th>
+              <th style="text-align: right; width: 120px;">ขายได้ (ลิตร)</th>
+              <th style="text-align: right; width: 110px;">ราคา/ลิตร</th>
+              <th style="text-align: right; width: 150px;">รวมเป็นเงิน (บาท)</th>
             </tr>
           </thead>
           <tbody id="nozzle-rows">
@@ -104,16 +147,16 @@
           <table>
             <thead>
               <tr>
-                <th>รายการโอน</th>
-                <th style="text-align:right; width:120px;">จำนวนเงิน</th>
-                <th style="width:40px;"></th>
+                <th>รายการโอน (ชื่อลูกค้า/บัญชี)</th>
+                <th style="text-align: right; width: 130px;">จำนวนเงิน</th>
+                <th style="width: 40px;"></th>
               </tr>
             </thead>
             <tbody id="transfer-rows"></tbody>
             <tfoot>
               <tr class="total-row">
                 <td>รวมเงินโอน</td>
-                <td id="total-transfer-val" class="read-only-num">0.00</td>
+                <td id="total-transfer-val" class="text-num-bold text-blue">0.00</td>
                 <td></td>
               </tr>
             </tfoot>
@@ -130,16 +173,16 @@
           <table>
             <thead>
               <tr>
-                <th>รายการจ่าย</th>
-                <th style="text-align:right; width:120px;">จำนวนเงิน</th>
-                <th style="width:40px;"></th>
+                <th>รายการจ่าย (ค่าของ/ค่าแรง)</th>
+                <th style="text-align: right; width: 130px;">จำนวนเงิน</th>
+                <th style="width: 40px;"></th>
               </tr>
             </thead>
             <tbody id="cash-rows"></tbody>
             <tfoot>
               <tr class="total-row">
-                <td>รวมรายจ่าย</td>
-                <td id="total-cash-val" class="read-only-num">0.00</td>
+                <td>รวมรายจ่ายเงินสด</td>
+                <td id="total-cash-val" class="text-num-bold text-red">0.00</td>
                 <td></td>
               </tr>
             </tfoot>
@@ -149,42 +192,41 @@
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">📈 สรุปยอดรวมประจำวัน</div>
-    <div class="summary-grid">
-      <div class="sum-box">
-        <span class="sum-label">ยอดขายน้ำมันรวมทั้งหมด</span>
-        <span class="sum-val" id="sum-total-sales">0.00</span>
-      </div>
-      <div class="sum-box">
-        <span class="sum-label">หัก ยอดเงินโอน</span>
-        <span class="sum-val text-blue" id="sum-total-transfer">0.00</span>
-      </div>
-      <div class="sum-box">
-        <span class="sum-label">หัก รายจ่ายเงินสด</span>
-        <span class="sum-val text-red" id="sum-total-cash">0.00</span>
-      </div>
-      <div class="sum-box" style="background: rgba(63,185,80,0.05); border-color: var(--green);">
-        <span class="sum-label" style="color: var(--green);">💵 เงินสดที่ต้องส่งจริง</span>
-        <span class="sum-val text-green" id="sum-cash-to-send">0.00</span>
-      </div>
+  <div class="summary-grid">
+    <div class="sum-box">
+      <span class="sum-label">ยอดขายน้ำมันรวมทั้งหมด</span>
+      <span class="sum-val" id="sum-total-sales">0.00</span>
+    </div>
+    <div class="sum-box">
+      <span class="sum-label">หัก ยอดเงินโอนรวม</span>
+      <span class="sum-val text-blue" id="sum-total-transfer">0.00</span>
+    </div>
+    <div class="sum-box">
+      <span class="sum-label">หัก รายจ่ายเงินสดหน้าลาน</span>
+      <span class="sum-val text-red" id="sum-total-cash">0.00</span>
+    </div>
+    <div class="sum-box sum-box-highlight">
+      <span class="sum-label" style="color: #56d364; font-weight: 600;">💵 เงินสดสุทธิที่ต้องส่งจริง</span>
+      <span class="sum-val" id="sum-cash-to-send">0.00</span>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="fb-modal">
+<div class="modal-overlay" id="gist-modal" onclick="if(event.target===this) closeGistModal()">
   <div class="modal-box">
-    <h3 style="font-size:16px;">🔥 Firebase Cloud Synchronization</h3>
-    <p style="font-size:13px; color:var(--text-muted);">ระบบทำการเชื่อมต่อกับฐานข้อมูลเรียบร้อยแล้ว คุณสามารถกดปุ่มเพื่อบันทึกข้อมูลขึ้นระบบคลาวด์ได้ทันที</p>
-    
-    <div class="flex-col" style="margin-top: 10px;">
-      <button class="btn btn-accent" id="btn-fb-save" style="justify-content: center; padding: 12px;">💾 บันทึกขึ้น Firebase Cloud</button>
+    <div class="modal-header">
+      <div class="modal-title">🔥 Firebase Real-time Synchronization</div>
+      <button class="btn btn-danger-text" style="font-size:16px; padding:0 4px;" onclick="closeGistModal()">✕</button>
     </div>
     
-    <div id="fb-status-text">🔄 ระบบ Cloud พร้อมทำงาน...</div>
-    
-    <div style="text-align:right;">
-      <button class="btn btn-sm" onclick="closeFirebaseModal()">ปิดหน้าต่าง</button>
+    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">
+      ระบบเชื่อมต่อผ่านฐานข้อมูล Firebase เรียบร้อยแล้ว ข้อมูลจะดึงลงมาแบบ Real-time ทันทีเมื่อเปิดเว็บ คุณสามารถกดบันทึกเพื่ออัปเดตข้อมูลขึ้นระบบคลาวด์ได้ตลอดเวลา
+    </p>
+
+    <div id="gist-status-text">🔄 ระบบ Cloud พร้อมทำงาน...</div>
+
+    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px;">
+      <button class="btn btn-success" id="btn-gist-save" style="width: 100%; justify-content: center; padding: 10px;">💾 บันทึกขึ้น Firebase Cloud</button>
     </div>
   </div>
 </div>
@@ -193,7 +235,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // ค่าโครงสร้างคอนฟิก Firebase ของคุณ
+  // ค่าคอนฟิก Firebase Cloud จากของจริงของคุณ
   const firebaseConfig = {
     apiKey: "AIzaSyAZOWoDHEiGIxkYIRgRkNWXjNWGLE4wgFQ",
     authDomain: "gas-station-dd6e9.firebaseapp.com",
@@ -204,25 +246,45 @@
     measurementId: "G-YB0SR5ETT1"
   };
 
-  // เริ่มต้น Firebase
+  // เริ่มต้นกระบวนการเชื่อมต่อหลังบ้าน
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const docRef = doc(db, "gas_station", "daily_records");
 
-  // นิยามหัวจ่ายน้ำมันในปั๊ม
-  const NOZZLES = [
-    { id: 'g95_1', name: 'ตู้ 1 — แก๊สโซฮอล์ 95', price: 35.50 },
-    { id: 'g91_1', name: 'ตู้ 1 — แก๊สโซฮอล์ 91', price: 34.20 },
-    { id: 'd_1',   name: 'ตู้ 2 — ดีเซล B7',    price: 32.94 },
-    { id: 'g95_2', name: 'ตู้ 3 — แก๊สโซฮอล์ 95', price: 35.50 },
-    { id: 'd_2',   name: 'ตู้ 4 — ดีเซล B7',    price: 32.94 }
+  // โครงสร้างชุดข้อมูลหัวจ่ายน้ำมันตามต้นฉบับ
+  const GROUPS = [
+    {
+      name: "ตู้ 1",
+      nozzles: [
+        { id: "g95_1", name: "แก๊สโซฮอล์ 95", type: "g95", defPrice: 35.50 },
+        { id: "g91_1", name: "แก๊สโซฮอล์ 91", type: "g91", defPrice: 34.20 }
+      ]
+    },
+    {
+      name: "ตู้ 2",
+      nozzles: [
+        { id: "diesel_1", name: "ดีเซล B7", type: "diesel", defPrice: 32.94 }
+      ]
+    },
+    {
+      name: "ตู้ 3",
+      nozzles: [
+        { id: "g95_2", name: "แก๊สโซฮอล์ 95", type: "g95", defPrice: 35.50 }
+      ]
+    },
+    {
+      name: "ตู้ 4",
+      nozzles: [
+        { id: "diesel_2", name: "ดีเซล B7", type: "diesel2", defPrice: 32.94 }
+      ]
+    }
   ];
 
-  // โครงสร้างคลังข้อมูลหลักในเครื่อง
+  // คลังข้อมูลหลัก
   window.sheetData = {}; 
-  window.currentDate = new Date().toISOString().split('T')[0];
+  window.currentDate = ""; 
 
-  // ฟังก์ชันสร้างโครงสร้างข้อมูลเปล่าสำหรับวันที่เลือก
+  // ฟังก์ชันดึงหรือสร้างช่องเก็บข้อมูลประจำวัน
   function getOrCreateDateData(dateStr) {
     if (!window.sheetData[dateStr]) {
       window.sheetData[dateStr] = {
@@ -230,52 +292,60 @@
         transfers: [],
         cashExpenses: []
       };
-      NOZZLES.forEach(n => {
-        window.sheetData[dateStr].nozzles[n.id] = { start: 0, end: 0, price: n.price };
+      // ฝังข้อมูลราคาเริ่มต้น
+      GROUPS.forEach(g => {
+        g.nozzles.forEach(n => {
+          window.sheetData[dateStr].nozzles[n.id] = { start: 0, end: 0, price: n.defPrice };
+        });
       });
     }
     return window.sheetData[dateStr];
   }
 
-  // วาดตารางตู้จ่ายน้ำมัน
+  // วาดรายการตู้จ่ายน้ำมันทั้งหมด (คงโครงสร้างเดิม)
   window.renderAllGroups = function() {
-    const data = getOrCreateDateData(window.currentDate);
     const tbody = document.getElementById('nozzle-rows');
     tbody.innerHTML = '';
 
-    let totalLiters = 0;
-    let totalBaht = 0;
+    const data = getOrCreateDateData(window.currentDate);
+    let allTotalLiters = 0;
+    let allTotalBaht = 0;
 
-    NOZZLES.forEach(n => {
-      const nzData = data.nozzles[n.id] || { start: 0, end: 0, price: n.price };
-      const liters = Math.max(0, nzData.end - nzData.start);
-      const baht = liters * nzData.price;
+    GROUPS.forEach(g => {
+      g.nozzles.forEach((n, idx) => {
+        const nzData = data.nozzles[n.id] || { start: 0, end: 0, price: n.defPrice };
+        const liters = Math.max(0, nzData.end - nzData.start);
+        const baht = liters * nzData.price;
 
-      totalLiters += liters;
-      totalBaht += baht;
+        allTotalLiters += liters;
+        allTotalBaht += baht;
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="font-weight:500;">${n.name}</td>
-        <td><input type="number" step="any" class="input-table" value="${nzData.start || ''}" oninput="updateNozzle('${n.id}', 'start', this.value)"></td>
-        <td><input type="number" step="any" class="input-table" value="${nzData.end || ''}" oninput="updateNozzle('${n.id}', 'end', this.value)"></td>
-        <td class="read-only-num">${liters.toFixed(2)}</td>
-        <td><input type="number" step="any" class="input-table" value="${nzData.price}" oninput="updateNozzle('${n.id}', 'price', this.value)"></td>
-        <td class="read-only-num" style="font-weight:600;">${baht.toFixed(2)}</td>
-      `;
-      tbody.appendChild(tr);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            ${idx === 0 ? `<span style="font-weight:600; color:var(--text-muted); margin-right:8px;">${g.name}</span>` : `<span style="display:inline-block; width:34px;"></span>`}
+            <span class="tag-dispenser tag-${n.type}">${n.name}</span>
+          </td>
+          <td><input type="number" step="any" class="input-table" value="${nzData.start || ''}" placeholder="0.00" oninput="updateNozzle('${n.id}', 'start', this.value)"></td>
+          <td><input type="number" step="any" class="input-table" value="${nzData.end || ''}" placeholder="0.00" oninput="updateNozzle('${n.id}', 'end', this.value)"></td>
+          <td class="text-num-bold" style="color: #c9d1d9;">${liters > 0 ? liters.toFixed(2) : '-'}</td>
+          <td><input type="number" step="any" class="input-table" value="${nzData.price}" oninput="updateNozzle('${n.id}', 'price', this.value)"></td>
+          <td class="text-num-bold" style="color:var(--accent); font-size:15px;">${baht > 0 ? baht.toFixed(2) : '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     });
 
-    // แถวสรุปรวมน้ำมัน
+    // แถวสรุปรวมน้ำมัน (ท้ายตาราง)
     const trTotal = document.createElement('tr');
     trTotal.className = 'total-row';
     trTotal.innerHTML = `
-      <td>รวมยอดขายน้ำมัน</td>
+      <td>รวมยอดขายน้ำมันทั้งหมด</td>
       <td></td>
       <td></td>
-      <td class="read-only-num">${totalLiters.toFixed(2)}</td>
+      <td class="text-num-bold">${allTotalLiters.toFixed(2)}</td>
       <td></td>
-      <td class="read-only-num" style="color:var(--accent); font-size:16px;">${totalBaht.toFixed(2)}</td>
+      <td class="text-num-bold" style="color:var(--accent); font-size:16px;">${allTotalBaht.toFixed(2)}</td>
     `;
     tbody.appendChild(trTotal);
   };
@@ -287,18 +357,18 @@
     window.calc();
   };
 
-  // จัดการตารางเงินโอน
+  // จัดการตารางเงินโอน (คงโครงสร้างเดิม)
   window.renderTransfer = function() {
-    const data = getOrCreateDateData(window.currentDate);
     const tbody = document.getElementById('transfer-rows');
     tbody.innerHTML = '';
+    const data = getOrCreateDateData(window.currentDate);
 
     data.transfers.forEach((item, index) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><input type="text" class="input-table" style="text-align:left;" value="${item.note || ''}" oninput="updateTransfer(${index}, 'note', this.value)" placeholder="ระบุชื่อผู้โอน/สลิป"></td>
-        <td><input type="number" step="any" class="input-table" value="${item.amount || ''}" oninput="updateTransfer(${index}, 'amount', this.value)" placeholder="0.00"></td>
-        <td><button class="btn btn-sm text-red" style="padding:2px 6px;" onclick="deleteTransfer(${index})">✕</button></td>
+        <td><input type="text" class="input-table" style="text-align:left;" value="${item.note || ''}" placeholder="ระบุรายละเอียด..." oninput="updateTransfer(${index}, 'note', this.value)"></td>
+        <td><input type="number" step="any" class="input-table" value="${item.amount || ''}" placeholder="0.00" oninput="updateTransfer(${index}, 'amount', this.value)"></td>
+        <td style="text-align:center;"><button class="btn-danger-text" onclick="deleteTransfer(${index})">✕</button></td>
       `;
       tbody.appendChild(tr);
     });
@@ -311,32 +381,32 @@
     window.calc();
   };
 
-  window.updateTransfer = function(index, field, value) {
+  window.updateTransfer = function(idx, field, val) {
     const data = getOrCreateDateData(window.currentDate);
-    if(field === 'amount') data.transfers[index][field] = parseFloat(value) || 0;
-    else data.transfers[index][field] = value;
+    if (field === 'amount') data.transfers[idx][field] = parseFloat(val) || 0;
+    else data.transfers[idx][field] = val;
     window.calc();
   };
 
-  window.deleteTransfer = function(index) {
+  window.deleteTransfer = function(idx) {
     const data = getOrCreateDateData(window.currentDate);
-    data.transfers.splice(index, 1);
+    data.transfers.splice(idx, 1);
     window.renderTransfer();
     window.calc();
   };
 
-  // จัดการตารางเงินสดหน้าลาน
+  // จัดการตารางเงินสดหน้าลาน (คงโครงสร้างเดิม)
   window.renderCash = function() {
-    const data = getOrCreateDateData(window.currentDate);
     const tbody = document.getElementById('cash-rows');
     tbody.innerHTML = '';
+    const data = getOrCreateDateData(window.currentDate);
 
     data.cashExpenses.forEach((item, index) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td><input type="text" class="input-table" style="text-align:left;" value="${item.note || ''}" oninput="updateCash(${index}, 'note', this.value)" placeholder="ระบุรายการจ่าย"></td>
-        <td><input type="number" step="any" class="input-table" value="${item.amount || ''}" oninput="updateCash(${index}, 'amount', this.value)" placeholder="0.00"></td>
-        <td><button class="btn btn-sm text-red" style="padding:2px 6px;" onclick="deleteCash(${index})">✕</button></td>
+        <td><input type="text" class="input-table" style="text-align:left;" value="${item.note || ''}" placeholder="ระบุรายละเอียด..." oninput="updateCash(${index}, 'note', this.value)"></td>
+        <td><input type="number" step="any" class="input-table" value="${item.amount || ''}" placeholder="0.00" oninput="updateCash(${index}, 'amount', this.value)"></td>
+        <td style="text-align:center;"><button class="btn-danger-text" onclick="deleteCash(${index})">✕</button></td>
       `;
       tbody.appendChild(tr);
     });
@@ -349,126 +419,133 @@
     window.calc();
   };
 
-  window.updateCash = function(index, field, value) {
+  window.updateCash = function(idx, field, val) {
     const data = getOrCreateDateData(window.currentDate);
-    if(field === 'amount') data.cashExpenses[index][field] = parseFloat(value) || 0;
-    else data.cashExpenses[index][field] = value;
+    if (field === 'amount') data.cashExpenses[idx][field] = parseFloat(val) || 0;
+    else data.cashExpenses[idx][field] = val;
     window.calc();
   };
 
-  window.deleteCash = function(index) {
+  window.deleteCash = function(idx) {
     const data = getOrCreateDateData(window.currentDate);
-    data.cashExpenses.splice(index, 1);
+    data.cashExpenses.splice(idx, 1);
     window.renderCash();
     window.calc();
   };
 
-  // คำนวณและสรุปผลเงินสดที่ต้องส่งทั้งหมด
+  // ฟังก์ชันคำนวณเงินสดคงเหลือปลายทาง (คงระบบเดิม)
   window.calc = function() {
     const data = getOrCreateDateData(window.currentDate);
 
-    // 1. คำนวณค่าน้ำมันรวม
     let totalSales = 0;
-    NOZZLES.forEach(n => {
-      const nzData = data.nozzles[n.id] || { start:0, end:0, price:n.price };
-      totalSales += Math.max(0, nzData.end - nzData.start) * nzData.price;
+    GROUPS.forEach(g => {
+      g.nozzles.forEach(n => {
+        const nzData = data.nozzles[n.id] || { start:0, end:0, price:n.defPrice };
+        totalSales += Math.max(0, nzData.end - nzData.start) * nzData.price;
+      });
     });
 
-    // 2. รวมเงินโอน
-    let totalTransfer = data.transfers.reduce((sum, item) => sum + (item.amount || 0), 0);
-    document.getElementById('total-transfer-val').innerText = totalTransfer.toFixed(2);
-
-    // 3. รวมเงินสดหน้าลาน
-    let totalCash = data.cashExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
-    document.getElementById('total-cash-val').innerText = totalCash.toFixed(2);
-
-    // 4. คำนวณเงินสดสุทธิที่ต้องส่งจริง
+    let totalTransfer = data.transfers.reduce((sum, i) => sum + (i.amount || 0), 0);
+    let totalCash = data.cashExpenses.reduce((sum, i) => sum + (i.amount || 0), 0);
     let cashToSend = totalSales - totalTransfer - totalCash;
 
-    // แสดงผลลงในกล่องแดชบอร์ดสรุปด้านล่าง
+    document.getElementById('total-transfer-val').innerText = totalTransfer.toFixed(2);
+    document.getElementById('total-cash-val').innerText = totalCash.toFixed(2);
+
     document.getElementById('sum-total-sales').innerText = totalSales.toFixed(2);
     document.getElementById('sum-total-transfer').innerText = totalTransfer.toFixed(2);
     document.getElementById('sum-total-cash').innerText = totalCash.toFixed(2);
     document.getElementById('sum-cash-to-send').innerText = cashToSend.toFixed(2);
   };
 
-  // ส่วนของการเชื่อมต่อกับคลาวด์คลังข้อมูล Firebase
-  async function saveToFirebase() {
-    try {
-      fbStatus('⏳ กำลังอัปโหลดข้อมูลขึ้น Cloud...', '#f0a500');
-      await setDoc(docRef, window.sheetData);
-      fbStatus('✅ บันทึกขึ้นระบบคลาวด์ Firebase สำเร็จ!', '#3fb950');
-    } catch (e) {
-      fbStatus('❌ บันทึกล้มเหลว: ' + e.message, '#f85149');
+  // ฟังก์ชันเปลี่ยนและแปลงค่าวันที่แสดงผล (คงระบบเดิม)
+  window.loadDate = function(dateStr) {
+    window.currentDate = dateStr;
+    document.getElementById('main-date').value = dateStr;
+
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) {
+      const options = { day: 'numeric', month: 'short', year: 'numeric' };
+      document.getElementById('header-date').innerText = d.toLocaleDateString('th-TH', options);
+    } else {
+      document.getElementById('header-date').innerText = dateStr;
     }
-  }
 
-  function initFirebaseSync() {
-    const dot = document.getElementById('fb-live-dot');
-    dot.style.backgroundColor = '#f0a500'; 
-    
-    // ตั้งระบบ Real-time listener คอยเฝ้าสังเกตข้อมูลหากเซิร์ฟเวอร์เปลี่ยน
-    onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const cloudData = docSnap.data();
-        window.sheetData = cloudData;
-        
-        // เรนเดอร์หน้าจอใหม่ด้วยข้อมูลล่าสุดจาก Cloud
-        window.renderAllGroups();
-        window.renderTransfer();
-        window.renderCash();
-        window.calc();
-        
-        dot.style.backgroundColor = '#3fb950'; // เปลี่ยนเป็นสีเขียวเมื่อซิงก์สำเร็จ
-        fbStatus('✅ เชื่อมต่อและดึงข้อมูล Cloud ล่าสุดแล้ว', '#3fb950');
-      } else {
-        dot.style.backgroundColor = '#58a6ff';
-        fbStatus('ℹ️ ไม่พบข้อมูลเก่าบนคลาวด์ ระบบพร้อมสร้างโครงสร้างใหม่', '#58a6ff');
-      }
-    }, (error) => {
-      dot.style.backgroundColor = '#f85149';
-      fbStatus('❌ ซิงก์ล้มเหลว: ' + error.message, '#f85149');
-    });
-  }
-
-  function fbStatus(msg, color) {
-    const txt = document.getElementById('fb-status-text');
-    if (txt) {
-      txt.innerText = msg;
-      txt.style.color = color;
-    }
-  }
-
-  // หน้าต่าง Modal เปิด/ปิด
-  window.openFirebaseModal = function() {
-    document.getElementById('fb-modal').style.display = 'flex';
-  };
-  window.closeFirebaseModal = function() {
-    document.getElementById('fb-modal').style.display = 'none';
-  };
-
-  // การเริ่มทำงานเมื่อโหลดหน้าเว็บ
-  document.addEventListener('DOMContentLoaded', () => {
-    // เซ็ตวันที่ปัจจุบันในกล่องเลือกวัน
-    const dateInput = document.getElementById('main-date');
-    dateInput.value = window.currentDate;
-    
-    dateInput.addEventListener('change', (e) => {
-      window.currentDate = e.target.value;
-      window.renderAllGroups();
-      window.renderTransfer();
-      window.renderCash();
-      window.calc();
-    });
-
-    // ผูกปุ่มบันทึก
-    document.getElementById('btn-fb-save').onclick = saveToFirebase;
-
-    // รันการแสดงผลหน้าลานและรันระบบซิงก์คลาวด์
     window.renderAllGroups();
     window.renderTransfer();
     window.renderCash();
     window.calc();
+  };
+
+  window.handleDateChange = function(val) {
+    if (val) window.loadDate(val);
+  };
+
+  window.triggerDatePicker = function() {
+    document.getElementById('main-date').showPicker();
+  };
+
+  // ส่วนจัดการการเซฟข้อมูลขึ้น Firebase Cloud
+  async function saveToFirebase() {
+    try {
+      gistStatus('⏳ กำลังอัปโหลดฐานข้อมูลขึ้น Cloud...', '#f0a500');
+      await setDoc(docRef, window.sheetData);
+      gistStatus('✅ บันทึกขึ้นระบบคลาวด์ Firebase สำเร็จแล้ว!', '#3fb950');
+    } catch (e) {
+      gistStatus('❌ เกิดข้อผิดพลาด: ' + e.message, '#f85149');
+    }
+  }
+
+  // ระบบ Real-time Listener คอยดึงข้อมูลเมื่อฐานข้อมูลมีการอัปเดต
+  function initFirebaseSync() {
+    const dot = document.getElementById('gist-live-dot');
+    dot.style.backgroundColor = '#f0a500';
+
+    onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const cloudData = docSnap.data();
+        window.sheetData = cloudData;
+
+        // โหลดข้อมูลล่าสุดมาแสดงผล
+        window.renderAllGroups();
+        window.renderTransfer();
+        window.renderCash();
+        window.calc();
+
+        dot.style.backgroundColor = '#3fb950'; // จุดไฟสีเขียว แปลว่าสำเร็จ
+        gistStatus('✅ ซิงก์ฐานข้อมูล Cloud ล่าสุดเรียบร้อย', '#3fb950');
+      } else {
+        dot.style.backgroundColor = '#58a6ff'; // จุดสีฟ้า กรณีคลังข้อมูลว่างเปล่า
+        gistStatus('ℹ️ ยังไม่มีฐานข้อมูลเก่าบน Cloud พร้อมตั้งค่าใหม่', '#58a6ff');
+      }
+    }, (error) => {
+      dot.style.backgroundColor = '#f85149'; // จุดสีแดงเมื่อหลุดการเชื่อมต่อ
+      gistStatus('❌ หลุดการซิงก์: ' + error.message, '#f85149');
+    });
+  }
+
+  function gistStatus(msg, color) {
+    const box = document.getElementById('gist-status-text');
+    if (box) {
+      box.innerText = msg;
+      box.style.color = color;
+    }
+  }
+
+  // หน้าต่างควบคุม Modal
+  window.openGistModal = function() { document.getElementById('gist-modal').style.display = 'flex'; };
+  window.closeGistModal = function() { document.getElementById('gist-modal').style.display = 'none'; };
+
+  // คำสั่งเริ่มทำงานเมื่อแอปพลิเคชันพร้อม
+  document.addEventListener('DOMContentLoaded', () => {
+    // กำหนดวันที่เริ่มเปิดเว็บเป็นวันปัจจุบันแบบเดิม
+    const today = new Date().toISOString().split('T')[0];
+    window.loadDate(today);
+
+    // ผูกคำสั่งปุ่มบันทึก
+    document.getElementById('btn-gist-save').onclick = saveToFirebase;
+
+    // เปิดการซิงก์คลาวด์อัตโนมัติ
     initFirebaseSync();
   });
 </script>
