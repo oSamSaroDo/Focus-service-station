@@ -1087,24 +1087,32 @@ function saveDate(silent = false) {
     'g95_price','g91_price','d_price','d4_price',
     'air_liter','air_price_custom','air_disc_custom','must_send_input'];
 
+  // ฟังก์ชันอ่านค่า input ที่ทำงานได้ทั้ง iOS Safari และ browser อื่น
+  function readNum(el) {
+    if (!el) return '';
+    // iOS Safari: valueAsNumber แม่นกว่า .value สำหรับ type="number"
+    const vn = el.valueAsNumber;
+    if (!isNaN(vn)) return vn;
+    const raw = el.value.trim().replace(',', '.');
+    return raw === '' ? '' : (parseFloat(raw) || '');
+  }
+
   const entry = {};
   fields.forEach(f => {
     const el = document.getElementById(f);
-    const raw = el ? el.value.trim() : '';
-    // เก็บตัวเลขจริง ถ้าว่างเก็บเป็น '' เพื่อให้ load กลับมาแสดงว่างเหมือนเดิม
-    entry[f] = raw === '' ? '' : parseFloat(raw);
+    entry[f] = readNum(el);
   });
 
   // ตั้งค่าทั่วไป
-  entry.change = parseFloat(document.getElementById('g_change').value) || 3700;
-  entry.disc   = parseFloat(document.getElementById('g_discount_per_liter').value) || 0.5;
+  entry.change = readNum(document.getElementById('g_change')) || 3700;
+  entry.disc   = readNum(document.getElementById('g_discount_per_liter')) || 0.5;
 
-  // บันทึก cash — ใช้ key เป็น string เสมอเพื่อให้ JSON ไม่สับสน
+  // บันทึก cash
   const cashData = {};
   DENOMS.forEach(d => {
     const el = document.getElementById('cash_' + d.value);
-    const raw = el ? el.value.trim() : '';
-    cashData[String(d.value)] = raw === '' ? 0 : (parseFloat(raw) || 0);
+    const v = readNum(el);
+    cashData[String(d.value)] = (v === '' || v === 0) ? 0 : v;
   });
   entry.cash = cashData;
 
@@ -1270,15 +1278,26 @@ function loadDate(dateKey) {
     'd4n_open','d4n_close','d4l_open','d4l_close',
     'g95_price','g91_price','d_price','d4_price','air_liter','air_price_custom','air_disc_custom','must_send_input'];
 
-  fields.forEach(f => {
-    const el = document.getElementById(f);
+  // ฟังก์ชัน set ค่า input ที่ทำงานได้ทั้ง iOS Safari และ browser อื่น
+  function setNum(el, val) {
     if (!el) return;
-    const val = d[f];
-    // '' → แสดงว่าง, 0 → แสดง 0, ตัวเลขอื่น → แสดงค่าจริง
-    el.value = (val === '' || val === undefined || val === null) ? '' : val;
+    if (val === '' || val === undefined || val === null) {
+      el.value = '';
+    } else {
+      // iOS Safari: ใช้ valueAsNumber สำหรับ type="number"
+      if (el.type === 'number') {
+        el.valueAsNumber = parseFloat(val);
+      } else {
+        el.value = val;
+      }
+    }
+  }
+
+  fields.forEach(f => {
+    setNum(document.getElementById(f), d[f]);
   });
-  document.getElementById('g_change').value = d.change || 3700;
-  document.getElementById('g_discount_per_liter').value = d.disc || 0.5;
+  setNum(document.getElementById('g_change'), d.change || 3700);
+  setNum(document.getElementById('g_discount_per_liter'), d.disc || 0.5);
 
   // โหลด cash (ถ้ามีข้อมูล ให้คืนค่า ถ้าไม่มีให้ reset)
   DENOMS.forEach(denom => {
@@ -1288,7 +1307,10 @@ function loadDate(dateKey) {
     const qty = d.cash
       ? (d.cash[String(denom.value)] ?? d.cash[denom.value] ?? 0)
       : 0;
-    if (el)  el.value = qty > 0 ? qty : '';
+    if (el) {
+      if (el.type === 'number') { el.valueAsNumber = qty > 0 ? qty : NaN; }
+      else { el.value = qty > 0 ? qty : ''; }
+    }
     if (sub) sub.textContent = qty > 0 ? fmt(qty * denom.value) : '0';
   });
   let loadedCash = 0;
