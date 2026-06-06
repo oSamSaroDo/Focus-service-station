@@ -89,7 +89,7 @@
   .text-red { color: var(--red); }
   .text-blue { color: var(--blue); }
 
-  /* Gist Sync Panel Styles */
+  /* Gist Panel Custom CSS styled for Firebase modal */
   .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
   .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 480px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
   .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
@@ -99,7 +99,6 @@
   #gist-status-text { font-size: 13px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-family: 'IBM Plex Mono', monospace; min-height: 38px; word-break: break-all; white-space: pre-wrap; }
   .live-dot { width: 8px; height: 8px; background-color: #8b949e; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px rgba(139,148,158,0.2); transition: background-color 0.3s; }
   
-  /* Loading Overlay */
   .loading-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22,27,34,0.7); border-radius: 8px; z-index: 5; justify-content: center; align-items: center; font-weight: 500; font-size: 14px; color: var(--accent); }
 </style>
 </head>
@@ -107,7 +106,7 @@
 
 <div class="container">
   <header>
-    <h1>⛽ บันทึกยอดน้ำมันประจำวัน <span id="gist-live-dot" class="live-dot" title="Firebase Real-time Sync Status"></span></h1>
+    <h1>⛽ บันทึกประจำวัน — ปั๊มน้ำมัน <span id="gist-live-dot" class="live-dot" title="Firebase Status"></span></h1>
     <div class="header-date-wrap">
       <span id="header-date" onclick="triggerDatePicker()">เลือกวันที่...</span>
       <input type="date" id="main-date" style="display:none;" onchange="handleDateChange(this.value)">
@@ -215,12 +214,12 @@
 <div class="modal-overlay" id="gist-modal" onclick="if(event.target===this) closeGistModal()">
   <div class="modal-box">
     <div class="modal-header">
-      <div class="modal-title">🔥 Firebase Real-time Synchronization</div>
+      <div class="modal-title">🔥 Firebase Cloud Synchronization</div>
       <button class="btn btn-danger-text" style="font-size:16px; padding:0 4px;" onclick="closeGistModal()">✕</button>
     </div>
     
     <p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">
-      ระบบเชื่อมต่อผ่านฐานข้อมูล Firebase เรียบร้อยแล้ว ข้อมูลจะดึงลงมาแบบ Real-time ทันทีเมื่อเปิดเว็บ คุณสามารถกดบันทึกเพื่ออัปเดตข้อมูลขึ้นระบบคลาวด์ได้ตลอดเวลา
+      แอปพลิเคชันเชื่อมโยงกับเซิร์ฟเวอร์ Firebase เรียบร้อยแล้ว ระบบจะซิงก์ข้อมูลแบบ Real-time โดยอัตโนมัติ คุณสามารถคลิกบันทึกด้านล่างเพื่ออัปเดตข้อมูลขึ้นคลาวด์ได้ทันที
     </p>
 
     <div id="gist-status-text">🔄 ระบบ Cloud พร้อมทำงาน...</div>
@@ -235,7 +234,7 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // ค่าคอนฟิก Firebase Cloud จากของจริงของคุณ
+  // ใช้ Config จริงจาก Firebase ของคุณ
   const firebaseConfig = {
     apiKey: "AIzaSyAZOWoDHEiGIxkYIRgRkNWXjNWGLE4wgFQ",
     authDomain: "gas-station-dd6e9.firebaseapp.com",
@@ -246,12 +245,12 @@
     measurementId: "G-YB0SR5ETT1"
   };
 
-  // เริ่มต้นกระบวนการเชื่อมต่อหลังบ้าน
+  // เริ่มประมวลผลระบบ Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
   const docRef = doc(db, "gas_station", "daily_records");
 
-  // โครงสร้างชุดข้อมูลหัวจ่ายน้ำมันตามต้นฉบับ
+  // คงตารางหัวจ่ายเดิมของระบบไว้ทั้งหมด
   const GROUPS = [
     {
       name: "ตู้ 1",
@@ -280,11 +279,9 @@
     }
   ];
 
-  // คลังข้อมูลหลัก
-  window.sheetData = {}; 
-  window.currentDate = ""; 
+  window.sheetData = {};
+  window.currentDate = "";
 
-  // ฟังก์ชันดึงหรือสร้างช่องเก็บข้อมูลประจำวัน
   function getOrCreateDateData(dateStr) {
     if (!window.sheetData[dateStr]) {
       window.sheetData[dateStr] = {
@@ -292,7 +289,6 @@
         transfers: [],
         cashExpenses: []
       };
-      // ฝังข้อมูลราคาเริ่มต้น
       GROUPS.forEach(g => {
         g.nozzles.forEach(n => {
           window.sheetData[dateStr].nozzles[n.id] = { start: 0, end: 0, price: n.defPrice };
@@ -302,11 +298,9 @@
     return window.sheetData[dateStr];
   }
 
-  // วาดรายการตู้จ่ายน้ำมันทั้งหมด (คงโครงสร้างเดิม)
   window.renderAllGroups = function() {
     const tbody = document.getElementById('nozzle-rows');
     tbody.innerHTML = '';
-
     const data = getOrCreateDateData(window.currentDate);
     let allTotalLiters = 0;
     let allTotalBaht = 0;
@@ -336,7 +330,6 @@
       });
     });
 
-    // แถวสรุปรวมน้ำมัน (ท้ายตาราง)
     const trTotal = document.createElement('tr');
     trTotal.className = 'total-row';
     trTotal.innerHTML = `
@@ -357,12 +350,10 @@
     window.calc();
   };
 
-  // จัดการตารางเงินโอน (คงโครงสร้างเดิม)
   window.renderTransfer = function() {
     const tbody = document.getElementById('transfer-rows');
     tbody.innerHTML = '';
     const data = getOrCreateDateData(window.currentDate);
-
     data.transfers.forEach((item, index) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -395,12 +386,10 @@
     window.calc();
   };
 
-  // จัดการตารางเงินสดหน้าลาน (คงโครงสร้างเดิม)
   window.renderCash = function() {
     const tbody = document.getElementById('cash-rows');
     tbody.innerHTML = '';
     const data = getOrCreateDateData(window.currentDate);
-
     data.cashExpenses.forEach((item, index) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -433,10 +422,8 @@
     window.calc();
   };
 
-  // ฟังก์ชันคำนวณเงินสดคงเหลือปลายทาง (คงระบบเดิม)
   window.calc = function() {
     const data = getOrCreateDateData(window.currentDate);
-
     let totalSales = 0;
     GROUPS.forEach(g => {
       g.nozzles.forEach(n => {
@@ -451,18 +438,15 @@
 
     document.getElementById('total-transfer-val').innerText = totalTransfer.toFixed(2);
     document.getElementById('total-cash-val').innerText = totalCash.toFixed(2);
-
     document.getElementById('sum-total-sales').innerText = totalSales.toFixed(2);
     document.getElementById('sum-total-transfer').innerText = totalTransfer.toFixed(2);
     document.getElementById('sum-total-cash').innerText = totalCash.toFixed(2);
     document.getElementById('sum-cash-to-send').innerText = cashToSend.toFixed(2);
   };
 
-  // ฟังก์ชันเปลี่ยนและแปลงค่าวันที่แสดงผล (คงระบบเดิม)
   window.loadDate = function(dateStr) {
     window.currentDate = dateStr;
     document.getElementById('main-date').value = dateStr;
-
     const d = new Date(dateStr);
     if (!isNaN(d.getTime())) {
       const options = { day: 'numeric', month: 'short', year: 'numeric' };
@@ -470,7 +454,6 @@
     } else {
       document.getElementById('header-date').innerText = dateStr;
     }
-
     window.renderAllGroups();
     window.renderTransfer();
     window.renderCash();
@@ -485,10 +468,10 @@
     document.getElementById('main-date').showPicker();
   };
 
-  // ส่วนจัดการการเซฟข้อมูลขึ้น Firebase Cloud
+  // ฟังก์ชันเขียนข้อมูลขึ้น Firebase Cloud
   async function saveToFirebase() {
     try {
-      gistStatus('⏳ กำลังอัปโหลดฐานข้อมูลขึ้น Cloud...', '#f0a500');
+      gistStatus('⏳ กำลังอัปโหลดข้อมูลขึ้น Cloud...', '#f0a500');
       await setDoc(docRef, window.sheetData);
       gistStatus('✅ บันทึกขึ้นระบบคลาวด์ Firebase สำเร็จแล้ว!', '#3fb950');
     } catch (e) {
@@ -496,31 +479,33 @@
     }
   }
 
-  // ระบบ Real-time Listener คอยดึงข้อมูลเมื่อฐานข้อมูลมีการอัปเดต
+  // เฝ้าสังเกตและดึงข้อมูลแบบ Real-time ดึงข้อมูลลงมาทันทีเมื่อหน้าเว็บเปิดหรือเมื่อข้อมูลฝั่งเซิร์ฟเวอร์อัปเดต
   function initFirebaseSync() {
     const dot = document.getElementById('gist-live-dot');
     dot.style.backgroundColor = '#f0a500';
 
     onSnapshot(docRef, (docSnap) => {
+      document.getElementById('loading-oil').style.display = 'none';
       if (docSnap.exists()) {
         const cloudData = docSnap.data();
         window.sheetData = cloudData;
 
-        // โหลดข้อมูลล่าสุดมาแสดงผล
+        // แสดงผลลัพธ์ข้อมูลชุดล่าสุดที่ดึงมา
         window.renderAllGroups();
         window.renderTransfer();
         window.renderCash();
         window.calc();
 
-        dot.style.backgroundColor = '#3fb950'; // จุดไฟสีเขียว แปลว่าสำเร็จ
+        dot.style.backgroundColor = '#3fb950'; // สีเขียว = เชื่อมต่อสำเร็จ
         gistStatus('✅ ซิงก์ฐานข้อมูล Cloud ล่าสุดเรียบร้อย', '#3fb950');
       } else {
-        dot.style.backgroundColor = '#58a6ff'; // จุดสีฟ้า กรณีคลังข้อมูลว่างเปล่า
-        gistStatus('ℹ️ ยังไม่มีฐานข้อมูลเก่าบน Cloud พร้อมตั้งค่าใหม่', '#58a6ff');
+        dot.style.backgroundColor = '#58a6ff'; // สีฟ้า = เชื่อมต่อสำเร็จแต่ยังไม่มีข้อมูลบนเซิร์ฟเวอร์
+        gistStatus('ℹ️ ยังไม่มีข้อมูลเดิมบน Cloud พร้อมเริ่มใช้งานใหม่', '#58a6ff');
       }
     }, (error) => {
-      dot.style.backgroundColor = '#f85149'; // จุดสีแดงเมื่อหลุดการเชื่อมต่อ
-      gistStatus('❌ หลุดการซิงก์: ' + error.message, '#f85149');
+      document.getElementById('loading-oil').style.display = 'none';
+      dot.style.backgroundColor = '#f85149'; // สีแดง = เกิดข้อผิดพลาด
+      gistStatus('❌ หลุดการเชื่อมต่อ: ' + error.message, '#f85149');
     });
   }
 
@@ -532,20 +517,18 @@
     }
   }
 
-  // หน้าต่างควบคุม Modal
   window.openGistModal = function() { document.getElementById('gist-modal').style.display = 'flex'; };
   window.closeGistModal = function() { document.getElementById('gist-modal').style.display = 'none'; };
 
-  // คำสั่งเริ่มทำงานเมื่อแอปพลิเคชันพร้อม
   document.addEventListener('DOMContentLoaded', () => {
-    // กำหนดวันที่เริ่มเปิดเว็บเป็นวันปัจจุบันแบบเดิม
+    document.getElementById('loading-oil').style.display = 'flex';
     const today = new Date().toISOString().split('T')[0];
     window.loadDate(today);
 
-    // ผูกคำสั่งปุ่มบันทึก
+    // ผูกคำสั่งปุ่มเซฟ
     document.getElementById('btn-gist-save').onclick = saveToFirebase;
 
-    // เปิดการซิงก์คลาวด์อัตโนมัติ
+    // รันการซิงก์ข้อมูล Firebase อัตโนมัติ
     initFirebaseSync();
   });
 </script>
