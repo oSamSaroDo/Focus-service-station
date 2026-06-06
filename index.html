@@ -25,513 +25,710 @@
     --diesel2-color: #58a6ff;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Sarabun', sans-serif; }
-  body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; font-size: 14px; }
-  .container { max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+  * { box-sizing: border-box; font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); padding: 15px; font-size: 14px; line-height: 1.4; }
+  input, select, button { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 14px; outline: none; }
+  input:focus, select:focus { border-color: var(--accent); }
+  button { cursor: pointer; font-weight: 500; background: var(--surface2); transition: all 0.2s; }
+  button:hover { border-color: var(--text-muted); background: var(--border); }
+  button.primary { background: var(--accent3); border-color: transparent; }
+  button.primary:hover { background: #2ea04fcc; }
+  button.danger { background: #da3637; border-color: transparent; }
+  button.danger:hover { background: #b82d30; }
 
-  header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); padding: 12px 20px; border-radius: 8px; border: 1px solid var(--border); }
-  h1 { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; color: var(--text); }
-  .header-date-wrap { display: flex; align-items: center; gap: 12px; }
-  #header-date { font-weight: 500; color: var(--accent); font-size: 15px; cursor: pointer; border-bottom: 1px dashed var(--accent); }
-  input[type="date"] { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 14px; outline: none; }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 13px; }
+  .text-right { text-align: right; }
+  .text-muted { color: var(--text-muted); }
+  .text-success { color: var(--green); font-weight: 600; }
+  .text-danger { color: var(--red); font-weight: 600; }
+  .text-accent { color: var(--accent); font-weight: 600; }
 
-  .btn { background: var(--border); color: var(--text); border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: background 0.15s; }
-  .btn:hover { background: #3c444d; }
-  .btn-accent { background: var(--accent); color: #000; font-weight: 600; }
-  .btn-accent:hover { background: #d49200; }
-  .btn-orange { background: var(--accent2); color: #fff; font-weight: 500; }
-  .btn-orange:hover { background: #c54f22; }
-  .btn-success { background: var(--accent3); color: #fff; font-weight: 500; }
-  .btn-success:hover { background: #268540; }
-  .btn-danger-text { background: transparent; color: var(--red); padding: 4px; border-radius: 4px; font-size: 12px; }
-  .btn-danger-text:hover { background: rgba(248,81,73,0.1); }
+  header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .header-left { display: flex; align-items: center; gap: 15px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  h1 { font-size: 18px; font-weight: 600; }
 
-  .grid-main { display: grid; grid-template-columns: 2.2fr 1fr; gap: 20px; }
-  @media (max-width: 1200px) { .grid-main { grid-template-columns: 1fr; } }
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+  @media(min-width: 1024px) { .main-grid { grid-template-columns: 1.3fr 1fr; } }
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 15px; position: relative; }
-  .card-title { font-size: 15px; font-weight: 600; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; color: var(--text); }
-  .card-title span { display: flex; align-items: center; gap: 8px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
 
-  .table-responsive { overflow-x: auto; margin: 0 -10px; padding: 0 10px; }
-  table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-  th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  th { color: var(--text-muted); font-weight: 500; font-size: 13px; white-space: nowrap; }
+  /* Table Style */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 13px; }
+  th, td { padding: 6px 8px; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface2); color: var(--text-muted); font-weight: 500; font-size: 12px; }
+  tr:hover td { background: #ffffff03; }
 
-  .tag-dispenser { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
-  .tag-g95 { background: var(--g95-color); }
-  .tag-g91 { background: var(--g91-color); color: #000; }
-  .tag-diesel { background: var(--diesel-color); }
-  .tag-diesel2 { background: var(--diesel2-color); }
+  /* Nozzle Specific Table Customization */
+  .nozzle-table td { padding: 4px 6px; }
+  .nozzle-table input { width: 100%; padding: 4px 6px; font-size: 13px; text-align: right; }
+  .nozzle-row-95 { border-left: 3px solid var(--g95-color); }
+  .nozzle-row-91 { border-left: 3px solid var(--g91-color); }
+  .nozzle-row-b7 { border-left: 3px solid var(--diesel-color); }
+  .nozzle-row-b10 { border-left: 3px solid var(--diesel2-color); }
 
-  .input-table { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 100%; padding: 6px 10px; border-radius: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: right; outline: none; transition: border-color 0.15s; }
-  .input-table:focus { border-color: var(--accent); }
-  .input-table::placeholder { color: #484f58; }
-  .input-table[readonly] { background: transparent; border-color: transparent; padding-right: 0; cursor: default; }
+  /* Dense layout for lists */
+  .dense-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+  .dense-row input, .dense-row select { padding: 4px 8px; font-size: 13px; }
   
-  .text-num { font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: right; }
-  .text-num-bold { font-family: 'IBM Plex Mono', monospace; font-size: 14px; text-align: right; font-weight: 600; }
-  .total-row { background: rgba(255,255,255,0.01); font-weight: 600; }
-  .total-row td { border-top: 1px solid var(--border); border-bottom: 2px double var(--border); }
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+  @media(min-width: 480px) { .summary-grid { grid-template-columns: repeat(4, 1fr); } }
+  .summary-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 10px; text-align: center; }
+  .summary-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .summary-val { font-size: 16px; font-weight: 600; }
 
-  .flex-col { display: flex; flex-direction: column; gap: 15px; }
-  .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .btn-sm { padding: 4px 8px; font-size: 12px; border-radius: 4px; }
+  .tab-container { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 10px; gap: 4px; }
+  .tab { padding: 6px 12px; cursor: pointer; border: 1px solid transparent; border-bottom: none; border-radius: 6px 6px 0 0; font-size: 13px; color: var(--text-muted); }
+  .tab.active { background: var(--surface); border-color: var(--border); color: var(--text); font-weight: 500; margin-bottom: -1px; }
 
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-  .sum-box { background: var(--surface); border: 1px solid var(--border); padding: 15px 20px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
-  .sum-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
-  .sum-val { font-size: 24px; font-weight: 700; font-family: 'IBM Plex Mono', monospace; color: var(--text); }
-  .sum-box-highlight { background: rgba(46,160,79,0.08); border-color: rgba(46,160,79,0.3); }
-  .sum-box-highlight .sum-val { color: #56d364; }
+  /* Gist Config Modal-like section */
+  .gist-box { background: var(--surface2); padding: 10px; border-radius: 6px; border: 1px solid var(--border); font-size: 12px; margin-top: 10px; display: none; }
+  .gist-box.show { display: block; }
+  .gist-box input { width: 100%; margin-bottom: 6px; font-size: 12px; padding: 4px 6px; background: var(--bg); }
 
-  .text-green { color: var(--green); }
-  .text-red { color: var(--red); }
-  .text-blue { color: var(--blue); }
-
-  /* Gist Panel Custom CSS styled for Firebase modal */
-  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-  .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; width: 90%; max-width: 480px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-  .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-  .modal-title { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
-  #gist-status-text { font-size: 13px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; font-family: 'IBM Plex Mono', monospace; min-height: 38px; word-break: break-all; white-space: pre-wrap; }
-  .live-dot { width: 8px; height: 8px; background-color: #8b949e; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px rgba(139,148,158,0.2); transition: background-color 0.3s; }
-  
-  .loading-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22,27,34,0.7); border-radius: 8px; z-index: 5; justify-content: center; align-items: center; font-weight: 500; font-size: 14px; color: var(--accent); }
+  .btn-sm { padding: 3px 8px; font-size: 12px; border-radius: 4px; }
+  .w-full { width: 100%; }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <header>
-    <h1>⛽ บันทึกประจำวัน — ปั๊มน้ำมัน <span id="gist-live-dot" class="live-dot" title="Firebase Status"></span></h1>
-    <div class="header-date-wrap">
-      <span id="header-date" onclick="triggerDatePicker()">เลือกวันที่...</span>
-      <input type="date" id="main-date" style="display:none;" onchange="handleDateChange(this.value)">
-      <button class="btn btn-orange" onclick="openGistModal()">🔥 Firebase Cloud</button>
-    </div>
-  </header>
-
-  <div class="grid-main">
-    <div class="card" id="card-oil">
-      <div class="loading-overlay" id="loading-oil">⏳ กำลังโหลดข้อมูล...</div>
-      <div class="card-title">📊 ยอดขายและมิเตอร์แยกตามตู้จ่าย</div>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 200px;">ตู้จ่าย / ชนิดน้ำมัน</th>
-              <th style="text-align: right; width: 140px;">มิเตอร์เปิด (เช้า)</th>
-              <th style="text-align: right; width: 140px;">มิเตอร์ปิด (ค่ำ)</th>
-              <th style="text-align: right; width: 120px;">ขายได้ (ลิตร)</th>
-              <th style="text-align: right; width: 110px;">ราคา/ลิตร</th>
-              <th style="text-align: right; width: 150px;">รวมเป็นเงิน (บาท)</th>
-            </tr>
-          </thead>
-          <tbody id="nozzle-rows">
-            </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="flex-col">
-      <div class="card">
-        <div class="card-title">
-          <span>📱 ยอดเงินโอน</span>
-          <button class="btn btn-sm" onclick="addTransferRow()">+ เพิ่มรายการ</button>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>รายการโอน (ชื่อลูกค้า/บัญชี)</th>
-                <th style="text-align: right; width: 130px;">จำนวนเงิน</th>
-                <th style="width: 40px;"></th>
-              </tr>
-            </thead>
-            <tbody id="transfer-rows"></tbody>
-            <tfoot>
-              <tr class="total-row">
-                <td>รวมเงินโอน</td>
-                <td id="total-transfer-val" class="text-num-bold text-blue">0.00</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">
-          <span>💸 รายจ่ายเงินสด (หน้าลาน)</span>
-          <button class="btn btn-sm" onclick="addCashRow()">+ เพิ่มรายการ</button>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>รายการจ่าย (ค่าของ/ค่าแรง)</th>
-                <th style="text-align: right; width: 130px;">จำนวนเงิน</th>
-                <th style="width: 40px;"></th>
-              </tr>
-            </thead>
-            <tbody id="cash-rows"></tbody>
-            <tfoot>
-              <tr class="total-row">
-                <td>รวมรายจ่ายเงินสด</td>
-                <td id="total-cash-val" class="text-num-bold text-red">0.00</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
-    </div>
+<header>
+  <div class="header-left">
+    <h1 id="header-date">บันทึกประจำวัน</h1>
+    <input type="date" id="main-date" onchange="changeDate()">
   </div>
+  <div class="header-right">
+    <button onclick="toggleGistBox()" class="btn-sm" id="btn-gist-config">☁️ Cloud Gist</button>
+    <button onclick="exportJSON()" class="btn-sm">💾 Backup</button>
+    <button onclick="importJSON()" class="btn-sm">📥 Restore</button>
+  </div>
+</header>
 
-  <div class="summary-grid">
-    <div class="sum-box">
-      <span class="sum-label">ยอดขายน้ำมันรวมทั้งหมด</span>
-      <span class="sum-val" id="sum-total-sales">0.00</span>
-    </div>
-    <div class="sum-box">
-      <span class="sum-label">หัก ยอดเงินโอนรวม</span>
-      <span class="sum-val text-blue" id="sum-total-transfer">0.00</span>
-    </div>
-    <div class="sum-box">
-      <span class="sum-label">หัก รายจ่ายเงินสดหน้าลาน</span>
-      <span class="sum-val text-red" id="sum-total-cash">0.00</span>
-    </div>
-    <div class="sum-box sum-box-highlight">
-      <span class="sum-label" style="color: #56d364; font-weight: 600;">💵 เงินสดสุทธิที่ต้องส่งจริง</span>
-      <span class="sum-val" id="sum-cash-to-send">0.00</span>
+<div id="gist-box" class="gist-box">
+  <div style="font-weight:600; margin-bottom:6px;">GitHub Gist Sync Settings</div>
+  <input type="password" id="gist-token" placeholder="GitHub Personal Access Token (classic)">
+  <input type="text" id="gist-id" placeholder="Gist ID (ความยาว 32 หลัก)">
+  <div style="display:flex; justify-content: space-between; align-items:center;">
+    <span id="gist-status" class="mono" style="color:var(--text-muted);">Not Connected</span>
+    <div>
+      <button onclick="saveGistConfig()" class="btn-sm primary">Save & Connect</button>
+      <button onclick="syncGistPull()" class="btn-sm">Pull</button>
+      <button onclick="syncGistPush()" class="btn-sm">Push</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="gist-modal" onclick="if(event.target===this) closeGistModal()">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">🔥 Firebase Cloud Synchronization</div>
-      <button class="btn btn-danger-text" style="font-size:16px; padding:0 4px;" onclick="closeGistModal()">✕</button>
+<div class="main-grid">
+  
+  <div>
+    <div class="card">
+      <div class="card-title">
+        <span>🔢 จดมิเตอร์หัวจ่าย</span>
+        <span class="text-muted mono" style="font-size:12px;">ลิตรสะสม</span>
+      </div>
+      <table class="nozzle-table">
+        <thead>
+          <tr>
+            <th>หัวจ่าย</th>
+            <th width="35%">เลขมิเตอร์ เปิด (เช้า)</th>
+            <th width="35%">เลขมิเตอร์ ปิด (เย็น)</th>
+            <th width="20%" class="text-right">ขายได้ (ลิตร)</th>
+          </tr>
+        </thead>
+        <tbody id="nozzle-tbody">
+          </tbody>
+      </table>
     </div>
-    
-    <p style="font-size: 13px; color: var(--text-muted); line-height: 1.4;">
-      แอปพลิเคชันเชื่อมโยงกับเซิร์ฟเวอร์ Firebase เรียบร้อยแล้ว ระบบจะซิงก์ข้อมูลแบบ Real-time โดยอัตโนมัติ คุณสามารถคลิกบันทึกด้านล่างเพื่ออัปเดตข้อมูลขึ้นคลาวด์ได้ทันที
-    </p>
 
-    <div id="gist-status-text">🔄 ระบบ Cloud พร้อมทำงาน...</div>
-
-    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 5px;">
-      <button class="btn btn-success" id="btn-gist-save" style="width: 100%; justify-content: center; padding: 10px;">💾 บันทึกขึ้น Firebase Cloud</button>
+    <div class="card">
+      <div class="card-title">📊 สรุปยอดขายน้ำมันประจำวัน</div>
+      <table id="summary-oil-table">
+        <thead>
+          <tr>
+            <th>ชนิดน้ำมัน</th>
+            <th class="text-right">จำนวนลิตร</th>
+            <th class="text-right">ราคา/ลิตร</th>
+            <th class="text-right">รวมเงิน (บาท)</th>
+          </tr>
+        </thead>
+        <tbody id="summary-oil-tbody"></tbody>
+      </table>
+      
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">รวมยอดขายน้ำมัน</div>
+          <div class="summary-val mono text-accent" id="sum-oil-total">0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">ยอดขายสินค้า/อื่น ๆ</div>
+          <div class="summary-val mono" id="sum-other-total">0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">รวมรายรับทั้งสิ้น</div>
+          <div class="summary-val mono text-success" id="sum-grand-total">0.00</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">ผลต่าง (ขาด/เกิน)</div>
+          <div class="summary-val mono" id="sum-diff">0.00</div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <div>
+    <div class="tab-container">
+      <div class="tab active" onclick="switchTab('transfer')">💳 ยอดโอน/บัตร/ค้าง (<span id="count-tx">0</span>)</div>
+      <div class="tab" onclick="switchTab('cash')">💵 เงินสด/รายจ่าย (<span id="count-cash">0</span>)</div>
+      <div class="tab" onclick="switchTab('prices')">⛽ ตั้งราคาน้ำมัน</div>
+    </div>
+
+    <div id="tab-transfer" class="tab-content card">
+      <table style="margin-bottom:8px;">
+        <thead>
+          <tr>
+            <th>ประเภท/รายการ</th>
+            <th width="35%" class="text-right">จำนวนเงิน (บาท)</th>
+            <th width="10%"></th>
+          </tr>
+        </thead>
+        <tbody id="tx-tbody"></tbody>
+      </table>
+      <div class="dense-row">
+        <select id="add-tx-type" style="width:35%;">
+          <option value="โอนเงิน">📱 โอนเงิน</option>
+          <option value="บัตรเครดิต">💳 บัตรเครดิต</option>
+          <option value="ค้างชำระ">⏳ ค้างชำระ</option>
+          <option value="สินค้า/อื่น ๆ">🛍️ สินค้า/อื่น ๆ</option>
+        </select>
+        <input type="text" id="add-tx-name" placeholder="บันทึกช่วยจำ/ชื่อ" style="flex:1;">
+        <input type="number" step="any" id="add-tx-amount" placeholder="0.00" class="mono text-right" style="width:25%;">
+        <button onclick="addTxItem()" class="primary btn-sm">+</button>
+      </div>
+    </div>
+
+    <div id="tab-cash" class="tab-content card" style="display:none;">
+      <table style="margin-bottom:8px;">
+        <thead>
+          <tr>
+            <th>รายการเงินสด/รายจ่าย</th>
+            <th width="35%" class="text-right">จำนวนเงิน (บาท)</th>
+            <th width="10%"></th>
+          </tr>
+        </thead>
+        <tbody id="cash-tbody"></tbody>
+      </table>
+      <div class="dense-row">
+        <select id="add-cash-type" style="width:35%;">
+          <option value="เงินสดส่ง">💵 เงินสดส่ง</option>
+          <option value="รายจ่าย">🧾 รายจ่ายปั๊ม</option>
+          <option value="เหรียญ/เงินทอน">🪙 เงินทอน/เหรียญ</option>
+        </select>
+        <input type="text" id="add-cash-name" placeholder="รายละเอียด" style="flex:1;">
+        <input type="number" step="any" id="add-cash-amount" placeholder="0.00" class="mono text-right" style="width:25%;">
+        <button onclick="addCashItem()" class="primary btn-sm">+</button>
+      </div>
+    </div>
+
+    <div id="tab-prices" class="tab-content card" style="display:none;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="dense-row"><span style="color:var(--g95-color)">● แก๊สโซฮอล์ 95:</span> <input type="number" step="any" id="p-g95" class="mono text-right" onchange="savePrice()"></div>
+        <div class="dense-row"><span style="color:var(--g91-color)">● แก๊สโซฮอล์ 91:</span> <input type="number" step="any" id="p-g91" class="mono text-right" onchange="savePrice()"></div>
+        <div class="dense-row"><span style="color:var(--diesel-color)">● ดีเซล B7:</span> <input type="number" step="any" id="p-b7" class="mono text-right" onchange="savePrice()"></div>
+        <div class="dense-row"><span style="color:var(--diesel2-color)">● ดีเซล B10:</span> <input type="number" step="any" id="p-b10" class="mono text-right" onchange="savePrice()"></div>
+      </div>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:8px; text-align:right;">*การเปลี่ยนราคาจะมีผลกับทุกวัน หากต้องการคงราคาเดิมของวันเก่า ให้จดบันทึกแยกไว้</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 บันทึกเพิ่มเติมประจำวัน</div>
+      <textarea id="day-notes" style="width:100%; height:60px; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:6px; padding:8px; font-size:13px; resize:none;" onchange="saveDate()"></textarea>
+    </div>
+
+  </div>
+
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script>
+// =================== DATA STRUCTURE & CONFIG ===================
+const NOZZLES = [
+  { id: 1, name: "แก๊สโซฮอล์ 95 (1)", type: "g95" },
+  { id: 2, name: "แก๊สโซฮอล์ 95 (2)", type: "g95" },
+  { id: 3, name: "แก๊สโซฮอล์ 91 (1)", type: "g91" },
+  { id: 4, name: "แก๊สโซฮอล์ 91 (2)", type: "g91" },
+  { id: 5, name: "ดีเซล B7 (1)", type: "b7" },
+  { id: 6, name: "ดีเซล B7 (2)", type: "b7" },
+  { id: 7, name: "ดีเซล B10 (1)", type: "b10" },
+  { id: 8, name: "ดีเซล B10 (2)", type: "b10" }
+];
 
-  // ใช้ Config จริงจาก Firebase ของคุณ
-  const firebaseConfig = {
-    apiKey: "AIzaSyAZOWoDHEiGIxkYIRgRkNWXjNWGLE4wgFQ",
-    authDomain: "gas-station-dd6e9.firebaseapp.com",
-    projectId: "gas-station-dd6e9",
-    storageBucket: "gas-station-dd6e9.firebasestorage.app",
-    messagingSenderId: "94552958790",
-    appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747",
-    measurementId: "G-YB0SR5ETT1"
-  };
+// Master database object structure in localStorage: sheetData[dateString] = { nozzles:[], items:[], notes:"" }
+let sheetData = JSON.parse(localStorage.getItem('pump_sheet_data')) || {};
+let globalPrices = JSON.parse(localStorage.getItem('pump_oil_prices')) || { g95: 35.00, g91: 34.00, b7: 32.00, b10: 31.00 };
+let currentDate = new Date().toISOString().split('T')[0];
 
-  // เริ่มประมวลผลระบบ Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const docRef = doc(db, "gas_station", "daily_records");
+// Initialize application state
+document.getElementById('main-date').value = currentDate;
+loadPricesToUI();
 
-  // คงตารางหัวจ่ายเดิมของระบบไว้ทั้งหมด
-  const GROUPS = [
-    {
-      name: "ตู้ 1",
-      nozzles: [
-        { id: "g95_1", name: "แก๊สโซฮอล์ 95", type: "g95", defPrice: 35.50 },
-        { id: "g91_1", name: "แก๊สโซฮอล์ 91", type: "g91", defPrice: 34.20 }
-      ]
-    },
-    {
-      name: "ตู้ 2",
-      nozzles: [
-        { id: "diesel_1", name: "ดีเซล B7", type: "diesel", defPrice: 32.94 }
-      ]
-    },
-    {
-      name: "ตู้ 3",
-      nozzles: [
-        { id: "g95_2", name: "แก๊สโซฮอล์ 95", type: "g95", defPrice: 35.50 }
-      ]
-    },
-    {
-      name: "ตู้ 4",
-      nozzles: [
-        { id: "diesel_2", name: "ดีเซล B7", type: "diesel2", defPrice: 32.94 }
-      ]
+// =================== APPLICATION LOGIC ===================
+
+function changeDate() {
+  currentDate = document.getElementById('main-date').value;
+  loadDate(currentDate);
+}
+
+function loadPricesToUI() {
+  document.getElementById('p-g95').value = globalPrices.g95;
+  document.getElementById('p-g91').value = globalPrices.g91;
+  document.getElementById('p-b7').value = globalPrices.b7;
+  document.getElementById('p-b10').value = globalPrices.b10;
+}
+
+function savePrice() {
+  globalPrices.g95 = parseFloat(document.getElementById('p-g95').value) || 0;
+  globalPrices.g91 = parseFloat(document.getElementById('p-g91').value) || 0;
+  globalPrices.b7 = parseFloat(document.getElementById('p-b7').value) || 0;
+  globalPrices.b10 = parseFloat(document.getElementById('p-b10').value) || 0;
+  localStorage.setItem('pump_oil_prices', JSON.stringify(globalPrices));
+  calc();
+}
+
+function loadDate(dateStr) {
+  if (!sheetData[dateStr]) {
+    // Generate default template data for new day
+    sheetData[dateStr] = {
+      nozzles: NOZZLES.map(n => ({ id: n.id, open: 0, close: 0 })),
+      items: [], // contains both financial tx & cash items
+      notes: ""
+    };
+  }
+  
+  const data = sheetData[dateStr];
+  
+  // Render notes
+  document.getElementById('day-notes').value = data.notes || "";
+  
+  renderAllGroups();
+  calc();
+}
+
+function saveDate(silent) {
+  const data = sheetData[currentDate];
+  if (!data) return;
+
+  // Read nozzle values
+  NOZZLES.forEach(n => {
+    const r = data.nozzles.find(x => x.id === n.id);
+    if (r) {
+      r.open = parseFloat(document.getElementById(`nz-${n.id}-open`).value) || 0;
+      r.close = parseFloat(document.getElementById(`nz-${n.id}-close`).value) || 0;
     }
+  });
+
+  // Read notes
+  data.notes = document.getElementById('day-notes').value;
+
+  // Commit to localstorage
+  localStorage.setItem('pump_sheet_data', JSON.stringify(sheetData));
+  
+  calc();
+
+  // บันทึกและซิงค์ข้อมูลขึ้น Firebase Cloud อัตโนมัติทันทีที่มีการบันทึกข้อมูล (หากตั้งค่าเชื่อมต่อไว้)
+  if (window._fbReady && typeof window.fbSave === 'function') {
+    window.fbSave();
+  }
+
+  // Handle subtle background autosave status UI if possible
+  if(!silent && window.GIST_CONNECTED) {
+     syncGistPush(true); // silent push to cloud gist if connected
+  }
+}
+
+function renderAllGroups() {
+  const data = sheetData[currentDate] || { nozzles: [], items: [] };
+  
+  // Render Nozzle Form Rows
+  const tbody = document.getElementById('nozzle-tbody');
+  tbody.innerHTML = "";
+  
+  NOZZLES.forEach(n => {
+    const val = data.nozzles.find(x => x.id === n.id) || { open: 0, close: 0 };
+    const diff = Math.max(0, val.close - val.open);
+    
+    const tr = document.createElement('tr');
+    tr.className = `nozzle-row-${n.type}`;
+    tr.innerHTML = `
+      <td class="mono font-weight-500">${n.name}</td>
+      <td><input type="number" step="any" id="nz-${n.id}-open" value="${val.open || ''}" placeholder="0" class="mono" onchange="saveDate()"></td>
+      <td><input type="number" step="any" id="nz-${n.id}-close" value="${val.close || ''}" placeholder="0" class="mono" onchange="saveDate()"></td>
+      <td class="text-right mono font-weight-600" id="nz-${n.id}-diff">${diff > 0 ? diff.toFixed(2) : '0.00'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  renderTransfer();
+  renderCash();
+}
+
+function renderTransfer() {
+  const data = sheetData[currentDate] || { items: [] };
+  const txTbody = document.getElementById('tx-tbody');
+  txTbody.innerHTML = "";
+  
+  const txItems = data.items.filter(i => ["โอนเงิน","บัตรเครดิต","ค้างชำระ","สินค้า/อื่น ๆ"].includes(i.type));
+  document.getElementById('count-tx').innerText = txItems.length;
+
+  txItems.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="text-muted font-size-12">[${item.type}]</span> ${item.name || '-'}</td>
+      <td class="text-right mono font-weight-500">${parseFloat(item.amount).toFixed(2)}</td>
+      <td class="text-center"><button class="danger btn-sm" style="padding:1px 5px;" onclick="deleteItem(${item.id})">×</button></td>
+    `;
+    txTbody.appendChild(tr);
+  });
+}
+
+function renderCash() {
+  const data = sheetData[currentDate] || { items: [] };
+  const cashTbody = document.getElementById('cash-tbody');
+  cashTbody.innerHTML = "";
+
+  const cashItems = data.items.filter(i => ["เงินสดส่ง","รายจ่าย","เหรียญ/เงินทอน"].includes(i.type));
+  document.getElementById('count-cash').innerText = cashItems.length;
+
+  cashItems.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="text-muted font-size-12">[${item.type}]</span> ${item.name || '-'}</td>
+      <td class="text-right mono font-weight-500">${parseFloat(item.amount).toFixed(2)}</td>
+      <td class="text-center"><button class="danger btn-sm" style="padding:1px 5px;" onclick="deleteItem(${item.id})">×</button></td>
+    `;
+    cashTbody.appendChild(tr);
+  });
+}
+
+function addTxItem() {
+  const type = document.getElementById('add-tx-type').value;
+  const name = document.getElementById('add-tx-name').value.trim();
+  const amount = parseFloat(document.getElementById('add-tx-amount').value) || 0;
+  
+  if(amount === 0) return;
+  
+  const data = sheetData[currentDate];
+  data.items.push({ id: Date.now(), type, name, amount });
+  
+  document.getElementById('add-tx-name').value = "";
+  document.getElementById('add-tx-amount').value = "";
+  
+  saveDate();
+  renderTransfer();
+}
+
+function addCashItem() {
+  const type = document.getElementById('add-cash-type').value;
+  const name = document.getElementById('add-cash-name').value.trim();
+  const amount = parseFloat(document.getElementById('add-cash-amount').value) || 0;
+  
+  if(amount === 0) return;
+
+  const data = sheetData[currentDate];
+  data.items.push({ id: Date.now(), type, name, amount });
+
+  document.getElementById('add-cash-name').value = "";
+  document.getElementById('add-cash-amount').value = "";
+
+  saveDate();
+  renderCash();
+}
+
+function deleteItem(id) {
+  const data = sheetData[currentDate];
+  data.items = data.items.filter(i => i.id !== id);
+  saveDate();
+  renderTransfer();
+  renderCash();
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  
+  // Highlight correct tab element
+  let idx = 0;
+  if(tabId==='cash') idx=1; if(tabId==='prices') idx=2;
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  document.getElementById('tab-' + tabId).style.display = 'block';
+}
+
+// =================== CALCULATIONS & AGGREGATIONS ===================
+function calc() {
+  const data = sheetData[currentDate];
+  if(!data) return;
+
+  // Calculate volume per oil type
+  const v = { g95:0, g91:0, b7:0, b10:0 };
+  NOZZLES.forEach(n => {
+    const r = data.nozzles.find(x => x.id === n.id) || {open:0, close:0};
+    const diff = Math.max(0, r.close - r.open);
+    v[n.type] += diff;
+    
+    // update per-nozzle subtotal labels safely
+    const lbl = document.getElementById(`nz-${n.id}-diff`);
+    if(lbl) lbl.innerText = diff > 0 ? diff.toFixed(2) : "0.00";
+  });
+
+  // Calculate Oil Summary Group
+  const sumTbody = document.getElementById('summary-oil-tbody');
+  sumTbody.innerHTML = "";
+
+  const oilTypesMeta = [
+    { key: 'g95', label: 'แก๊สโซฮอล์ 95', price: globalPrices.g95 },
+    { key: 'g91', label: 'แก๊สโซฮอล์ 91', price: globalPrices.g91 },
+    { key: 'b7', label: 'ดีเซล B7', price: globalPrices.b7 },
+    { key: 'b10', label: 'ดีเซล B10', price: globalPrices.b10 }
   ];
 
-  window.sheetData = {};
-  window.currentDate = "";
+  let sumOilTotalMoney = 0;
 
-  function getOrCreateDateData(dateStr) {
-    if (!window.sheetData[dateStr]) {
-      window.sheetData[dateStr] = {
-        nozzles: {},
-        transfers: [],
-        cashExpenses: []
-      };
-      GROUPS.forEach(g => {
-        g.nozzles.forEach(n => {
-          window.sheetData[dateStr].nozzles[n.id] = { start: 0, end: 0, price: n.defPrice };
-        });
-      });
-    }
-    return window.sheetData[dateStr];
-  }
+  oilTypesMeta.forEach(m => {
+    const liters = v[m.key];
+    const money = liters * m.price;
+    sumOilTotalMoney += money;
 
-  window.renderAllGroups = function() {
-    const tbody = document.getElementById('nozzle-rows');
-    tbody.innerHTML = '';
-    const data = getOrCreateDateData(window.currentDate);
-    let allTotalLiters = 0;
-    let allTotalBaht = 0;
-
-    GROUPS.forEach(g => {
-      g.nozzles.forEach((n, idx) => {
-        const nzData = data.nozzles[n.id] || { start: 0, end: 0, price: n.defPrice };
-        const liters = Math.max(0, nzData.end - nzData.start);
-        const baht = liters * nzData.price;
-
-        allTotalLiters += liters;
-        allTotalBaht += baht;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>
-            ${idx === 0 ? `<span style="font-weight:600; color:var(--text-muted); margin-right:8px;">${g.name}</span>` : `<span style="display:inline-block; width:34px;"></span>`}
-            <span class="tag-dispenser tag-${n.type}">${n.name}</span>
-          </td>
-          <td><input type="number" step="any" class="input-table" value="${nzData.start || ''}" placeholder="0.00" oninput="updateNozzle('${n.id}', 'start', this.value)"></td>
-          <td><input type="number" step="any" class="input-table" value="${nzData.end || ''}" placeholder="0.00" oninput="updateNozzle('${n.id}', 'end', this.value)"></td>
-          <td class="text-num-bold" style="color: #c9d1d9;">${liters > 0 ? liters.toFixed(2) : '-'}</td>
-          <td><input type="number" step="any" class="input-table" value="${nzData.price}" oninput="updateNozzle('${n.id}', 'price', this.value)"></td>
-          <td class="text-num-bold" style="color:var(--accent); font-size:15px;">${baht > 0 ? baht.toFixed(2) : '-'}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    });
-
-    const trTotal = document.createElement('tr');
-    trTotal.className = 'total-row';
-    trTotal.innerHTML = `
-      <td>รวมยอดขายน้ำมันทั้งหมด</td>
-      <td></td>
-      <td></td>
-      <td class="text-num-bold">${allTotalLiters.toFixed(2)}</td>
-      <td></td>
-      <td class="text-num-bold" style="color:var(--accent); font-size:16px;">${allTotalBaht.toFixed(2)}</td>
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span style="font-weight:500;">${m.label}</span></td>
+      <td class="text-right mono">${liters > 0 ? liters.toFixed(2) : '-'}</td>
+      <td class="text-right mono">${m.price.toFixed(2)}</td>
+      <td class="text-right mono font-weight-500">${money > 0 ? money.toFixed(2) : '0.00'}</td>
     `;
-    tbody.appendChild(trTotal);
-  };
-
-  window.updateNozzle = function(id, field, value) {
-    const data = getOrCreateDateData(window.currentDate);
-    data.nozzles[id][field] = parseFloat(value) || 0;
-    window.renderAllGroups();
-    window.calc();
-  };
-
-  window.renderTransfer = function() {
-    const tbody = document.getElementById('transfer-rows');
-    tbody.innerHTML = '';
-    const data = getOrCreateDateData(window.currentDate);
-    data.transfers.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="text" class="input-table" style="text-align:left;" value="${item.note || ''}" placeholder="ระบุรายละเอียด..." oninput="updateTransfer(${index}, 'note', this.value)"></td>
-        <td><input type="number" step="any" class="input-table" value="${item.amount || ''}" placeholder="0.00" oninput="updateTransfer(${index}, 'amount', this.value)"></td>
-        <td style="text-align:center;"><button class="btn-danger-text" onclick="deleteTransfer(${index})">✕</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  };
-
-  window.addTransferRow = function() {
-    const data = getOrCreateDateData(window.currentDate);
-    data.transfers.push({ note: '', amount: 0 });
-    window.renderTransfer();
-    window.calc();
-  };
-
-  window.updateTransfer = function(idx, field, val) {
-    const data = getOrCreateDateData(window.currentDate);
-    if (field === 'amount') data.transfers[idx][field] = parseFloat(val) || 0;
-    else data.transfers[idx][field] = val;
-    window.calc();
-  };
-
-  window.deleteTransfer = function(idx) {
-    const data = getOrCreateDateData(window.currentDate);
-    data.transfers.splice(idx, 1);
-    window.renderTransfer();
-    window.calc();
-  };
-
-  window.renderCash = function() {
-    const tbody = document.getElementById('cash-rows');
-    tbody.innerHTML = '';
-    const data = getOrCreateDateData(window.currentDate);
-    data.cashExpenses.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><input type="text" class="input-table" style="text-align:left;" value="${item.note || ''}" placeholder="ระบุรายละเอียด..." oninput="updateCash(${index}, 'note', this.value)"></td>
-        <td><input type="number" step="any" class="input-table" value="${item.amount || ''}" placeholder="0.00" oninput="updateCash(${index}, 'amount', this.value)"></td>
-        <td style="text-align:center;"><button class="btn-danger-text" onclick="deleteCash(${index})">✕</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  };
-
-  window.addCashRow = function() {
-    const data = getOrCreateDateData(window.currentDate);
-    data.cashExpenses.push({ note: '', amount: 0 });
-    window.renderCash();
-    window.calc();
-  };
-
-  window.updateCash = function(idx, field, val) {
-    const data = getOrCreateDateData(window.currentDate);
-    if (field === 'amount') data.cashExpenses[idx][field] = parseFloat(val) || 0;
-    else data.cashExpenses[idx][field] = val;
-    window.calc();
-  };
-
-  window.deleteCash = function(idx) {
-    const data = getOrCreateDateData(window.currentDate);
-    data.cashExpenses.splice(idx, 1);
-    window.renderCash();
-    window.calc();
-  };
-
-  window.calc = function() {
-    const data = getOrCreateDateData(window.currentDate);
-    let totalSales = 0;
-    GROUPS.forEach(g => {
-      g.nozzles.forEach(n => {
-        const nzData = data.nozzles[n.id] || { start:0, end:0, price:n.defPrice };
-        totalSales += Math.max(0, nzData.end - nzData.start) * nzData.price;
-      });
-    });
-
-    let totalTransfer = data.transfers.reduce((sum, i) => sum + (i.amount || 0), 0);
-    let totalCash = data.cashExpenses.reduce((sum, i) => sum + (i.amount || 0), 0);
-    let cashToSend = totalSales - totalTransfer - totalCash;
-
-    document.getElementById('total-transfer-val').innerText = totalTransfer.toFixed(2);
-    document.getElementById('total-cash-val').innerText = totalCash.toFixed(2);
-    document.getElementById('sum-total-sales').innerText = totalSales.toFixed(2);
-    document.getElementById('sum-total-transfer').innerText = totalTransfer.toFixed(2);
-    document.getElementById('sum-total-cash').innerText = totalCash.toFixed(2);
-    document.getElementById('sum-cash-to-send').innerText = cashToSend.toFixed(2);
-  };
-
-  window.loadDate = function(dateStr) {
-    window.currentDate = dateStr;
-    document.getElementById('main-date').value = dateStr;
-    const d = new Date(dateStr);
-    if (!isNaN(d.getTime())) {
-      const options = { day: 'numeric', month: 'short', year: 'numeric' };
-      document.getElementById('header-date').innerText = d.toLocaleDateString('th-TH', options);
-    } else {
-      document.getElementById('header-date').innerText = dateStr;
-    }
-    window.renderAllGroups();
-    window.renderTransfer();
-    window.renderCash();
-    window.calc();
-  };
-
-  window.handleDateChange = function(val) {
-    if (val) window.loadDate(val);
-  };
-
-  window.triggerDatePicker = function() {
-    document.getElementById('main-date').showPicker();
-  };
-
-  // ฟังก์ชันเขียนข้อมูลขึ้น Firebase Cloud
-  async function saveToFirebase() {
-    try {
-      gistStatus('⏳ กำลังอัปโหลดข้อมูลขึ้น Cloud...', '#f0a500');
-      await setDoc(docRef, window.sheetData);
-      gistStatus('✅ บันทึกขึ้นระบบคลาวด์ Firebase สำเร็จแล้ว!', '#3fb950');
-    } catch (e) {
-      gistStatus('❌ เกิดข้อผิดพลาด: ' + e.message, '#f85149');
-    }
-  }
-
-  // เฝ้าสังเกตและดึงข้อมูลแบบ Real-time ดึงข้อมูลลงมาทันทีเมื่อหน้าเว็บเปิดหรือเมื่อข้อมูลฝั่งเซิร์ฟเวอร์อัปเดต
-  function initFirebaseSync() {
-    const dot = document.getElementById('gist-live-dot');
-    dot.style.backgroundColor = '#f0a500';
-
-    onSnapshot(docRef, (docSnap) => {
-      document.getElementById('loading-oil').style.display = 'none';
-      if (docSnap.exists()) {
-        const cloudData = docSnap.data();
-        window.sheetData = cloudData;
-
-        // แสดงผลลัพธ์ข้อมูลชุดล่าสุดที่ดึงมา
-        window.renderAllGroups();
-        window.renderTransfer();
-        window.renderCash();
-        window.calc();
-
-        dot.style.backgroundColor = '#3fb950'; // สีเขียว = เชื่อมต่อสำเร็จ
-        gistStatus('✅ ซิงก์ฐานข้อมูล Cloud ล่าสุดเรียบร้อย', '#3fb950');
-      } else {
-        dot.style.backgroundColor = '#58a6ff'; // สีฟ้า = เชื่อมต่อสำเร็จแต่ยังไม่มีข้อมูลบนเซิร์ฟเวอร์
-        gistStatus('ℹ️ ยังไม่มีข้อมูลเดิมบน Cloud พร้อมเริ่มใช้งานใหม่', '#58a6ff');
-      }
-    }, (error) => {
-      document.getElementById('loading-oil').style.display = 'none';
-      dot.style.backgroundColor = '#f85149'; // สีแดง = เกิดข้อผิดพลาด
-      gistStatus('❌ หลุดการเชื่อมต่อ: ' + error.message, '#f85149');
-    });
-  }
-
-  function gistStatus(msg, color) {
-    const box = document.getElementById('gist-status-text');
-    if (box) {
-      box.innerText = msg;
-      box.style.color = color;
-    }
-  }
-
-  window.openGistModal = function() { document.getElementById('gist-modal').style.display = 'flex'; };
-  window.closeGistModal = function() { document.getElementById('gist-modal').style.display = 'none'; };
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('loading-oil').style.display = 'flex';
-    const today = new Date().toISOString().split('T')[0];
-    window.loadDate(today);
-
-    // ผูกคำสั่งปุ่มเซฟ
-    document.getElementById('btn-gist-save').onclick = saveToFirebase;
-
-    // รันการซิงก์ข้อมูล Firebase อัตโนมัติ
-    initFirebaseSync();
+    sumTbody.appendChild(tr);
   });
-</script>
 
+  // Financial aggregates breakdown parsing
+  let totalTransfer = 0; // โอนเงิน + บัตรเครดิต
+  let totalDebt = 0;     // ค้างชำระ
+  let totalOtherSales = 0; // สินค้า/อื่น ๆ
+  let totalCashSent = 0; // เงินสดส่ง
+  let totalExpenses = 0; // รายจ่ายปั๊ม
+  let totalCoins = 0;    // เงินทอน/เหรียญ
+
+  data.items.forEach(i => {
+    const val = parseFloat(i.amount) || 0;
+    if (i.type === "โอนเงิน" || i.type === "บัตรเครดิต") totalTransfer += val;
+    if (i.type === "ค้างชำระ") totalDebt += val;
+    if (i.type === "สินค้า/อื่น ๆ") totalOtherSales += val;
+    if (i.type === "เงินสดส่ง") totalCashSent += val;
+    if (i.type === "รายจ่าย") totalExpenses += val;
+    if (i.type === "เหรียญ/เงินทอน") totalCoins += val;
+  });
+
+  const grandRevenueTotal = sumOilTotalMoney + totalOtherSales;
+  
+  // Real Assets Counter (Actual cash hand-in + documented bank streams)
+  const actualMoneyCollected = totalCashSent + totalExpenses + totalTransfer + totalDebt - totalCoins; 
+  const varianceDiff = actualMoneyCollected - grandRevenueTotal;
+
+  // Render Display Boxes
+  document.getElementById('sum-oil-total').innerText = sumOilTotalMoney.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('sum-other-total').innerText = totalOtherSales.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  document.getElementById('sum-grand-total').innerText = grandRevenueTotal.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  const diffEl = document.getElementById('sum-diff');
+  diffEl.innerText = (varianceDiff > 0 ? "+" : "") + varianceDiff.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+  if (Math.abs(varianceDiff) < 0.02) {
+    diffEl.className = "summary-val mono text-success";
+  } else if (varianceDiff < 0) {
+    diffEl.className = "summary-val mono text-danger";
+  } else {
+    diffEl.className = "summary-val mono text-accent";
+  }
+}
+
+// =================== DATA BACKUP UTILITIES ===================
+function exportJSON() {
+  const databaseExport = {
+    pump_sheet_data: sheetData,
+    pump_oil_prices: globalPrices
+  };
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(databaseExport));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `PUMP_BACKUP_${new Date().toISOString().split('T')[0]}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function importJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsText(file, 'UTF-8');
+    reader.onload = readerEvent => {
+      try {
+        const parsed = JSON.parse(readerEvent.target.result);
+        if(parsed.pump_sheet_data && parsed.pump_oil_prices) {
+          sheetData = parsed.pump_sheet_data;
+          globalPrices = parsed.pump_oil_prices;
+          localStorage.setItem('pump_sheet_data', JSON.stringify(sheetData));
+          localStorage.setItem('pump_oil_prices', JSON.stringify(globalPrices));
+          loadPricesToUI();
+          loadDate(currentDate);
+          alert('📥 โหลดข้อมูลสำรองเรียบร้อยแล้ว!');
+        } else {
+          alert('รูปแบบไฟล์ไม่ถูกต้อง');
+        }
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการอ่านไฟล์');
+      }
+    }
+  }
+  input.click();
+}
+
+// =================== GITHUB GIST SYNC MECHANICS ===================
+const GIST_FILENAME = "pump_oil_sync_data.json";
+
+function toggleGistBox() {
+  document.getElementById('gist-box').classList.toggle('show');
+}
+
+function gistStatus(msg, color) {
+  const el = document.getElementById('gist-status');
+  el.innerText = msg;
+  if(color) el.style.color = color;
+}
+
+function saveGistConfig() {
+  const token = document.getElementById('gist-token').value.trim();
+  const id = document.getElementById('gist-id').value.trim();
+  
+  if(!token || !id) {
+    alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+    return;
+  }
+  
+  localStorage.setItem('gist_token', token);
+  localStorage.setItem('gist_id', id);
+  syncGistPull(); // initial fetch request
+}
+
+async function syncGistPull() {
+  const token = localStorage.getItem('gist_token');
+  const id    = localStorage.getItem('gist_id');
+  if(!token || !id) return;
+
+  document.getElementById('gist-token').value = token;
+  document.getElementById('gist-id').value = id;
+  gistStatus('🔄 กําลังโหลดข้อมูล...', '#f0a500');
+
+  try {
+    const res = await fetch(`https://api.github.com/gists/${id}`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if(!res.ok) throw new Error('การเชื่อมต่อล้มเหลว ตรวจสอบ Token/ID');
+    
+    const gist = await res.json();
+    const file = gist.files[GIST_FILENAME];
+    if (!file) {
+      gistStatus('❌ ไม่พบไฟล์ ' + GIST_FILENAME + ' ใน Gist นี้', '#f85149');
+      return;
+    }
+
+    // Parse and merge data
+    const loaded = JSON.parse(file.content);
+    Object.assign(sheetData, loaded);
+
+    // Remove keys not in loaded (full replace)
+    Object.keys(sheetData).forEach(k => { if (!loaded[k]) delete sheetData[k]; });
+    Object.assign(sheetData, loaded);
+
+    renderAllGroups();
+
+    const loadedDate = new Date().toLocaleString('th-TH');
+    gistStatus(`✅ โหลดสำเร็จ! พบ ${Object.keys(loaded).length} วัน (${loadedDate})`, '#3fb950');
+
+    // Auto-load latest date
+    const keys = Object.keys(loaded);
+    if (keys.length > 0) loadDate(keys[keys.length - 1]);
+
+  } catch(e) {
+    gistStatus('❌ Error: ' + e.message, '#f85149');
+  }
+}
+
+async function syncGistPush(silent = false) {
+  const token = localStorage.getItem('gist_token');
+  const id    = localStorage.getItem('gist_id');
+  if(!token || !id) return;
+
+  window.GIST_CONNECTED = true;
+  if(!silent) gistStatus('🔄 กําลังอัปโหลด...', '#f0a500');
+
+  try {
+    const body = {
+      files: {
+        [GIST_FILENAME]: {
+          content: JSON.stringify(sheetData, null, 2)
+        }
+      }
+    };
+    const res = await fetch(`https://api.github.com/gists/${id}`, {
+      method: 'PATCH',
+      headers: { 
+        'Authorization': `token ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    
+    if(!res.ok) throw new Error('Push failed');
+    
+    const savedDate = new Date().toLocaleString('th-TH');
+    gistStatus(`☁️ ซิงค์ Cloud แล้ว (${savedDate})`, '#3fb950');
+  } catch(e) {
+    if(!silent) gistStatus('❌ อัปโหลดล้มเหลว', '#f85149');
+  }
+}
+
+// =================== INIT ===================
+function init() {
+  renderAllGroups();
+  renderTransfer();
+  renderCash();
+  calc();
+
+  // Auto-load token/id if saved
+  const savedToken = localStorage.getItem('gist_token');
+  const savedId    = localStorage.getItem('gist_id');
+  if (savedToken && savedId) {
+    // Show a subtle sync indicator in header
+    const hd = document.getElementById('header-date');
+    hd.title = 'Gist ID: ' + savedId;
+    window.GIST_CONNECTED = true;
+    
+    // Populate form fields
+    document.getElementById('gist-token').value = savedToken;
+    document.getElementById('gist-id').value = savedId;
+    
+    // Background execution pull
+    syncGistPull();
+  }
+  
+  // Set accurate state selection on dynamic page components 
+  loadDate(currentDate);
+}
+
+// Run application initializer on window document injection completion 
+window.onload = init;
+
+</script>
 </body>
 </html>
