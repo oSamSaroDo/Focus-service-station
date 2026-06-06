@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<script>
-// จับ HTML ต้นฉบับก่อน JS ใดๆ จะรัน (template tag ยังว่างอยู่)
-const SOURCE_HTML = document.currentScript.ownerDocument.documentElement.outerHTML;
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>บันทึกประจำวัน — ปั๊มน้ำมัน</title>
@@ -365,9 +361,9 @@ const SOURCE_HTML = document.currentScript.ownerDocument.documentElement.outerHT
     .fuel-fields { flex-direction: column; }
   }
 </style>
-<template id="sheetdata-store">
+<div id="sheetdata-store" hidden>
 {}
-</template>
+</div>
 </head>
 <body>
 
@@ -770,7 +766,7 @@ const SOURCE_HTML = document.currentScript.ownerDocument.documentElement.outerHT
 // =================== DATA FROM EXCEL ===================
 /*SHEETDATA_START*/
 // sheetData โหลดจาก <script id="sheetdata-store">
-const _raw = document.getElementById('sheetdata-store').innerHTML.trim();
+const _raw = document.getElementById('sheetdata-store').textContent.trim();
 const sheetData = (_raw && _raw !== '{}') ? JSON.parse(_raw) : {
   "26-5-69": { g95n_open:6823.22, g95n_close:6938.41, g95l_open:3391.36, g95l_close:3472.16, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:15973.99, dn_close:16346.04, dl_open:12149.06, dl_close:12449.01, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:0, change:3700, disc:0.5 },
   "28-5-69": { g95n_open:7181.4, g95n_close:7310.12, g95l_open:3610.36, g95l_close:3698.08, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:16722.75, dn_close:17073.7, dl_open:12983.35, dl_close:13211.35, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:100.12, change:3700, disc:0.5 },
@@ -1135,15 +1131,17 @@ function saveDate(silent = false) {
 function downloadHTML() {
   saveDate(true);
 
-  const json = JSON.stringify(sheetData, null, 2);
+  // เขียน JSON เข้า div store
+  const storeEl = document.getElementById('sheetdata-store');
+  storeEl.textContent = '\n' + JSON.stringify(sheetData, null, 2) + '\n';
 
-  // แทนที่ข้อมูลใน SOURCE_HTML (string ต้นฉบับที่โหลดตอนเริ่ม)
-  const updated = SOURCE_HTML.replace(
-    /(<template[^>]*id="sheetdata-store"[^>]*>)[\s\S]*?(<\/template>)/,
-    '$1\n' + json + '\n$2'
-  );
+  // outerHTML ของ div จะถูก serialize ถูกต้องเสมอ (div ไม่มี shadow DOM)
+  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 
-  const blob = new Blob([updated], { type: 'text/html;charset=utf-8' });
+  // reset store กลับ (ไม่กระทบ sheetData ใน RAM)
+  storeEl.textContent = '\n{}\n';
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
