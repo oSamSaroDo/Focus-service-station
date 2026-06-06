@@ -361,9 +361,9 @@
     .fuel-fields { flex-direction: column; }
   }
 </style>
-<script id="sheetdata-store" type="application/json">
+<template id="sheetdata-store">
 {}
-</script>
+</template>
 </head>
 <body>
 
@@ -766,7 +766,7 @@
 // =================== DATA FROM EXCEL ===================
 /*SHEETDATA_START*/
 // sheetData โหลดจาก <script id="sheetdata-store">
-const _raw = document.getElementById('sheetdata-store').textContent.trim();
+const _raw = document.getElementById('sheetdata-store').innerHTML.trim();
 const sheetData = (_raw && _raw !== '{}') ? JSON.parse(_raw) : {
   "26-5-69": { g95n_open:6823.22, g95n_close:6938.41, g95l_open:3391.36, g95l_close:3472.16, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:15973.99, dn_close:16346.04, dl_open:12149.06, dl_close:12449.01, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:0, change:3700, disc:0.5 },
   "28-5-69": { g95n_open:7181.4, g95n_close:7310.12, g95l_open:3610.36, g95l_close:3698.08, g91n_open:0, g91n_close:0, g91l_open:0, g91l_close:0, dn_open:16722.75, dn_close:17073.7, dl_open:12983.35, dl_close:13211.35, g95_price:45.86, g91_price:45.35, d_price:41.69, air_liter:100.12, change:3700, disc:0.5 },
@@ -1132,23 +1132,42 @@ function downloadHTML() {
   // บันทึกข้อมูลหน้าจอก่อนเสมอ
   saveDate(true);
 
-  // เขียน sheetData ล่าสุดเข้า <script id="sheetdata-store"> โดยตรง
-  const storeEl = document.getElementById('sheetdata-store');
-  storeEl.textContent = JSON.stringify(sheetData, null, 2);
+  // อ่านไฟล์ HTML ต้นฉบับ แล้วแทนที่ JSON store ด้วยข้อมูลปัจจุบัน
+  fetch(location.href)
+    .then(r => r.text())
+    .then(html => {
+      const json = JSON.stringify(sheetData, null, 2);
 
-  // ดึง HTML หลังจาก DOM อัปเดตแล้ว
-  const html = document.documentElement.outerHTML;
+      // แทนที่ระหว่าง <script id="sheetdata-store"...> ... </script>
+      html = html.replace(
+        /(<template[^>]*id="sheetdata-store"[^>]*>)([\s\S]*?)(<\/template>)/,
+        '$1\n' + json + '\n$3'
+      );
 
-  // reset store กลับเป็นค่าว่าง (ไม่กระทบ sheetData ใน RAM)
-  storeEl.textContent = '{}';
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
+      a.download = `บันทึก_${dateLabel}.html`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    })
+    .catch(() => {
+      // fallback: ถ้า fetch ไม่ได้ (เปิดจาก file://) ใช้ outerHTML พร้อม inject JSON
+      const storeEl = document.getElementById('sheetdata-store');
+      const oldHTML = storeEl.innerHTML;
+      storeEl.innerHTML = '\n' + JSON.stringify(sheetData, null, 2) + '\n';
+      const html = document.documentElement.outerHTML;
+      storeEl.innerHTML = oldHTML;
 
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
-  a.download = `บันทึก_${dateLabel}.html`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
+      a.download = `บันทึก_${dateLabel}.html`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
 }
 
 // =================== DATE TABS WITH MONTH GROUPS ===================
