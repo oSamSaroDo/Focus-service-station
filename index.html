@@ -752,6 +752,7 @@
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearAll()">🗑 ล้างข้อมูล</button>
       <button class="btn btn-ghost" onclick="downloadHTML()" style="border-color:#58a6ff; color:#58a6ff;">⬇ ดาวน์โหลด HTML</button>
+      <button class="btn btn-primary" onclick="saveDate()" style="background:var(--accent3); min-width:120px;">💾 บันทึกข้อมูล</button>
       <button class="btn btn-primary" onclick="window.print()">🖨 พิมพ์ / บันทึก PDF</button>
     </div>
 
@@ -1062,6 +1063,60 @@ document.getElementById('addDateModal').addEventListener('click', function(e) {
   if (e.target === this) closeAddDate();
 });
 
+// =================== SAVE DATE ===================
+function saveDate() {
+  const activeTab = document.querySelector('.date-tab.active');
+  if (!activeTab) {
+    alert('⚠️ กรุณาเลือกวันที่ก่อนบันทึก');
+    return;
+  }
+  const dateKey = activeTab.dataset.date;
+
+  // รวบรวม fields มิเตอร์ + ราคา
+  const fields = ['g95n_open','g95n_close','g95l_open','g95l_close',
+    'g91n_open','g91n_close','g91l_open','g91l_close',
+    'dn_open','dn_close','dl_open','dl_close',
+    'd4n_open','d4n_close','d4l_open','d4l_close',
+    'g95_price','g91_price','d_price','d4_price',
+    'air_liter','air_price_custom','air_disc_custom','must_send_input'];
+
+  const entry = {};
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    entry[f] = el ? (parseFloat(el.value) || 0) : 0;
+  });
+
+  // ตั้งค่าทั่วไป
+  entry.change = parseFloat(document.getElementById('g_change').value) || 3700;
+  entry.disc   = parseFloat(document.getElementById('g_discount_per_liter').value) || 0.5;
+
+  // บันทึก cash (จำนวนธนบัตร/เหรียญ)
+  const cashData = {};
+  DENOMS.forEach(d => {
+    const el = document.getElementById('cash_' + d.value);
+    cashData[d.value] = el ? (parseFloat(el.value) || 0) : 0;
+  });
+  entry.cash = cashData;
+
+  // บันทึก transfer rows
+  entry.transfer = transferRows.map(r => ({ label: r.label, amount: r.amount || 0 }));
+
+  // เขียนกลับ sheetData
+  sheetData[dateKey] = entry;
+
+  // แสดง feedback
+  const btn = document.querySelector('[onclick="saveDate()"]');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '✅ บันทึกแล้ว!';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+    }, 1800);
+  }
+}
+
 // =================== DOWNLOAD HTML ===================
 function downloadHTML() {
   const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
@@ -1200,18 +1255,30 @@ function loadDate(dateKey) {
   document.getElementById('g_change').value = d.change || 3700;
   document.getElementById('g_discount_per_liter').value = d.disc || 0.5;
 
-  // reset cash
+  // โหลด cash (ถ้ามีข้อมูล ให้คืนค่า ถ้าไม่มีให้ reset)
   DENOMS.forEach(denom => {
-    const el = document.getElementById('cash_'+denom.value);
-    if(el) el.value = '';
-    const sub = document.getElementById('csub_'+denom.value);
-    if(sub) sub.textContent = '0';
+    const el  = document.getElementById('cash_' + denom.value);
+    const sub = document.getElementById('csub_' + denom.value);
+    const qty = d.cash ? (d.cash[denom.value] || 0) : 0;
+    if (el)  el.value = qty || '';
+    if (sub) sub.textContent = qty ? fmt(qty * denom.value) : '0';
   });
-  document.getElementById('total_cash').textContent = '0 ฿';
+  // คำนวณ total_cash ใหม่
+  let loadedCash = 0;
+  DENOMS.forEach(d2 => {
+    const qty = d.cash ? (d.cash[d2.value] || 0) : 0;
+    loadedCash += qty * d2.value;
+  });
+  document.getElementById('total_cash').textContent = fmt(loadedCash) + ' ฿';
 
-  // reset transfer
-  transferRows = [{ label:"พักยอด", amount:0 }];
-  transferCount = 1;
+  // โหลด transfer rows (ถ้ามีข้อมูล ให้คืนค่า ถ้าไม่มีให้ reset)
+  if (d.transfer && d.transfer.length > 0) {
+    transferRows = d.transfer.map(r => ({ label: r.label, amount: r.amount || 0 }));
+    transferCount = transferRows.length;
+  } else {
+    transferRows = [{ label:"พักยอด", amount:0 }];
+    transferCount = 1;
+  }
   renderTransfer();
 
   calc();
