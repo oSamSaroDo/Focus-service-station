@@ -1083,18 +1083,21 @@ function saveDate() {
   const entry = {};
   fields.forEach(f => {
     const el = document.getElementById(f);
-    entry[f] = el ? (parseFloat(el.value) || 0) : 0;
+    const raw = el ? el.value.trim() : '';
+    // เก็บตัวเลขจริง ถ้าว่างเก็บเป็น '' เพื่อให้ load กลับมาแสดงว่างเหมือนเดิม
+    entry[f] = raw === '' ? '' : parseFloat(raw);
   });
 
   // ตั้งค่าทั่วไป
   entry.change = parseFloat(document.getElementById('g_change').value) || 3700;
   entry.disc   = parseFloat(document.getElementById('g_discount_per_liter').value) || 0.5;
 
-  // บันทึก cash (จำนวนธนบัตร/เหรียญ)
+  // บันทึก cash — ใช้ key เป็น string เสมอเพื่อให้ JSON ไม่สับสน
   const cashData = {};
   DENOMS.forEach(d => {
     const el = document.getElementById('cash_' + d.value);
-    cashData[d.value] = el ? (parseFloat(el.value) || 0) : 0;
+    const raw = el ? el.value.trim() : '';
+    cashData[String(d.value)] = raw === '' ? 0 : (parseFloat(raw) || 0);
   });
   entry.cash = cashData;
 
@@ -1259,7 +1262,10 @@ function loadDate(dateKey) {
 
   fields.forEach(f => {
     const el = document.getElementById(f);
-    if(el) el.value = d[f] || '';
+    if (!el) return;
+    const val = d[f];
+    // '' → แสดงว่าง, 0 → แสดง 0, ตัวเลขอื่น → แสดงค่าจริง
+    el.value = (val === '' || val === undefined || val === null) ? '' : val;
   });
   document.getElementById('g_change').value = d.change || 3700;
   document.getElementById('g_discount_per_liter').value = d.disc || 0.5;
@@ -1268,14 +1274,18 @@ function loadDate(dateKey) {
   DENOMS.forEach(denom => {
     const el  = document.getElementById('cash_' + denom.value);
     const sub = document.getElementById('csub_' + denom.value);
-    const qty = d.cash ? (d.cash[denom.value] || 0) : 0;
-    if (el)  el.value = qty || '';
-    if (sub) sub.textContent = qty ? fmt(qty * denom.value) : '0';
+    // key อาจเป็น string หรือ number ขึ้นกับแหล่งที่มา ลอง both
+    const qty = d.cash
+      ? (d.cash[String(denom.value)] ?? d.cash[denom.value] ?? 0)
+      : 0;
+    if (el)  el.value = qty > 0 ? qty : '';
+    if (sub) sub.textContent = qty > 0 ? fmt(qty * denom.value) : '0';
   });
-  // คำนวณ total_cash ใหม่
   let loadedCash = 0;
   DENOMS.forEach(d2 => {
-    const qty = d.cash ? (d.cash[d2.value] || 0) : 0;
+    const qty = d.cash
+      ? (d.cash[String(d2.value)] ?? d.cash[d2.value] ?? 0)
+      : 0;
     loadedCash += qty * d2.value;
   });
   document.getElementById('total_cash').textContent = fmt(loadedCash) + ' ฿';
