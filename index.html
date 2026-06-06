@@ -361,11 +361,11 @@
     .fuel-fields { flex-direction: column; }
   }
 </style>
+</head>
+<body>
 <div id="sheetdata-store" hidden>
 {}
 </div>
-</head>
-<body>
 
 <header>
   <div class="logo">
@@ -1131,15 +1131,15 @@ function saveDate(silent = false) {
 function downloadHTML() {
   saveDate(true);
 
-  // เขียน JSON เข้า div store
-  const storeEl = document.getElementById('sheetdata-store');
-  storeEl.textContent = '\n' + JSON.stringify(sheetData, null, 2) + '\n';
+  // ดึง outerHTML ทั้งหน้า (div store ยังว่างอยู่)
+  let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
 
-  // outerHTML ของ div จะถูก serialize ถูกต้องเสมอ (div ไม่มี shadow DOM)
-  const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-
-  // reset store กลับ (ไม่กระทบ sheetData ใน RAM)
-  storeEl.textContent = '\n{}\n';
+  // แทนที่เนื้อใน div store ด้วย JSON ใน string โดยตรง — ไม่แตะ DOM
+  const json = JSON.stringify(sheetData, null, 2);
+  html = html.replace(
+    /(<div[^>]*id="sheetdata-store"[^>]*>)([\s\S]*?)(<\/div>)/,
+    '$1\n' + json + '\n$3'
+  );
 
   const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
