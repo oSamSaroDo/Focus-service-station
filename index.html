@@ -1119,7 +1119,16 @@ function saveDate() {
 
 // =================== DOWNLOAD HTML ===================
 function downloadHTML() {
-  const blob = new Blob([document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+  // ดึง HTML ปัจจุบันเป็น string
+  let html = document.documentElement.outerHTML;
+
+  // แทนที่บล็อก sheetData เดิมด้วยข้อมูลใน RAM ที่อัปเดตล่าสุด
+  // ใช้ marker comment เพื่อให้ replace ถูกจุดเสมอ
+  const newSheetData = 'const sheetData = ' + JSON.stringify(sheetData, null, 2) + ';';
+  // จับตั้งแต่ "const sheetData = {" จนถึง "};" ที่อยู่ต้นบรรทัด (ปิด object)
+  html = html.replace(/const sheetData\s*=\s*\{[\s\S]*?\n\};/, newSheetData);
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
