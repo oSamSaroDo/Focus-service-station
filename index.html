@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+<script>
+// จับ HTML ต้นฉบับก่อน JS ใดๆ จะรัน (template tag ยังว่างอยู่)
+const SOURCE_HTML = document.currentScript.ownerDocument.documentElement.outerHTML;
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>บันทึกประจำวัน — ปั๊มน้ำมัน</title>
@@ -1129,45 +1133,23 @@ function saveDate(silent = false) {
 
 // =================== DOWNLOAD HTML ===================
 function downloadHTML() {
-  // บันทึกข้อมูลหน้าจอก่อนเสมอ
   saveDate(true);
 
-  // อ่านไฟล์ HTML ต้นฉบับ แล้วแทนที่ JSON store ด้วยข้อมูลปัจจุบัน
-  fetch(location.href)
-    .then(r => r.text())
-    .then(html => {
-      const json = JSON.stringify(sheetData, null, 2);
+  const json = JSON.stringify(sheetData, null, 2);
 
-      // แทนที่ระหว่าง <script id="sheetdata-store"...> ... </script>
-      html = html.replace(
-        /(<template[^>]*id="sheetdata-store"[^>]*>)([\s\S]*?)(<\/template>)/,
-        '$1\n' + json + '\n$3'
-      );
+  // แทนที่ข้อมูลใน SOURCE_HTML (string ต้นฉบับที่โหลดตอนเริ่ม)
+  const updated = SOURCE_HTML.replace(
+    /(<template[^>]*id="sheetdata-store"[^>]*>)[\s\S]*?(<\/template>)/,
+    '$1\n' + json + '\n$2'
+  );
 
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
-      a.download = `บันทึก_${dateLabel}.html`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    })
-    .catch(() => {
-      // fallback: ถ้า fetch ไม่ได้ (เปิดจาก file://) ใช้ outerHTML พร้อม inject JSON
-      const storeEl = document.getElementById('sheetdata-store');
-      const oldHTML = storeEl.innerHTML;
-      storeEl.innerHTML = '\n' + JSON.stringify(sheetData, null, 2) + '\n';
-      const html = document.documentElement.outerHTML;
-      storeEl.innerHTML = oldHTML;
-
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
-      a.download = `บันทึก_${dateLabel}.html`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
+  const blob = new Blob([updated], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const dateLabel = document.getElementById('header-date').textContent.replace(/[^\w\-]/g,'_') || 'gas-station';
+  a.download = `บันทึก_${dateLabel}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // =================== DATE TABS WITH MONTH GROUPS ===================
