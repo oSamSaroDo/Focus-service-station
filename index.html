@@ -443,6 +443,51 @@ function fbStatus(msg, color) {
   if (el) { el.style.display='block'; el.style.color=color; el.innerHTML=msg; }
 }
 
+window.fbStop = function() {
+  if (window._unsub) {
+    window._unsub();
+    window._unsub = null;
+  }
+  window._fbReady = false;
+  window._db      = null;
+
+  const dot = document.getElementById('fb_live_dot');
+  if (dot) dot.style.display = 'none';
+
+  // header button → สีเทา แสดงว่าหยุดแล้ว
+  const fbBtn = document.getElementById('fb_header_btn');
+  if (fbBtn) {
+    fbBtn.style.borderColor = '#8b949e';
+    fbBtn.style.color = '#8b949e';
+    fbBtn.textContent = '⛔ Firebase (หยุด)';
+  }
+
+  fbStatus('⛔ หยุด Firebase แล้ว — ข้อมูลจะไม่ sync จนกว่าจะกด เริ่มใหม่', '#f85149');
+
+  const stopBtn  = document.getElementById('fb_stop_btn');
+  const startBtn = document.getElementById('fb_start_btn');
+  if (stopBtn)  stopBtn.style.display  = 'none';
+  if (startBtn) startBtn.style.display = 'flex';
+};
+
+window.fbRestart = function() {
+  // คืนสี header button
+  const fbBtn = document.getElementById('fb_header_btn');
+  if (fbBtn) {
+    fbBtn.style.borderColor = '#f0a500';
+    fbBtn.style.color = '#f0a500';
+    fbBtn.textContent = '🔥 Firebase';
+  }
+
+  fbStatus('⏳ กำลังเชื่อมต่อใหม่...', '#58a6ff');
+  window.fbInit(FIREBASE_CONFIG);
+
+  const stopBtn  = document.getElementById('fb_stop_btn');
+  const startBtn = document.getElementById('fb_start_btn');
+  if (stopBtn)  stopBtn.style.display  = 'flex';
+  if (startBtn) startBtn.style.display = 'none';
+};
+
 // Expose doc/setDoc ออกมาให้ autoSaveToFirebase ใช้ได้จาก regular script
 window._fbDoc    = doc;
 window._fbSetDoc = setDoc;
@@ -470,7 +515,7 @@ window.addEventListener('load', () => {
   </div>
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <div class="header-date" id="header-date">—</div>
-    <button class="btn btn-ghost" onclick="
+    <button id="fb_header_btn" class="btn btn-ghost" onclick="
   document.getElementById('fb_config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
   document.getElementById('fbModal').style.display='flex';
 " style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">🔥 Firebase</button>
@@ -508,6 +553,8 @@ window.addEventListener('load', () => {
         if(!cfg){document.getElementById('fb_status').style.display='block';document.getElementById('fb_status').style.color='#f85149';document.getElementById('fb_status').textContent='❌ กรุณาวาง Config';return;}
         localStorage.setItem('fb_config',cfg);
         window.fbInit(cfg);
+        const s=document.getElementById('fb_stop_btn'); if(s) s.style.display='inline-block';
+        const r=document.getElementById('fb_start_btn'); if(r) r.style.display='none';
       " style="background:#f0a500; border:none; border-radius:8px; padding:9px 18px; color:#000; font-weight:700; cursor:pointer;">🔥 เชื่อมต่อ</button>
 
       <button onclick="window.fbSave()" style="background:#238636; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">💾 บันทึกขึ้น Cloud</button>
@@ -515,6 +562,18 @@ window.addEventListener('load', () => {
       <button onclick="window.fbStartSync()" style="background:#1f6feb; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">🔄 โหลดจาก Cloud</button>
 
       <button onclick="document.getElementById('fbModal').style.display='none'" style="background:#21262d; border:1px solid #30363d; border-radius:8px; padding:9px 18px; color:#e6edf3; cursor:pointer;">ปิด</button>
+    </div>
+
+    <!-- Stop / Restart row -->
+    <div style="display:flex; gap:8px; margin-bottom:14px;">
+      <button id="fb_stop_btn" onclick="window.fbStop()"
+        style="flex:1; background:rgba(248,81,73,0.12); border:1px solid #f85149; border-radius:8px; padding:9px 14px; color:#f85149; font-weight:700; cursor:pointer; font-size:13px;">
+        ⛔ หยุด Firebase
+      </button>
+      <button id="fb_start_btn" onclick="window.fbRestart()"
+        style="flex:1; display:none; background:rgba(63,185,80,0.12); border:1px solid #3fb950; border-radius:8px; padding:9px 14px; color:#3fb950; font-weight:700; cursor:pointer; font-size:13px;">
+        ▶️ เริ่มใหม่
+      </button>
     </div>
 
     <div id="fb_status" style="display:none; font-size:12px; padding:10px; background:#0d1117; border-radius:8px; line-height:1.6;"></div>
@@ -1503,16 +1562,11 @@ async function autoSaveToGist(token, gistId) {
       files: { [GIST_FILENAME]: { content: payload } }
     })
   });
+  if (res.status === 401) throw new Error('Token หมดอายุ/ถูกยกเลิก — กรุณาสร้าง Token ใหม่');
+  if (res.status === 404) throw new Error('ไม่พบ Gist ID — ID อาจผิด');
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error('Gist: ' + (err.message || res.status));
-  }
-  // อัปเดต status ใน header
-  const hd = document.getElementById('header-date');
-  if (hd) {
-    const prev = hd.textContent;
-    hd.textContent = '☁️ Gist synced!';
-    setTimeout(() => hd.textContent = prev, 2000);
+    throw new Error('Gist ' + res.status + ': ' + (err.message || ''));
   }
 }
 
@@ -1865,46 +1919,55 @@ async function gistLoad() {
   gistStatus('⏳ กำลังโหลด...', '#58a6ff');
 
   try {
-    const res = await fetch('https://api.github.com/gists/' + gistId, {
-      headers: {
-        'Authorization': 'token ' + token,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
+    const loaded = await loadFromGist(token, gistId);
 
-    if (!res.ok) {
-      const err = await res.json();
-      gistStatus('❌ Error: ' + (err.message || res.status), '#f85149');
-      return;
-    }
-
-    const data = await res.json();
-    const file = data.files[GIST_FILENAME];
-    if (!file) {
-      gistStatus('❌ ไม่พบไฟล์ ' + GIST_FILENAME + ' ใน Gist นี้', '#f85149');
-      return;
-    }
-
-    // Parse and merge data
-    const loaded = JSON.parse(file.content);
+    Object.keys(sheetData).forEach(k => delete sheetData[k]);
     Object.assign(sheetData, loaded);
-
-    // Remove keys not in loaded (full replace)
-    Object.keys(sheetData).forEach(k => { if (!loaded[k]) delete sheetData[k]; });
-    Object.assign(sheetData, loaded);
-
     renderAllGroups();
 
-    const loadedDate = new Date().toLocaleString('th-TH');
-    gistStatus(`✅ โหลดสำเร็จ! พบ ${Object.keys(loaded).length} วัน (${loadedDate})`, '#3fb950');
-
-    // Auto-load latest date
     const keys = Object.keys(loaded);
     if (keys.length > 0) loadDate(keys[keys.length - 1]);
 
+    gistStatus(`✅ โหลดสำเร็จ! พบ ${keys.length} วัน (${new Date().toLocaleString('th-TH')})`, '#3fb950');
   } catch(e) {
-    gistStatus('❌ Error: ' + e.message, '#f85149');
+    gistStatus('❌ ' + e.message, '#f85149');
   }
+}
+
+// =================== GIST LOADER (shared) ===================
+async function loadFromGist(token, gistId) {
+  const res = await fetch('https://api.github.com/gists/' + gistId, {
+    headers: {
+      'Authorization': 'token ' + token,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+
+  if (res.status === 401) throw new Error('Token ไม่ถูกต้องหรือหมดอายุ (401) — กรุณาสร้าง Token ใหม่');
+  if (res.status === 403) throw new Error('Token ไม่มีสิทธิ์ gist (403) — ต้องเลือก scope: gist ตอนสร้าง Token');
+  if (res.status === 404) throw new Error('ไม่พบ Gist ID นี้ (404) — ID อาจผิดหรือถูกลบไปแล้ว');
+  if (!res.ok) {
+    let msg = 'HTTP ' + res.status;
+    try { const j = await res.json(); msg += ': ' + (j.message || ''); } catch(_) {}
+    throw new Error(msg);
+  }
+
+  const data = await res.json();
+
+  // content อาจถูก truncate ถ้า Gist ใหญ่ — ใช้ raw_url แทน
+  const fileEntry = data.files[GIST_FILENAME];
+  if (!fileEntry) throw new Error('ไม่พบไฟล์ "' + GIST_FILENAME + '" ใน Gist นี้');
+
+  let content = fileEntry.content;
+  if (fileEntry.truncated) {
+    const rawRes = await fetch(fileEntry.raw_url);
+    if (!rawRes.ok) throw new Error('โหลด raw content ไม่สำเร็จ: HTTP ' + rawRes.status);
+    content = await rawRes.text();
+  }
+
+  const loaded = JSON.parse(content);
+  if (typeof loaded !== 'object' || Array.isArray(loaded)) throw new Error('ข้อมูลใน Gist ผิดรูปแบบ');
+  return loaded;
 }
 
 // =================== INIT ===================
@@ -1914,55 +1977,85 @@ async function init() {
   renderCash();
   calc();
 
-  // Auto-load from Gist if token + id are saved
   const savedToken = localStorage.getItem('gist_token');
   const savedId    = localStorage.getItem('gist_id');
-  if (savedToken && savedId) {
-    // แสดงจุดเขียวบน header ทันที
-    const dot = document.getElementById('gist_dot');
-    if (dot) dot.style.display = 'inline-block';
-    const gistBtn = document.getElementById('gist_header_btn');
-    if (gistBtn) gistBtn.style.borderColor = '#3fb950';
+  if (!savedToken || !savedId) return;
 
-    const hd = document.getElementById('header-date');
-    const prev = hd ? hd.textContent : '';
-    if (hd) hd.textContent = '⏳ กำลังโหลดจาก Gist...';
+  // แสดงจุดเขียวบน header
+  const dot     = document.getElementById('gist_dot');
+  const gistBtn = document.getElementById('gist_header_btn');
+  if (dot)     dot.style.display = 'inline-block';
+  if (gistBtn) gistBtn.style.borderColor = '#3fb950';
 
-    try {
-      const res = await fetch('https://api.github.com/gists/' + savedId, {
-        headers: {
-          'Authorization': 'token ' + savedToken,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      const file = data.files[GIST_FILENAME];
-      if (!file) throw new Error('ไม่พบไฟล์ใน Gist');
+  const hd   = document.getElementById('header-date');
+  const prev = hd ? hd.textContent : '';
+  if (hd) hd.textContent = '⏳ กำลังโหลดจาก Gist...';
 
-      const loaded = JSON.parse(file.content);
-      // full replace sheetData
-      Object.keys(sheetData).forEach(k => delete sheetData[k]);
-      Object.assign(sheetData, loaded);
+  try {
+    const loaded = await loadFromGist(savedToken, savedId);
 
-      renderAllGroups();
+    Object.keys(sheetData).forEach(k => delete sheetData[k]);
+    Object.assign(sheetData, loaded);
+    renderAllGroups();
 
-      // load latest date
-      const keys = Object.keys(loaded);
-      if (keys.length > 0) loadDate(keys[keys.length - 1]);
+    const keys = Object.keys(loaded);
+    if (keys.length > 0) loadDate(keys[keys.length - 1]);
 
-      if (hd) {
-        hd.textContent = '☁️ โหลดจาก Gist แล้ว (' + keys.length + ' วัน)';
-        setTimeout(() => hd.textContent = keys[keys.length-1] || prev, 2500);
-      }
-    } catch(e) {
-      console.warn('Auto-load Gist failed:', e.message);
-      if (hd) {
-        hd.textContent = '⚠️ โหลด Gist ไม่สำเร็จ';
-        setTimeout(() => hd.textContent = prev, 2500);
-      }
+    if (hd) {
+      hd.textContent = '☁️ โหลดจาก Gist แล้ว (' + keys.length + ' วัน)';
+      setTimeout(() => hd.textContent = keys[keys.length - 1] || prev, 2500);
     }
+  } catch(e) {
+    console.error('Auto-load Gist failed:', e.message);
+    if (hd) {
+      // แสดง error จริงๆ ใน header 6 วินาที แล้วค่อยกลับ
+      hd.textContent = '❌ ' + e.message;
+      hd.title = e.message;
+      // แสดง toast แจ้ง error พร้อมปุ่มเปิด modal
+      showGistErrorToast(e.message);
+      setTimeout(() => { hd.textContent = prev; hd.title = ''; }, 6000);
+    }
+    // เปลี่ยน dot เป็นสีแดง
+    if (dot)     dot.style.background = '#f85149';
+    if (gistBtn) gistBtn.style.borderColor = '#f85149';
   }
+}
+
+function showGistErrorToast(msg) {
+  // ลบ toast เก่า
+  const old = document.getElementById('gist_error_toast');
+  if (old) old.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'gist_error_toast';
+  toast.style.cssText = `
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+    background:#1c2330; border:1px solid #f85149; border-radius:12px;
+    padding:14px 18px; z-index:2000; max-width:92vw; width:360px;
+    box-shadow:0 8px 32px rgba(0,0,0,0.6); animation: slideUp 0.25s ease;
+  `;
+  toast.innerHTML = `
+    <div style="display:flex; align-items:flex-start; gap:10px;">
+      <span style="font-size:18px; flex-shrink:0;">⚠️</span>
+      <div style="flex:1;">
+        <div style="font-size:13px; font-weight:700; color:#f85149; margin-bottom:4px;">โหลด Gist ไม่สำเร็จ</div>
+        <div style="font-size:11px; color:#8b949e; line-height:1.5; font-family:'IBM Plex Mono',monospace;">${msg}</div>
+      </div>
+      <button onclick="this.closest('#gist_error_toast').remove()" style="background:none; border:none; color:#8b949e; cursor:pointer; font-size:16px; padding:0; flex-shrink:0;">✕</button>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button onclick="openGistModal(); document.getElementById('gist_error_toast').remove();"
+        style="flex:1; background:#238636; border:none; border-radius:6px; padding:8px; color:#fff; font-size:12px; font-weight:600; cursor:pointer;">
+        🔑 แก้ไข Token/ID
+      </button>
+      <button onclick="document.getElementById('gist_error_toast').remove()"
+        style="flex:1; background:#21262d; border:1px solid #30363d; border-radius:6px; padding:8px; color:#8b949e; font-size:12px; cursor:pointer;">
+        ปิด
+      </button>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 10000);
 }
 
 init();
