@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รายงานสรุป — ปั๊มน้ำมัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2330;
+  --border: #30363d;
+  --accent: #f0a500;
+  --accent2: #e05c2a;
+  --green: #3fb950;
+  --red: #f85149;
+  --blue: #58a6ff;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Sarabun', sans-serif;
+  font-size: 15px;
+  min-height: 100vh;
+}
+
+/* ── SCREEN HEADER ── */
+.screen-header {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(12px);
+  flex-wrap: wrap; gap: 12px;
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 38px; height: 38px; background: var(--accent);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.logo-text { font-size: 16px; font-weight: 700; }
+.logo-sub  { font-size: 11px; color: var(--text-muted); }
+
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn {
+  padding: 8px 18px; border-radius: 8px; border: none;
+  cursor: pointer; font-family: 'Sarabun', sans-serif;
+  font-size: 13px; font-weight: 600; transition: all 0.18s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #0d1117; }
+.btn-primary:hover { background: #fbb628; transform: translateY(-1px); }
+.btn-ghost  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-pdf    { background: #e05c2a; color: #fff; }
+.btn-pdf:hover { background: #f0692e; transform: translateY(-1px); }
+
+/* ── FILTER BAR ── */
+.filter-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.filter-bar label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.filter-bar select, .filter-bar input[type="date"] {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+  padding: 6px 10px; cursor: pointer;
+}
+.filter-bar select:focus, .filter-bar input[type="date"]:focus {
+  outline: none; border-color: var(--accent);
+}
+#status_bar {
+  margin-left: auto; font-size: 12px; color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── MAIN ── */
+main { max-width: 1200px; margin: 0 auto; padding: 28px 24px; }
+
+/* ── STAT CARDS ── */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 18px 20px;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+}
+.stat-card.orange::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+.stat-card.green::before  { background: linear-gradient(90deg, #3fb950, #2ea04f); }
+.stat-card.blue::before   { background: linear-gradient(90deg, #58a6ff, #388bfd); }
+.stat-card.red::before    { background: linear-gradient(90deg, #f85149, #da3633); }
+
+.stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: var(--text); }
+.stat-unit  { font-size: 12px; color: var(--text-muted); margin-left: 4px; }
+.stat-sub   { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+/* ── TABLE ── */
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 28px; }
+
+table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+thead th {
+  background: var(--surface2); padding: 11px 14px;
+  text-align: right; font-size: 11px; font-weight: 600;
+  color: var(--text-muted); letter-spacing: 0.5px; white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+thead th:first-child { text-align: left; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody td {
+  padding: 10px 14px; text-align: right;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+}
+tbody td:first-child {
+  text-align: left; font-family: 'Sarabun', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--accent);
+}
+tbody td.positive { color: var(--green); }
+tbody td.negative { color: var(--red); }
+tbody td.neutral  { color: var(--text-muted); }
+
+tfoot td {
+  padding: 12px 14px; text-align: right;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700;
+  background: var(--surface2); color: var(--accent);
+  border-top: 2px solid var(--accent);
+}
+tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; font-size: 14px; }
+
+/* diff badge */
+.diff-ok  { color: var(--green); }
+.diff-bad { color: var(--red); }
+
+/* ── LOADING / EMPTY ── */
+#loading, #empty {
+  text-align: center; padding: 60px 24px;
+  color: var(--text-muted); font-size: 15px;
+}
+#loading .spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── PRINT STYLES ── */
+@media print {
+  body { background: #fff; color: #111; font-size: 11pt; }
+  .screen-header, .filter-bar, .no-print { display: none !important; }
+  main { max-width: none; padding: 0; }
+  .print-header { display: block !important; }
+  .stat-card { background: #f8f9fa; border: 1px solid #dee2e6; page-break-inside: avoid; }
+  .stat-card::before { display: none; }
+  .stat-label { color: #6c757d; }
+  .stat-value { color: #111; font-size: 16pt; }
+  .stat-sub { color: #6c757d; }
+  table { font-size: 9pt; }
+  thead th { background: #f1f3f5; color: #495057; border-bottom: 2px solid #dee2e6; }
+  tbody tr:hover { background: none; }
+  tfoot td { background: #fff3cd; color: #856404; border-top: 2px solid #f0a500; }
+  .table-wrap { border: 1px solid #dee2e6; border-radius: 0; }
+  .stat-grid { grid-template-columns: repeat(4,1fr); gap: 8px; }
+  .diff-ok  { color: #198754; }
+  .diff-bad { color: #dc3545; }
+  @page { margin: 12mm 14mm; size: A4 landscape; }
+}
+
+/* ── PRINT HEADER (hidden on screen) ── */
+.print-header {
+  display: none;
+  text-align: center; margin-bottom: 20px;
+  border-bottom: 2px solid #f0a500; padding-bottom: 10px;
+}
+.print-header h1 { font-size: 18pt; font-weight: 700; }
+.print-header p  { font-size: 10pt; color: #6c757d; margin-top: 4px; }
+
+/* ── MONTH SECTION BREAK ── */
+.month-section { margin-bottom: 36px; }
+.month-title {
+  font-size: 13px; font-weight: 700; color: var(--accent);
+  background: rgba(240,165,0,0.08); border: 1px solid rgba(240,165,0,0.3);
+  border-radius: 6px; padding: 5px 14px; display: inline-block; margin-bottom: 12px;
+}
+
+/* ── GIST SETUP CARD ── */
+.setup-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 28px; max-width: 500px; margin: 60px auto;
+  text-align: center;
+}
+.setup-card h2 { font-size: 18px; margin-bottom: 10px; }
+.setup-card p  { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+.setup-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; padding: 10px 14px; margin-bottom: 10px;
+}
+.setup-input:focus { outline: none; border-color: var(--accent); }
+
+@media (max-width: 800px) {
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .screen-header { padding: 14px 16px; }
+  main { padding: 20px 12px; }
+  .filter-bar { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── SCREEN HEADER ── -->
+<header class="screen-header no-print">
+  <div class="logo">
+    <div class="logo-icon">⛽</div>
+    <div>
+      <div class="logo-text">รายงานสรุป</div>
+      <div class="logo-sub">ปั๊มน้ำมัน — Gas Station Report</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
+    <button class="btn btn-ghost" onclick="reloadGist()" id="btn_reload">🔄 โหลดใหม่</button>
+    <button class="btn btn-pdf no-print" onclick="printReport()">⬇ ดาวน์โหลด PDF</button>
+  </div>
+</header>
+
+<!-- ── FILTER BAR ── -->
+<div class="filter-bar no-print" id="filter_bar" style="display:none;">
+  <label>กรอง:</label>
+  <select id="filter_month" onchange="render()">
+    <option value="">ทุกเดือน</option>
+  </select>
+  <label>ตั้งแต่</label>
+  <input type="date" id="filter_from" onchange="render()">
+  <label>ถึง</label>
+  <input type="date" id="filter_to" onchange="render()">
+  <button class="btn btn-ghost" style="padding:6px 12px; font-size:12px;" onclick="clearFilters()">✕ ล้างตัวกรอง</button>
+  <span id="status_bar">—</span>
+</div>
+
+<!-- ── PRINT HEADER ── -->
+<div class="print-header">
+  <h1>รายงานสรุปประจำวัน — ปั๊มน้ำมัน</h1>
+  <p id="print_subtitle">พิมพ์เมื่อ: —</p>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<main id="main_content">
+  <div id="loading">
+    <div class="spinner"></div>
+    กำลังโหลดข้อมูล...
+  </div>
+  <div id="empty" style="display:none;">
+    ไม่พบข้อมูลในช่วงที่เลือก
+  </div>
+  <div id="report_body" style="display:none;"></div>
+
+  <!-- ── GIST SETUP (fallback) ── -->
+  <div id="setup_card" style="display:none;">
+    <div class="setup-card">
+      <div style="font-size:32px; margin-bottom:14px;">☁️</div>
+      <h2>เชื่อมต่อ GitHub Gist</h2>
+      <p>กรอก Token และ Gist ID เดียวกับที่ใช้ในหน้าหลัก<br>ระบบจะจำไว้ในเบราว์เซอร์นี้</p>
+      <input class="setup-input" id="setup_token" type="password" placeholder="GitHub Personal Access Token (ghp_...)">
+      <input class="setup-input" id="setup_id" type="text" placeholder="Gist ID (เช่น ad99451d096bdbd24a...)">
+      <div style="margin-top:4px; font-size:11px; color:var(--text-muted); margin-bottom:16px;">
+        Token ต้องมีสิทธิ์ <strong style="color:var(--accent)">gist</strong>
+        — <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" style="color:var(--blue);">สร้าง Token ที่นี่</a>
+      </div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="connectGist()">เชื่อมต่อและโหลดข้อมูล</button>
+      <div id="setup_error" style="margin-top:12px; font-size:12px; color:var(--red); display:none;"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// ── Constants ──────────────────────────────────────────────
+const GIST_FILENAME = 'gas-station-data.json';
+const MONTHS_TH = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+let sheetData = {};
+
+// ── Helpers ────────────────────────────────────────────────
+function fmt(n, dec = 2) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return n.toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function parseKey(k) {
+  const p = k.split('-');
+  return { day: parseInt(p[0]), month: parseInt(p[1]), year2: parseInt(p[2]) };
+}
+
+// Convert "d-m-yy" → Date object for comparison
+function keyToDate(k) {
+  const p = parseKey(k);
+  const year = p.year2 < 100 ? 2500 + p.year2 - 543 : p.year2 - 543; // พ.ศ. → ค.ศ.
+  return new Date(year, p.month - 1, p.day);
+}
+
+function monthGroupKey(k) {
+  const p = parseKey(k);
+  return `${p.month}-${p.year2}`;
+}
+
+function monthLabel(mgKey) {
+  const [m, y] = mgKey.split('-').map(Number);
+  return `${MONTHS_TH[m]} 25${String(y).padStart(2,'0')}`;
+}
+
+// ── Compute one day's numbers ─────────────────────────────
+function computeDay(d) {
+  const disc   = d.disc   ?? 0.5;
+  const change = d.change ?? 3700;
+
+  // G95
+  const g95n_l = Math.max(0, (d.g95n_close || 0) - (d.g95n_open || 0));
+  const g95l_l = Math.max(0, (d.g95l_close || 0) - (d.g95l_open || 0));
+  const g95_l  = g95n_l + g95l_l;
+  const g95_sale = g95_l * (d.g95_price || 0);
+
+  // G91
+  const g91n_l = Math.max(0, (d.g91n_close || 0) - (d.g91n_open || 0));
+  const g91l_l = Math.max(0, (d.g91l_close || 0) - (d.g91l_open || 0));
+  const g91_l  = g91n_l + g91l_l;
+  const g91_sale = g91_l * (d.g91_price || 0);
+
+  // Diesel ตู้ 3
+  const dn_l  = Math.max(0, (d.dn_close || 0) - (d.dn_open || 0));
+  const dl_l  = Math.max(0, (d.dl_close || 0) - (d.dl_open || 0));
+  const d3_l  = dn_l + dl_l;
+  const dp    = d.d_price || 0;
+  const d3_sale = d3_l * dp;
+
+  // Diesel ตู้ 4
+  const d4n_l = Math.max(0, (d.d4n_close || 0) - (d.d4n_open || 0));
+  const d4l_l = Math.max(0, (d.d4l_close || 0) - (d.d4l_open || 0));
+  const d4_l  = d4n_l + d4l_l;
+  const d4p   = d.d4_price || dp;
+  const d4_sale = d4_l * d4p;
+
+  // Promotion
+  const air_l    = d.air_liter || 0;
+  const air_p    = d.air_price_custom || dp;
+  const air_d    = (d.air_disc_custom !== '' && d.air_disc_custom !== undefined) ? (d.air_disc_custom || 0) : disc;
+  const air_net  = air_l * (air_p - air_d);
+
+  const totalFuelFull = g95_sale + g91_sale + d3_sale + d4_sale;
+  const totalLiter    = g95_l + g91_l + d3_l + d4_l;
+
+  // Cash & transfer
+  const cashTotal = computeCash(d) + computeTransfer(d);
+  const mustSend  = cashTotal - change;
+  const diff      = mustSend - totalFuelFull;
+
+  return {
+    g95_l, g95_sale,
+    g91_l, g91_sale,
+    d3_l, d3_sale,
+    d4_l, d4_sale,
+    air_l, air_net,
+    totalFuelFull, totalLiter,
+    cashTotal, mustSend, diff,
+    change, disc
+  };
+}
+
+function computeCash(d) {
+  if (!d.cash) return 0;
+  const denoms = [1000,500,100,50,20,1];
+  return denoms.reduce((s, v) => {
+    const qty = d.cash[String(v)] || d.cash[v] || 0;
+    return s + qty * v;
+  }, 0);
+}
+
+function computeTransfer(d) {
+  if (!d.transfer) return 0;
+  return d.transfer.reduce((s, r) => s + (r.amount || 0), 0);
+}
+
+// ── Filter helpers ────────────────────────────────────────
+function getFilteredKeys() {
+  const month = document.getElementById('filter_month')?.value || '';
+  const from  = document.getElementById('filter_from')?.value;   // yyyy-mm-dd
+  const to    = document.getElementById('filter_to')?.value;
+
+  return Object.keys(sheetData).filter(k => {
+    if (month) {
+      if (monthGroupKey(k) !== month) return false;
+    }
+    if (from || to) {
+      const d = keyToDate(k);
+      if (from && d < new Date(from)) return false;
+      if (to   && d > new Date(to))   return false;
+    }
+    return true;
+  });
+}
+
+function clearFilters() {
+  document.getElementById('filter_month').value = '';
+  document.getElementById('filter_from').value  = '';
+  document.getElementById('filter_to').value    = '';
+  render();
+}
+
+// ── Populate month filter ─────────────────────────────────
+function populateMonthFilter() {
+  const sel = document.getElementById('filter_month');
+  const groups = [...new Set(Object.keys(sheetData).map(monthGroupKey))];
+  sel.innerHTML = '<option value="">ทุกเดือน</option>';
+  groups.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = monthLabel(g);
+    sel.appendChild(opt);
+  });
+}
+
+// ── Render ────────────────────────────────────────────────
+function render() {
+  const keys = getFilteredKeys();
+  const body = document.getElementById('report_body');
+  const empty = document.getElementById('empty');
+
+  document.getElementById('status_bar').textContent = `แสดง ${keys.length} วัน จาก ${Object.keys(sheetData).length} วัน`;
+
+  if (keys.length === 0) {
+    body.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  body.style.display  = 'block';
+
+  // Compute totals across filtered days
+  let totG95sale=0, totG91sale=0, totD3sale=0, totD4sale=0;
+  let totG95l=0, totG91l=0, totD3l=0, totD4l=0;
+  let totFull=0, totSend=0, totDiff=0;
+  let daysOver=0, daysShort=0, daysExact=0;
+
+  keys.forEach(k => {
+    const c = computeDay(sheetData[k]);
+    totG95sale += c.g95_sale; totG91sale += c.g91_sale;
+    totD3sale  += c.d3_sale;  totD4sale  += c.d4_sale;
+    totG95l += c.g95_l; totG91l += c.g91_l;
+    totD3l  += c.d3_l;  totD4l  += c.d4_l;
+    totFull += c.totalFuelFull; totSend += c.mustSend; totDiff += c.diff;
+    if (Math.abs(c.diff) < 0.01) daysExact++;
+    else if (c.diff >= 0) daysOver++;
+    else daysShort++;
+  });
+  const totLiter = totG95l + totG91l + totD3l + totD4l;
+
+  // ── Build HTML ──
+  let html = '';
+
+  // ── Stat Cards ──
+  html += `
+  <div class="stat-grid">
+    <div class="stat-card orange">
+      <div class="stat-label">รวมยอดน้ำมัน</div>
+      <div class="stat-value">${fmt(totFull)}<span class="stat-unit">฿</span></div>
+      <div class="stat-sub">${fmt(totLiter)} ลิตร รวม</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">ยอดส่งรวม (หักทอน)</div>
+      <div class="stat-value">${fmt(totSend)}<span class="stat-unit">฿</span></div>
+      <div class="stat-sub">${keys.length} วันทำการ</div>
+    </div>
+    <div class="stat-card ${totDiff >= 0 ? 'green' : 'red'}">
+      <div class="stat-label">ผลต่างรวม</div>
+      <div class="stat-value">${fmt(Math.abs(totDiff))}<span class="stat-unit">฿</span></div>
+      <div class="stat-sub">${totDiff >= 0 ? '▲ เกินรวม' : '▼ ขาดรวม'}</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">วันที่ยอดตรง / เกิน / ขาด</div>
+      <div class="stat-value" style="font-size:17px;">
+        <span style="color:var(--green)">${daysExact}</span>
+        <span style="font-size:13px; color:var(--text-muted)"> / </span>
+        <span style="color:var(--blue)">${daysOver}</span>
+        <span style="font-size:13px; color:var(--text-muted)"> / </span>
+        <span style="color:var(--red)">${daysShort}</span>
+      </div>
+      <div class="stat-sub">ตรง / เกิน / ขาด</div>
+    </div>
+  </div>`;
+
+  // ── Per-fuel summary bar ──
+  html += `
+  <div class="section-label">สรุปแยกตาม ประเภทน้ำมัน</div>
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px;">
+    ${[
+      {label:'ตู้ 1 · G95', sale:totG95sale, liter:totG95l, color:'#f85149'},
+      {label:'ตู้ 2 · G91', sale:totG91sale, liter:totG91l, color:'#3fb950'},
+      {label:'ตู้ 3 · Diesel', sale:totD3sale, liter:totD3l, color:'#58a6ff'},
+      {label:'ตู้ 4 · Diesel', sale:totD4sale, liter:totD4l, color:'#58a6ff'},
+    ].map(f => `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${f.color};margin-bottom:8px;">${f.label}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;">${fmt(f.sale)} <span style="font-size:11px;color:var(--text-muted)">฿</span></div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${fmt(f.liter)} ลิตร</div>
+      </div>`).join('')}
+  </div>`;
+
+  // ── Daily Table by month group ──
+  const groupMap = {};
+  keys.forEach(k => {
+    const g = monthGroupKey(k);
+    if (!groupMap[g]) groupMap[g] = [];
+    groupMap[g].push(k);
+  });
+
+  html += `<div class="section-label">รายละเอียดรายวัน</div>`;
+
+  Object.entries(groupMap).forEach(([gk, dayKeys]) => {
+    let mG95=0,mG91=0,mD3=0,mD4=0,mFull=0,mSend=0,mDiff=0;
+
+    const rows = dayKeys.map(k => {
+      const c = computeDay(sheetData[k]);
+      mG95+=c.g95_sale; mG91+=c.g91_sale; mD3+=c.d3_sale; mD4+=c.d4_sale;
+      mFull+=c.totalFuelFull; mSend+=c.mustSend; mDiff+=c.diff;
+      const diffClass = Math.abs(c.diff)<0.01 ? 'neutral' : c.diff>=0 ? 'positive' : 'negative';
+      const diffTxt   = Math.abs(c.diff)<0.01 ? 'ตรง' : (c.diff>0?'+':'-') + fmt(Math.abs(c.diff));
+      return `<tr>
+        <td>${k}</td>
+        <td>${fmt(c.g95_sale)}</td>
+        <td style="color:var(--text-muted)">${fmt(c.g95_l,2)}</td>
+        <td>${fmt(c.g91_sale)}</td>
+        <td style="color:var(--text-muted)">${fmt(c.g91_l,2)}</td>
+        <td>${fmt(c.d3_sale)}</td>
+        <td style="color:var(--text-muted)">${fmt(c.d3_l,2)}</td>
+        <td>${fmt(c.d4_sale)}</td>
+        <td>${fmt(c.totalFuelFull)}</td>
+        <td>${fmt(c.totalLiter,2)}</td>
+        <td>${fmt(c.mustSend)}</td>
+        <td class="${diffClass}">${diffTxt}</td>
+      </tr>`;
+    }).join('');
+
+    const mDiffClass = Math.abs(mDiff)<0.01 ? '' : mDiff>=0 ? 'positive' : 'negative';
+    const mDiffTxt   = Math.abs(mDiff)<0.01 ? 'ตรง' : (mDiff>0?'+':'-') + fmt(Math.abs(mDiff));
+
+    html += `
+    <div class="month-section">
+      <div class="month-title">${monthLabel(gk)}</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>G95 (฿)</th><th>ลิตร</th>
+              <th>G91 (฿)</th><th>ลิตร</th>
+              <th>D ตู้3 (฿)</th><th>ลิตร</th>
+              <th>D ตู้4 (฿)</th>
+              <th>รวมน้ำมัน (฿)</th><th>รวมลิตร</th>
+              <th>ยอดส่ง (฿)</th>
+              <th>ผลต่าง</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+          <tfoot>
+            <tr>
+              <td>รวม ${monthLabel(gk)}</td>
+              <td>${fmt(mG95)}</td><td></td>
+              <td>${fmt(mG91)}</td><td></td>
+              <td>${fmt(mD3)}</td><td></td>
+              <td>${fmt(mD4)}</td>
+              <td>${fmt(mFull)}</td><td></td>
+              <td>${fmt(mSend)}</td>
+              <td class="${mDiffClass}">${mDiffTxt}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>`;
+  });
+
+  // ── Grand total footer ──
+  if (Object.keys(groupMap).length > 1) {
+    const grandDiffClass = Math.abs(totDiff)<0.01 ? '' : totDiff>=0 ? 'diff-ok' : 'diff-bad';
+    const grandDiffTxt   = Math.abs(totDiff)<0.01 ? 'ยอดตรง ✓' : (totDiff>0?'+':'-') + fmt(Math.abs(totDiff)) + ' ฿';
+    html += `
+    <div style="background:var(--surface2);border:1px solid var(--accent);border-radius:12px;padding:20px 24px;display:flex;flex-wrap:wrap;gap:24px;align-items:center;margin-bottom:28px;">
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">ยอดรวมทั้งหมด</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;color:var(--accent)">${fmt(totFull)} ฿</div>
+        <div style="font-size:12px;color:var(--text-muted);">${fmt(totLiter)} ลิตร · ${keys.length} วัน</div>
+      </div>
+      <div style="width:1px;height:50px;background:var(--border);"></div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">ยอดส่งรวม</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;">${fmt(totSend)} ฿</div>
+      </div>
+      <div style="width:1px;height:50px;background:var(--border);"></div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">ผลต่างรวม</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;" class="${grandDiffClass}">${grandDiffTxt}</div>
+      </div>
+    </div>`;
+  }
+
+  body.innerHTML = html;
+
+  // update print subtitle
+  document.getElementById('print_subtitle').textContent =
+    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${keys.length} วัน`;
+}
+
+// ── Load from Gist ────────────────────────────────────────
+async function loadFromGist(token, gistId) {
+  const res = await fetch('https://api.github.com/gists/' + gistId, {
+    headers: {
+      'Authorization': 'token ' + token,
+      'Accept': 'application/vnd.github.v3+json'
+    }
+  });
+  if (res.status === 401) throw new Error('Token ไม่ถูกต้องหรือหมดอายุ (401)');
+  if (res.status === 403) throw new Error('Token ไม่มีสิทธิ์ gist (403)');
+  if (res.status === 404) throw new Error('ไม่พบ Gist ID นี้ (404)');
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+
+  const data = await res.json();
+  const fileEntry = data.files[GIST_FILENAME];
+  if (!fileEntry) throw new Error('ไม่พบไฟล์ "' + GIST_FILENAME + '" ใน Gist');
+
+  let content = fileEntry.content;
+  if (fileEntry.truncated) {
+    const r2 = await fetch(fileEntry.raw_url);
+    content = await r2.text();
+  }
+  return JSON.parse(content);
+}
+
+async function initLoad() {
+  const token = localStorage.getItem('gist_token');
+  const id    = localStorage.getItem('gist_id');
+
+  if (!token || !id) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup_card').style.display = 'block';
+    return;
+  }
+
+  try {
+    const loaded = await loadFromGist(token, id);
+    sheetData = loaded;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('filter_bar').style.display = 'flex';
+    document.getElementById('report_body').style.display = 'block';
+    populateMonthFilter();
+    render();
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup_card').style.display = 'block';
+    document.getElementById('setup_error').style.display = 'block';
+    document.getElementById('setup_error').textContent = '❌ ' + e.message;
+  }
+}
+
+async function connectGist() {
+  const token = document.getElementById('setup_token').value.trim();
+  const id    = document.getElementById('setup_id').value.trim();
+  const errEl = document.getElementById('setup_error');
+
+  if (!token || !id) {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ กรุณากรอก Token และ Gist ID ให้ครบ';
+    return;
+  }
+
+  errEl.style.display = 'none';
+  document.querySelector('.setup-card button').textContent = '⏳ กำลังโหลด...';
+
+  try {
+    const loaded = await loadFromGist(token, id);
+    localStorage.setItem('gist_token', token);
+    localStorage.setItem('gist_id', id);
+    sheetData = loaded;
+    document.getElementById('setup_card').style.display = 'none';
+    document.getElementById('filter_bar').style.display = 'flex';
+    document.getElementById('report_body').style.display = 'block';
+    populateMonthFilter();
+    render();
+  } catch(e) {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ ' + e.message;
+    document.querySelector('.setup-card button').textContent = 'เชื่อมต่อและโหลดข้อมูล';
+  }
+}
+
+async function reloadGist() {
+  const token = localStorage.getItem('gist_token');
+  const id    = localStorage.getItem('gist_id');
+  const btn   = document.getElementById('btn_reload');
+  if (!token || !id) { initLoad(); return; }
+  btn.textContent = '⏳...';
+  btn.disabled = true;
+  try {
+    sheetData = await loadFromGist(token, id);
+    populateMonthFilter();
+    render();
+    btn.textContent = '✅ โหลดแล้ว';
+    setTimeout(() => { btn.textContent = '🔄 โหลดใหม่'; btn.disabled = false; }, 1500);
+  } catch(e) {
+    btn.textContent = '❌ ล้มเหลว';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = '🔄 โหลดใหม่'; }, 2000);
+  }
+}
+
+function printReport() {
+  document.getElementById('print_subtitle').textContent =
+    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${getFilteredKeys().length} วัน`;
+  window.print();
+}
+
+// ── Start ─────────────────────────────────────────────────
+initLoad();
+</script>
+</body>
+</html>
