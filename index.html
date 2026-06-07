@@ -371,9 +371,21 @@ window._fbReady = false;
 window._db      = null;
 window._unsub   = null;
 
+// ===== Firebase Config (hardcoded) =====
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAZOWoDHEiGIxkYIRgRkNWXjNWGLE4wgFQ",
+  authDomain: "gas-station-dd6e9.firebaseapp.com",
+  projectId: "gas-station-dd6e9",
+  storageBucket: "gas-station-dd6e9.firebasestorage.app",
+  messagingSenderId: "94552958790",
+  appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747",
+  measurementId: "G-YB0SR5ETT1"
+};
+
 window.fbInit = function(cfg) {
   try {
-    const app = initializeApp(JSON.parse(cfg), 'gas-'+Date.now());
+    const parsed = (typeof cfg === 'string') ? JSON.parse(cfg) : cfg;
+    const app = initializeApp(parsed, 'gas-'+Date.now());
     window._db = getFirestore(app);
     window._fbReady = true;
     fbStatus('✅ เชื่อมต่อสำเร็จ! กำลังโหลดข้อมูล...', '#3fb950');
@@ -430,6 +442,17 @@ function fbStatus(msg, color) {
   const el = document.getElementById('fb_status');
   if (el) { el.style.display='block'; el.style.color=color; el.innerHTML=msg; }
 }
+
+// Expose doc/setDoc ออกมาให้ autoSaveToFirebase ใช้ได้จาก regular script
+window._fbDoc    = doc;
+window._fbSetDoc = setDoc;
+
+// ===== Auto-connect Firebase on load =====
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    window.fbInit(FIREBASE_CONFIG);
+  }, 500);
+});
 </script>
 </head>
 <body>
@@ -448,13 +471,13 @@ function fbStatus(msg, color) {
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <div class="header-date" id="header-date">—</div>
     <button class="btn btn-ghost" onclick="
-  const saved = localStorage.getItem('fb_config');
-  if(saved) document.getElementById('fb_config').value = saved;
+  document.getElementById('fb_config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
   document.getElementById('fbModal').style.display='flex';
 " style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">🔥 Firebase</button>
-<button class="btn btn-ghost" onclick="openGistModal()" style="padding:6px 14px; font-size:12px; border-color:#8b949e; display:flex; align-items:center; gap:6px;">
+<button id="gist_header_btn" class="btn btn-ghost" onclick="openGistModal()" style="padding:6px 14px; font-size:12px; border-color:#8b949e; display:flex; align-items:center; gap:6px;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
       GitHub Sync
+      <span id="gist_dot" style="display:none; width:7px; height:7px; background:#3fb950; border-radius:50; flex-shrink:0;"></span>
     </button>
   </div>
 </header>
@@ -487,7 +510,7 @@ function fbStatus(msg, color) {
         window.fbInit(cfg);
       " style="background:#f0a500; border:none; border-radius:8px; padding:9px 18px; color:#000; font-weight:700; cursor:pointer;">🔥 เชื่อมต่อ</button>
 
-      <button onclick="saveAll(); document.getElementById('fbModal').style.display='none';" style="background:#238636; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">💾 บันทึกขึ้น Cloud</button>
+      <button onclick="window.fbSave()" style="background:#238636; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">💾 บันทึกขึ้น Cloud</button>
 
       <button onclick="window.fbStartSync()" style="background:#1f6feb; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">🔄 โหลดจาก Cloud</button>
 
@@ -879,7 +902,7 @@ function fbStatus(msg, color) {
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearAll()">🗑 ล้างข้อมูล</button>
       <button class="btn btn-ghost" onclick="downloadHTML()" style="border-color:#58a6ff; color:#58a6ff;">⬇ ดาวน์โหลด HTML</button>
-      <button class="btn btn-primary" id="save_all_btn" onclick="saveAll()" style="background:var(--accent3); min-width:150px;">💾 บันทึกข้อมูล</button>
+      <button class="btn btn-primary" onclick="saveDate()" style="background:var(--accent3); min-width:120px;">💾 บันทึกข้อมูล</button>
       <button class="btn btn-primary" onclick="window.print()">🖨 พิมพ์ / บันทึก PDF</button>
     </div>
 
@@ -1214,15 +1237,12 @@ function saveDate(silent = false) {
   // ฟังก์ชันอ่านค่า input ที่ทำงานได้ทั้ง iOS Safari และ browser อื่น
   function readNum(el) {
     if (!el) return '';
-    // ลอง .value ก่อน (ได้ string ที่ผู้ใช้พิมพ์จริงๆ)
     const raw = String(el.value).trim().replace(',', '.');
     if (raw !== '' && raw !== '0' && !isNaN(parseFloat(raw))) {
       return parseFloat(raw);
     }
-    // fallback: valueAsNumber
     const vn = el.valueAsNumber;
     if (!isNaN(vn)) return vn;
-    // ถ้า raw เป็น '0' ให้คืน 0
     if (raw === '0') return 0;
     return '';
   }
@@ -1233,11 +1253,9 @@ function saveDate(silent = false) {
     entry[f] = readNum(el);
   });
 
-  // ตั้งค่าทั่วไป
   entry.change = readNum(document.getElementById('g_change')) || 3700;
   entry.disc   = readNum(document.getElementById('g_discount_per_liter')) || 0.5;
 
-  // บันทึก cash
   const cashData = {};
   DENOMS.forEach(d => {
     const el = document.getElementById('cash_' + d.value);
@@ -1245,23 +1263,111 @@ function saveDate(silent = false) {
     cashData[String(d.value)] = (v === '' || v === 0) ? 0 : v;
   });
   entry.cash = cashData;
-
-  // บันทึก transfer rows
   entry.transfer = transferRows.map(r => ({ label: r.label, amount: r.amount || 0 }));
 
-  // เขียนกลับ sheetData
   sheetData[dateKey] = entry;
 
-  // แสดง feedback
+  // ---- Auto-save: Firebase + Gist ----
   const btn = document.querySelector('[onclick="saveDate()"]');
-  if (btn) {
-    const orig = btn.textContent;
-    btn.textContent = '✅ บันทึกแล้ว!';
-    btn.style.background = 'var(--green)';
-    setTimeout(() => {
-      btn.textContent = orig;
-      btn.style.background = '';
-    }, 1800);
+  const origText = btn ? btn.textContent : '';
+  const origBg   = btn ? btn.style.background : '';
+
+  function setBtnSaving() {
+    if (!btn) return;
+    btn.textContent = '⏳ กำลัง sync...';
+    btn.style.background = '#1f6feb';
+    btn.disabled = true;
+  }
+  function setBtnDone(msg, ok) {
+    if (!btn) return;
+    btn.textContent = msg;
+    btn.style.background = ok ? 'var(--green)' : '#c0392b';
+    btn.disabled = false;
+    setTimeout(() => { btn.textContent = origText; btn.style.background = origBg; }, 2500);
+  }
+
+  const hasFirebase = window._fbReady && window._db;
+  const gistToken   = localStorage.getItem('gist_token') || '';
+  const gistId      = localStorage.getItem('gist_id')    || '';
+  const hasGist     = !!(gistToken && gistId);
+
+  if (hasFirebase || hasGist) {
+    setBtnSaving();
+    const tasks = [];
+    if (hasFirebase) tasks.push(autoSaveToFirebase());
+    if (hasGist)     tasks.push(autoSaveToGist(gistToken, gistId));
+    Promise.allSettled(tasks).then(results => {
+      const allOk = results.every(r => r.status === 'fulfilled');
+      const icons = [];
+      if (hasFirebase) icons.push('🔥');
+      if (hasGist)     icons.push('☁️');
+      setBtnDone(allOk ? icons.join('') + ' บันทึกแล้ว!' : '⚠️ sync บางตัวล้มเหลว', allOk);
+    });
+  } else {
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✅ บันทึกแล้ว!';
+      btn.style.background = 'var(--green)';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2500);
+    }
+  }
+}
+
+// =================== AUTO SAVE TO GIST ===================
+async function autoSaveToGist(token, gistId) {
+  const payload = JSON.stringify(sheetData, null, 2);
+  const res = await fetch('https://api.github.com/gists/' + gistId, {
+    method: 'PATCH',
+    headers: {
+      'Authorization': 'token ' + token,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+    body: JSON.stringify({
+      description: 'Gas Station Daily Records',
+      files: { [GIST_FILENAME]: { content: payload } }
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error('Gist: ' + (err.message || res.status));
+  }
+  // อัปเดต status ใน header
+  const hd = document.getElementById('header-date');
+  if (hd) {
+    const prev = hd.textContent;
+    hd.textContent = '☁️ Gist synced!';
+    setTimeout(() => hd.textContent = prev, 2000);
+  }
+}
+
+async function autoSaveToFirebase() {
+  // รอให้ module expose ฟังก์ชันก่อน (กรณี module โหลดช้า)
+  let tries = 0;
+  while ((!window._fbDoc || !window._fbSetDoc) && tries < 20) {
+    await new Promise(r => setTimeout(r, 200));
+    tries++;
+  }
+  if (!window._fbDoc || !window._fbSetDoc || !window._db) {
+    console.warn('Firebase not ready for auto-save');
+    return;
+  }
+  try {
+    const docRef = window._fbDoc(window._db, 'gas_station', 'daily_records');
+    await window._fbSetDoc(docRef, { records: sheetData, updated: new Date().toISOString() });
+    // แสดงจุดเขียว
+    const dot = document.getElementById('fb_live_dot');
+    if (dot) dot.style.display = 'inline';
+    // แสดงสถานะ ☁️ ใน header
+    const hd = document.getElementById('header-date');
+    if (hd) {
+      const prev = hd.textContent;
+      hd.textContent = '☁️ บันทึกขึ้น Cloud แล้ว';
+      setTimeout(() => hd.textContent = prev, 2000);
+    }
+  } catch(e) {
+    console.error('Firebase auto-save error:', e.message);
+    alert('❌ บันทึกขึ้น Firebase ไม่สำเร็จ: ' + e.message);
   }
 }
 
@@ -1506,9 +1612,18 @@ document.getElementById('gistModal').addEventListener('click', function(e) {
 function gistRememberToken() {
   const token = document.getElementById('gist_token').value.trim();
   const id    = document.getElementById('gist_id').value.trim();
-  if (token) localStorage.setItem('gist_token', token);
-  if (id)    localStorage.setItem('gist_id', id);
-  gistStatus('✅ จำ Token และ Gist ID ไว้ในเบราว์เซอร์แล้ว', '#3fb950');
+  if (!token || !id) {
+    gistStatus('❌ กรุณากรอก Token และ Gist ID ให้ครบ', '#f85149');
+    return;
+  }
+  localStorage.setItem('gist_token', token);
+  localStorage.setItem('gist_id', id);
+  gistStatus('✅ จำ Token และ Gist ID ไว้แล้ว — จะ sync อัตโนมัติทุกครั้งที่กดบันทึกและรีเว็บ', '#3fb950');
+  // แสดงจุดเขียวบน header
+  const dot = document.getElementById('gist_dot');
+  if (dot) dot.style.display = 'inline-block';
+  const btn = document.getElementById('gist_header_btn');
+  if (btn) btn.style.borderColor = '#3fb950';
 }
 
 function gistStatus(msg, color) {
@@ -1617,80 +1732,68 @@ async function gistLoad() {
   }
 }
 
-// =================== TOAST NOTIFICATION ===================
-function showToast(msg, color, duration) {
-  let toast = document.getElementById('save_toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'save_toast';
-    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1c2330;border:1px solid #30363d;border-radius:10px;padding:12px 22px;font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.5);opacity:0;transition:all 0.3s ease;white-space:nowrap;';
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  toast.style.color = color || '#e6edf3';
-  toast.style.borderColor = color || '#30363d';
-  toast.style.opacity = '1';
-  toast.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(20px)';
-  }, duration || 3000);
-}
-
-// =================== SAVE ALL (LOCAL + CLOUD) ===================
-async function saveAll() {
-  const btn = document.getElementById('save_all_btn');
-
-  // 1. บันทึก local ก่อนเสมอ
-  saveDate(true);
-  showToast('💾 บันทึก local แล้ว...', '#f0a500', 4500);
-
-  // 2. ถ้าเชื่อมต่อ Firebase อยู่ → บันทึก Cloud ด้วย
-  if (window._fbReady && window._db) {
-    btn.disabled = true;
-    btn.textContent = '⏳ กำลังบันทึก Cloud...';
-    try {
-      await window.fbSave();
-      showToast('✅ บันทึก local + Cloud สำเร็จ!', '#3fb950', 3500);
-    } catch(e) {
-      showToast('⚠️ Local OK — Cloud: ' + e.message, '#f85149', 4000);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '💾 บันทึกข้อมูล';
-    }
-  } else {
-    // ยังไม่ได้เชื่อมต่อ Firebase → บันทึก local อย่างเดียว แจ้งเตือนให้เชื่อมต่อ
-    showToast('💾 บันทึก local แล้ว (ยังไม่ได้เชื่อมต่อ Firebase)', '#f0a500', 4000);
-  }
-}
-
 // =================== INIT ===================
-function init() {
+async function init() {
   renderAllGroups();
   renderTransfer();
   renderCash();
   calc();
 
-  // Auto-load token/id if saved
+  // Auto-load from Gist if token + id are saved
   const savedToken = localStorage.getItem('gist_token');
   const savedId    = localStorage.getItem('gist_id');
   if (savedToken && savedId) {
-    // Show a subtle sync indicator in header
+    // แสดงจุดเขียวบน header ทันที
+    const dot = document.getElementById('gist_dot');
+    if (dot) dot.style.display = 'inline-block';
+    const gistBtn = document.getElementById('gist_header_btn');
+    if (gistBtn) gistBtn.style.borderColor = '#3fb950';
+
     const hd = document.getElementById('header-date');
-    hd.title = 'Gist ID: ' + savedId;
+    const prev = hd ? hd.textContent : '';
+    if (hd) hd.textContent = '⏳ กำลังโหลดจาก Gist...';
+
+    try {
+      const res = await fetch('https://api.github.com/gists/' + savedId, {
+        headers: {
+          'Authorization': 'token ' + savedToken,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const file = data.files[GIST_FILENAME];
+      if (!file) throw new Error('ไม่พบไฟล์ใน Gist');
+
+      const loaded = JSON.parse(file.content);
+      // full replace sheetData
+      Object.keys(sheetData).forEach(k => delete sheetData[k]);
+      Object.assign(sheetData, loaded);
+
+      renderAllGroups();
+
+      // load latest date
+      const keys = Object.keys(loaded);
+      if (keys.length > 0) loadDate(keys[keys.length - 1]);
+
+      if (hd) {
+        hd.textContent = '☁️ โหลดจาก Gist แล้ว (' + keys.length + ' วัน)';
+        setTimeout(() => hd.textContent = keys[keys.length-1] || prev, 2500);
+      }
+    } catch(e) {
+      console.warn('Auto-load Gist failed:', e.message);
+      if (hd) {
+        hd.textContent = '⚠️ โหลด Gist ไม่สำเร็จ';
+        setTimeout(() => hd.textContent = prev, 2500);
+      }
+    }
   }
 }
 
 init();
 
-  // Auto-reconnect Firebase ถ้าเคยตั้งค่าไว้
-  const _savedFbCfg = localStorage.getItem('fb_config');
-  if (_savedFbCfg) {
-    setTimeout(() => {
-      if (window.fbInit) window.fbInit(_savedFbCfg);
-    }, 800);
-  }
+  // Firebase เชื่อมต่ออัตโนมัติผ่าน FIREBASE_CONFIG ที่ฝังไว้แล้ว
+  // (ไม่ต้องโหลดจาก localStorage อีกต่อไป)
 </script>
 </body>
 </html>
