@@ -515,10 +515,7 @@ window.addEventListener('load', () => {
   </div>
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <div class="header-date" id="header-date">—</div>
-    <button id="fb_header_btn" class="btn btn-ghost" onclick="
-  document.getElementById('fb_config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
-  document.getElementById('fbModal').style.display='flex';
-" style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">
+    <button id="fb_header_btn" class="btn btn-ghost" onclick="document.getElementById('fbModal').style.display='flex';" style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">
   🔥 Firebase
   <span id="fb_live_dot_header" style="display:none; width:7px; height:7px; background:#3fb950; border-radius:50%; flex-shrink:0;"></span>
 </button>
@@ -530,32 +527,18 @@ window.addEventListener('load', () => {
 
 <!-- ===== FIREBASE MODAL ===== -->
 <div id="fbModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
-  <div style="background:#161b22; border:1px solid #f0a500; border-radius:16px; padding:28px; width:460px; max-width:94vw; box-shadow:0 24px 64px rgba(0,0,0,0.7);">
+  <div style="background:#161b22; border:1px solid #f0a500; border-radius:16px; padding:28px; width:420px; max-width:94vw; box-shadow:0 24px 64px rgba(0,0,0,0.7);">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
       <span style="font-size:22px;">🔥</span>
       <span style="font-size:17px; font-weight:700; color:#e6edf3;">Firebase Real-time Sync</span>
       <span id="fb_live_dot" style="display:none; width:8px; height:8px; background:#3fb950; border-radius:50%; margin-left:4px;"></span>
     </div>
-    <div style="font-size:12px; color:#8b949e; margin-bottom:16px; line-height:1.6;">
-      ข้อมูลอัปเดตทุกเครื่องอัตโนมัติทันที ไม่ต้องกด sync<br>
-      <a href="https://console.firebase.google.com" target="_blank" style="color:#58a6ff;">สร้าง Firebase Project ฟรี →</a>
-    </div>
-
-    <div style="margin-bottom:12px;">
-      <div style="font-size:11px; color:#8b949e; margin-bottom:4px;">วาง Firebase Config (JSON) จาก Project Settings:</div>
-      <textarea id="fb_config" rows="6" placeholder='{"apiKey":"...","authDomain":"...","projectId":"..."}' style="width:100%; background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:10px; color:#e6edf3; font-size:11px; font-family:monospace; resize:vertical; box-sizing:border-box;"></textarea>
+    <div style="font-size:12px; color:#8b949e; margin-bottom:20px; line-height:1.6;">
+      Project: <span style="color:#f0a500; font-family:monospace;">gas-station-dd6e9</span><br>
+      ข้อมูลอัปเดตทุกเครื่องอัตโนมัติทันที ไม่ต้องกด sync
     </div>
 
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-      <button onclick="
-        const cfg = document.getElementById('fb_config').value.trim();
-        if(!cfg){document.getElementById('fb_status').style.display='block';document.getElementById('fb_status').style.color='#f85149';document.getElementById('fb_status').textContent='❌ กรุณาวาง Config';return;}
-        localStorage.setItem('fb_config',cfg);
-        window.fbInit(cfg);
-        const s=document.getElementById('fb_stop_btn'); if(s) s.style.display='inline-block';
-        const r=document.getElementById('fb_start_btn'); if(r) r.style.display='none';
-      " style="background:#f0a500; border:none; border-radius:8px; padding:9px 18px; color:#000; font-weight:700; cursor:pointer;">🔥 เชื่อมต่อ</button>
-
       <button onclick="window.fbSave()" style="background:#238636; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">💾 บันทึกขึ้น Cloud</button>
 
       <button onclick="window.fbStartSync()" style="background:#1f6feb; border:none; border-radius:8px; padding:9px 18px; color:#fff; font-weight:700; cursor:pointer;">🔄 โหลดจาก Cloud</button>
@@ -576,17 +559,6 @@ window.addEventListener('load', () => {
     </div>
 
     <div id="fb_status" style="display:none; font-size:12px; padding:10px; background:#0d1117; border-radius:8px; line-height:1.6;"></div>
-
-    <details style="margin-top:14px;">
-      <summary style="color:#8b949e; font-size:11px; cursor:pointer;">📋 วิธีสร้าง Firebase Project (คลิกดู)</summary>
-      <div style="color:#8b949e; font-size:11px; line-height:1.8; margin-top:8px; padding-left:8px;">
-        1. ไป <a href="https://console.firebase.google.com" target="_blank" style="color:#58a6ff;">console.firebase.google.com</a><br>
-        2. คลิก <b style="color:#e6edf3;">Add project</b> → ตั้งชื่อ → Create<br>
-        3. เมนูซ้าย → <b style="color:#e6edf3;">Firestore Database</b> → Create database → Start in test mode<br>
-        4. Project Settings (⚙️) → Your apps → คลิก &lt;/&gt; → Register<br>
-        5. คัดลอก <b style="color:#e6edf3;">firebaseConfig</b> (เฉพาะ JSON ข้างใน { }) มาวางด้านบน
-      </div>
-    </details>
   </div>
 </div>
 
@@ -1299,20 +1271,16 @@ function saveDate(silent = false) {
     });
   } else {
     if (btn) {
-      btn.textContent = '✅ บันทึกแล้ว! (ไม่มี Firebase)';
-      btn.style.background = 'var(--green)';
+      btn.textContent = '⚠️ Firebase ไม่พร้อม';
+      btn.style.background = '#c0392b';
+      btn.disabled = false;
       setTimeout(() => { btn.textContent = origText; btn.style.background = origBg; }, 2500);
     }
   }
 }
 
 async function autoSaveToFirebase() {
-  let tries = 0;
-  while ((!window._fbDoc || !window._fbSetDoc) && tries < 20) {
-    await new Promise(r => setTimeout(r, 200));
-    tries++;
-  }
-  if (!window._fbDoc || !window._fbSetDoc || !window._db) throw new Error('Firebase ยังไม่พร้อม');
+  if (!window._db) throw new Error('Firebase ยังไม่พร้อม');
   const docRef = window._fbDoc(window._db, 'gas_station', 'daily_records');
   await window._fbSetDoc(docRef, { records: sheetData, updated: new Date().toISOString() });
   // อัปเดต header dot
