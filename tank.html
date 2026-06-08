@@ -238,6 +238,8 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
   .grid-3, .grid-2 { grid-template-columns: 1fr; }
   header { padding: 16px; }
   main { padding: 20px 14px; }
+  .refill-row1 { grid-template-columns: 1fr 1fr !important; }
+  .refill-row1 .btn-primary { grid-column: span 2; height: 38px !important; }
 }
 </style>
 </head>
@@ -391,32 +393,30 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
     <div class="section-label">🚛 บันทึกน้ำมันเติมเข้าแทงค์ (รายวัน)</div>
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">➕ เพิ่มรายการเติมน้ำมันเข้าแทงค์</div>
-      <!-- Row 1: วันที่ + หมายเหตุ -->
-      <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-bottom:10px;">
+      <!-- Row 1: วันที่ + ปริมาณน้ำมัน + ปุ่มเพิ่ม -->
+      <div class="refill-row1" style="display:grid; grid-template-columns:auto 1fr 1fr 1fr auto; gap:10px; align-items:flex-end; margin-bottom:10px;">
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">วันที่เติม</div>
           <input type="date" id="refill_date" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:13px; padding:7px 10px;">
         </div>
         <div class="field-group" style="margin-bottom:0;">
-          <div class="field-label">หมายเหตุ (ถ้ามี)</div>
-          <input type="text" id="refill_note" placeholder="เช่น บริษัท ABC จัดส่ง">
-        </div>
-      </div>
-      <!-- Row 2: ปริมาณน้ำมัน + ปุ่มเพิ่ม -->
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:flex-end;">
-        <div class="field-group" style="margin-bottom:0;">
-          <div class="field-label">G95 (ลิตร)</div>
-          <input type="number" id="refill_g95" step="0.01" placeholder="0.00">
+          <div class="field-label" style="color:var(--g95);">G95 (ลิตร)</div>
+          <input type="number" id="refill_g95" step="0.01" placeholder="0.00" style="border-color:rgba(248,81,73,0.3);">
         </div>
         <div class="field-group" style="margin-bottom:0;">
-          <div class="field-label">G91 (ลิตร)</div>
-          <input type="number" id="refill_g91" step="0.01" placeholder="0.00">
+          <div class="field-label" style="color:var(--g91);">G91 (ลิตร)</div>
+          <input type="number" id="refill_g91" step="0.01" placeholder="0.00" style="border-color:rgba(63,185,80,0.3);">
         </div>
         <div class="field-group" style="margin-bottom:0;">
-          <div class="field-label">Diesel (ลิตร)</div>
-          <input type="number" id="refill_d" step="0.01" placeholder="0.00">
+          <div class="field-label" style="color:var(--diesel);">Diesel (ลิตร)</div>
+          <input type="number" id="refill_d" step="0.01" placeholder="0.00" style="border-color:rgba(88,166,255,0.3);">
         </div>
         <button class="btn btn-primary" style="white-space:nowrap; height:36px;" onclick="addRefill()">+ เพิ่ม</button>
+      </div>
+      <!-- Row 2: หมายเหตุ -->
+      <div class="field-group" style="margin-bottom:0;">
+        <div class="field-label">📝 หมายเหตุ (ถ้ามี)</div>
+        <input type="text" id="refill_note" placeholder="เช่น บริษัท ABC จัดส่ง, รถบรรทุกทะเบียน...">
       </div>
     </div>
 
