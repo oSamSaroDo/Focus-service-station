@@ -142,6 +142,7 @@ tbody td {
 tbody td:first-child {
   text-align: left; font-family: 'Sarabun', sans-serif;
   font-size: 13px; font-weight: 600; color: var(--accent);
+  white-space: nowrap;
 }
 tbody td.positive { color: var(--green); }
 tbody td.negative { color: var(--red); }
@@ -301,6 +302,11 @@ function keyToDate(k) {
   const p = parseKey(k);
   const year = p.year2 < 100 ? 2500 + p.year2 - 543 : p.year2 - 543; // พ.ศ. → ค.ศ.
   return new Date(year, p.month - 1, p.day);
+}
+
+function fmtKey(k) {
+  const p = parseKey(k);
+  return `${String(p.day).padStart(2,'0')} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}`;
 }
 
 function monthGroupKey(k) {
@@ -548,7 +554,7 @@ function render() {
       const diffClass = Math.abs(c.diff)<0.01 ? 'neutral' : c.diff>=0 ? 'positive' : 'negative';
       const diffTxt   = Math.abs(c.diff)<0.01 ? 'ตรง' : (c.diff>0?'+':'-') + fmt(Math.abs(c.diff));
       return `<tr>
-        <td>${k}</td>
+        <td>${fmtKey(k)}</td>
         <td>${fmt(c.g95_sale)}</td>
         <td style="color:var(--text-muted)">${fmt(c.g95_l,2)}</td>
         <td>${fmt(c.g91_sale)}</td>
