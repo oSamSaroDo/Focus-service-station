@@ -769,14 +769,11 @@ window.addEventListener('load', startSync);
         <div class="result-sub" id="sum_g91_liter">— ลิตร</div>
       </div>
       <div class="card" style="text-align:center">
-        <div class="card-title" style="justify-content:center"><span class="dot" style="background:var(--diesel-color)"></span>ตู้ 3 · Diesel</div>
+        <div class="card-title" style="justify-content:center"><span class="dot" style="background:var(--diesel-color)"></span>ตู้ 3+4 · Diesel</div>
         <div class="result-val" id="sum_d">—</div><span class="result-unit">฿</span>
         <div class="result-sub" id="sum_d_liter">— ลิตร</div>
-      </div>
-      <div class="card" style="text-align:center">
-        <div class="card-title" style="justify-content:center"><span class="dot" style="background:var(--diesel2-color)"></span>ตู้ 4 · Diesel</div>
-        <div class="result-val" id="sum_d4">—</div><span class="result-unit">฿</span>
-        <div class="result-sub" id="sum_d4_liter">— ลิตร</div>
+        <div style="display:none" id="sum_d4"></div>
+        <div style="display:none" id="sum_d4_liter"></div>
       </div>
     </div>
     <div style="margin-bottom:20px; margin-top:-8px;">
@@ -1063,8 +1060,10 @@ function calc() {
   document.getElementById('sum_g95_liter').textContent = fmt(g95_total_l, 2) + ' ลิตร';
   document.getElementById('sum_g91').textContent = g91_total_l > 0 ? fmt(g91_sale) : '—';
   document.getElementById('sum_g91_liter').textContent = fmt(g91_total_l, 2) + ' ลิตร';
-  document.getElementById('sum_d').textContent = d3_total_l > 0 ? fmt(d3_sale) : '—';
-  document.getElementById('sum_d_liter').textContent = fmt(d3_total_l, 2) + ' ลิตร';
+  const d_combined_sale = d3_sale + d4_sale;
+  const d_combined_l    = d3_total_l + d4_total_l;
+  document.getElementById('sum_d').textContent = d_combined_l > 0 ? fmt(d_combined_sale) : '—';
+  document.getElementById('sum_d_liter').textContent = fmt(d_combined_l, 2) + ' ลิตร';
   document.getElementById('sum_d4').textContent = d4_total_l > 0 ? fmt(d4_sale) : '—';
   document.getElementById('sum_d4_liter').textContent = fmt(d4_total_l, 2) + ' ลิตร';
 
