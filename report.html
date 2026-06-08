@@ -210,20 +210,6 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
   border-radius: 6px; padding: 5px 14px; display: inline-block; margin-bottom: 12px;
 }
 
-/* ── GIST SETUP CARD ── */
-.setup-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 28px; max-width: 500px; margin: 60px auto;
-  text-align: center;
-}
-.setup-card h2 { font-size: 18px; margin-bottom: 10px; }
-.setup-card p  { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
-.setup-input {
-  width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--text); font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px; padding: 10px 14px; margin-bottom: 10px;
-}
-.setup-input:focus { outline: none; border-color: var(--accent); }
 
 @media (max-width: 800px) {
   .stat-grid { grid-template-columns: repeat(2,1fr); }
@@ -246,7 +232,7 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
   </div>
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
-    <button class="btn btn-ghost" onclick="reloadGist()" id="btn_reload">🔄 โหลดใหม่</button>
+    <button class="btn btn-ghost" onclick="reloadFirebase()" id="btn_reload">🔄 โหลดใหม่</button>
     <button class="btn btn-pdf no-print" onclick="printReport()">⬇ ดาวน์โหลด PDF</button>
   </div>
 </header>
@@ -282,30 +268,22 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
   </div>
   <div id="report_body" style="display:none;"></div>
 
-  <!-- ── GIST SETUP (fallback) ── -->
+  <!-- ── FIREBASE ERROR (fallback) ── -->
   <div id="setup_card" style="display:none;">
-    <div class="setup-card">
-      <div style="font-size:32px; margin-bottom:14px;">☁️</div>
-      <h2>เชื่อมต่อ GitHub Gist</h2>
-      <p>กรอก Token และ Gist ID เดียวกับที่ใช้ในหน้าหลัก<br>ระบบจะจำไว้ในเบราว์เซอร์นี้</p>
-      <input class="setup-input" id="setup_token" type="password" placeholder="GitHub Personal Access Token (ghp_...)">
-      <input class="setup-input" id="setup_id" type="text" placeholder="Gist ID (เช่น ad99451d096bdbd24a...)">
-      <div style="margin-top:4px; font-size:11px; color:var(--text-muted); margin-bottom:16px;">
-        Token ต้องมีสิทธิ์ <strong style="color:var(--accent)">gist</strong>
-        — <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" style="color:var(--blue);">สร้าง Token ที่นี่</a>
-      </div>
-      <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="connectGist()">เชื่อมต่อและโหลดข้อมูล</button>
-      <div id="setup_error" style="margin-top:12px; font-size:12px; color:var(--red); display:none;"></div>
+    <div style="background:var(--surface);border:1px solid var(--red);border-radius:12px;padding:28px;max-width:460px;margin:60px auto;text-align:center;">
+      <div style="font-size:32px;margin-bottom:14px;">🔥</div>
+      <h2 style="font-size:18px;margin-bottom:10px;">ไม่สามารถเชื่อมต่อ Firebase</h2>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.6;" id="setup_error"></p>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="reloadFirebase()">🔄 ลองใหม่</button>
     </div>
   </div>
 </main>
 
 <script>
 // ── Constants ──────────────────────────────────────────────
-const GIST_FILENAME = 'gas-station-data.json';
 const MONTHS_TH = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
-let sheetData = {};
+var sheetData = {};
 
 // ── Helpers ────────────────────────────────────────────────
 function fmt(n, dec = 2) {
@@ -634,99 +612,63 @@ function render() {
     `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${keys.length} วัน`;
 }
 
-// ── Load from Gist ────────────────────────────────────────
-async function loadFromGist(token, gistId) {
-  const res = await fetch('https://api.github.com/gists/' + gistId, {
-    headers: {
-      'Authorization': 'token ' + token,
-      'Accept': 'application/vnd.github.v3+json'
-    }
+<script type="module">
+// ── Firebase ───────────────────────────────────────────────
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAZOWoDHEiGIxkYIRgRkNWXjNWGLE4wgFQ",
+  authDomain: "gas-station-dd6e9.firebaseapp.com",
+  projectId: "gas-station-dd6e9",
+  storageBucket: "gas-station-dd6e9.firebasestorage.app",
+  messagingSenderId: "94552958790",
+  appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
+};
+
+let _db = null;
+let _unsub = null;
+
+async function initFirebase() {
+  const app = initializeApp(FIREBASE_CONFIG);
+  _db = getFirestore(app);
+}
+
+async function loadFromFirebase() {
+  if (!_db) await initFirebase();
+  const docRef = doc(_db, 'gas_station', 'daily_records');
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) return {};
+  return snap.data().records || {};
+}
+
+function startRealtimeSync() {
+  if (!_db) return;
+  if (_unsub) _unsub();
+  const docRef = doc(_db, 'gas_station', 'daily_records');
+  _unsub = onSnapshot(docRef, (snap) => {
+    if (!snap.exists()) return;
+    const loaded = snap.data().records || {};
+    window.sheetData = loaded;
+    if (typeof populateMonthFilter === 'function') populateMonthFilter();
+    if (typeof render === 'function') render();
+    document.getElementById('status_bar').textContent =
+      `🟢 Real-time · ${Object.keys(loaded).length} วัน`;
   });
-  if (res.status === 401) throw new Error('Token ไม่ถูกต้องหรือหมดอายุ (401)');
-  if (res.status === 403) throw new Error('Token ไม่มีสิทธิ์ gist (403)');
-  if (res.status === 404) throw new Error('ไม่พบ Gist ID นี้ (404)');
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-
-  const data = await res.json();
-  const fileEntry = data.files[GIST_FILENAME];
-  if (!fileEntry) throw new Error('ไม่พบไฟล์ "' + GIST_FILENAME + '" ใน Gist');
-
-  let content = fileEntry.content;
-  if (fileEntry.truncated) {
-    const r2 = await fetch(fileEntry.raw_url);
-    content = await r2.text();
-  }
-  return JSON.parse(content);
 }
 
-async function initLoad() {
-  const token = localStorage.getItem('gist_token');
-  const id    = localStorage.getItem('gist_id');
-
-  if (!token || !id) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('setup_card').style.display = 'block';
-    return;
-  }
-
-  try {
-    const loaded = await loadFromGist(token, id);
-    sheetData = loaded;
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('filter_bar').style.display = 'flex';
-    document.getElementById('report_body').style.display = 'block';
-    populateMonthFilter();
-    render();
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('setup_card').style.display = 'block';
-    document.getElementById('setup_error').style.display = 'block';
-    document.getElementById('setup_error').textContent = '❌ ' + e.message;
-  }
-}
-
-async function connectGist() {
-  const token = document.getElementById('setup_token').value.trim();
-  const id    = document.getElementById('setup_id').value.trim();
-  const errEl = document.getElementById('setup_error');
-
-  if (!token || !id) {
-    errEl.style.display = 'block';
-    errEl.textContent = '❌ กรุณากรอก Token และ Gist ID ให้ครบ';
-    return;
-  }
-
-  errEl.style.display = 'none';
-  document.querySelector('.setup-card button').textContent = '⏳ กำลังโหลด...';
-
-  try {
-    const loaded = await loadFromGist(token, id);
-    localStorage.setItem('gist_token', token);
-    localStorage.setItem('gist_id', id);
-    sheetData = loaded;
-    document.getElementById('setup_card').style.display = 'none';
-    document.getElementById('filter_bar').style.display = 'flex';
-    document.getElementById('report_body').style.display = 'block';
-    populateMonthFilter();
-    render();
-  } catch(e) {
-    errEl.style.display = 'block';
-    errEl.textContent = '❌ ' + e.message;
-    document.querySelector('.setup-card button').textContent = 'เชื่อมต่อและโหลดข้อมูล';
-  }
-}
-
-async function reloadGist() {
-  const token = localStorage.getItem('gist_token');
-  const id    = localStorage.getItem('gist_id');
-  const btn   = document.getElementById('btn_reload');
-  if (!token || !id) { initLoad(); return; }
+window.reloadFirebase = async function() {
+  const btn = document.getElementById('btn_reload');
   btn.textContent = '⏳...';
   btn.disabled = true;
   try {
-    sheetData = await loadFromGist(token, id);
-    populateMonthFilter();
-    render();
+    window.sheetData = await loadFromFirebase();
+    if (typeof populateMonthFilter === 'function') populateMonthFilter();
+    if (typeof render === 'function') render();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('filter_bar').style.display = 'flex';
+    document.getElementById('report_body').style.display = 'block';
+    document.getElementById('setup_card').style.display = 'none';
     btn.textContent = '✅ โหลดแล้ว';
     setTimeout(() => { btn.textContent = '🔄 โหลดใหม่'; btn.disabled = false; }, 1500);
   } catch(e) {
@@ -734,16 +676,34 @@ async function reloadGist() {
     btn.disabled = false;
     setTimeout(() => { btn.textContent = '🔄 โหลดใหม่'; }, 2000);
   }
+};
+
+async function initLoad() {
+  try {
+    await initFirebase();
+    window.sheetData = await loadFromFirebase();
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('filter_bar').style.display = 'flex';
+    document.getElementById('report_body').style.display = 'block';
+    if (typeof populateMonthFilter === 'function') populateMonthFilter();
+    if (typeof render === 'function') render();
+    startRealtimeSync();
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup_card').style.display = 'block';
+    document.getElementById('setup_error').textContent = '❌ ' + e.message;
+  }
 }
 
+initLoad();
+</script>
+
+<script>
 function printReport() {
   document.getElementById('print_subtitle').textContent =
     `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${getFilteredKeys().length} วัน`;
   window.print();
 }
-
-// ── Start ─────────────────────────────────────────────────
-initLoad();
 </script>
 </body>
 </html>
