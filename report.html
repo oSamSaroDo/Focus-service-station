@@ -413,7 +413,12 @@ function clearFilters() {
 // ── Populate month filter ─────────────────────────────────
 function populateMonthFilter() {
   const sel = document.getElementById('filter_month');
-  const groups = [...new Set(Object.keys(sheetData).map(monthGroupKey))];
+  const groups = [...new Set(Object.keys(sheetData).map(monthGroupKey))].sort((a, b) => {
+    const [am, ay] = a.split('-').map(Number);
+    const [bm, by] = b.split('-').map(Number);
+    if (ay !== by) return ay - by;
+    return am - bm;
+  });
   sel.innerHTML = '<option value="">ทุกเดือน</option>';
   groups.forEach(g => {
     const opt = document.createElement('option');
@@ -437,6 +442,14 @@ function render() {
   }
   empty.style.display = 'none';
   body.style.display  = 'block';
+
+  // เรียงวันจากน้อยไปมาก
+  keys.sort((a, b) => {
+    const pa = parseKey(a), pb = parseKey(b);
+    if (pa.year2 !== pb.year2) return pa.year2 - pb.year2;
+    if (pa.month !== pb.month) return pa.month - pb.month;
+    return pa.day - pb.day;
+  });
 
   // Compute totals across filtered days
   let totG95sale=0, totG91sale=0, totD3sale=0, totD4sale=0;
@@ -494,12 +507,11 @@ function render() {
   // ── Per-fuel summary bar ──
   html += `
   <div class="section-label">สรุปแยกตาม ประเภทน้ำมัน</div>
-  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:28px;">
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px;">
     ${[
       {label:'ตู้ 1 · G95', sale:totG95sale, liter:totG95l, color:'#f85149'},
       {label:'ตู้ 2 · G91', sale:totG91sale, liter:totG91l, color:'#3fb950'},
-      {label:'ตู้ 3 · Diesel', sale:totD3sale, liter:totD3l, color:'#58a6ff'},
-      {label:'ตู้ 4 · Diesel', sale:totD4sale, liter:totD4l, color:'#58a6ff'},
+      {label:'ตู้ 3+4 · Diesel', sale:totD3sale+totD4sale, liter:totD3l+totD4l, color:'#58a6ff'},
     ].map(f => `
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
         <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${f.color};margin-bottom:8px;">${f.label}</div>
@@ -516,9 +528,17 @@ function render() {
     groupMap[g].push(k);
   });
 
+  // เรียง month group จากน้อยไปมาก
+  const sortedGroupEntries = Object.entries(groupMap).sort(([a], [b]) => {
+    const [am, ay] = a.split('-').map(Number);
+    const [bm, by] = b.split('-').map(Number);
+    if (ay !== by) return ay - by;
+    return am - bm;
+  });
+
   html += `<div class="section-label">รายละเอียดรายวัน</div>`;
 
-  Object.entries(groupMap).forEach(([gk, dayKeys]) => {
+  sortedGroupEntries.forEach(([gk, dayKeys]) => {
     let mG95=0,mG91=0,mD3=0,mD4=0,mFull=0,mSend=0,mDiff=0;
 
     const rows = dayKeys.map(k => {
@@ -533,9 +553,8 @@ function render() {
         <td style="color:var(--text-muted)">${fmt(c.g95_l,2)}</td>
         <td>${fmt(c.g91_sale)}</td>
         <td style="color:var(--text-muted)">${fmt(c.g91_l,2)}</td>
-        <td>${fmt(c.d3_sale)}</td>
-        <td style="color:var(--text-muted)">${fmt(c.d3_l,2)}</td>
-        <td>${fmt(c.d4_sale)}</td>
+        <td>${fmt(c.d3_sale + c.d4_sale)}</td>
+        <td style="color:var(--text-muted)">${fmt(c.d3_l + c.d4_l,2)}</td>
         <td>${fmt(c.totalFuelFull)}</td>
         <td>${fmt(c.totalLiter,2)}</td>
         <td>${fmt(c.mustSend)}</td>
@@ -556,8 +575,7 @@ function render() {
               <th>วันที่</th>
               <th>G95 (฿)</th><th>ลิตร</th>
               <th>G91 (฿)</th><th>ลิตร</th>
-              <th>D ตู้3 (฿)</th><th>ลิตร</th>
-              <th>D ตู้4 (฿)</th>
+              <th>D ตู้3+4 (฿)</th><th>ลิตร</th>
               <th>รวมน้ำมัน (฿)</th><th>รวมลิตร</th>
               <th>ยอดส่ง (฿)</th>
               <th>ผลต่าง</th>
@@ -569,8 +587,7 @@ function render() {
               <td>รวม ${monthLabel(gk)}</td>
               <td>${fmt(mG95)}</td><td></td>
               <td>${fmt(mG91)}</td><td></td>
-              <td>${fmt(mD3)}</td><td></td>
-              <td>${fmt(mD4)}</td>
+              <td>${fmt(mD3+mD4)}</td><td></td>
               <td>${fmt(mFull)}</td><td></td>
               <td>${fmt(mSend)}</td>
               <td class="${mDiffClass}">${mDiffTxt}</td>
