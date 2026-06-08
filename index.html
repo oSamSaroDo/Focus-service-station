@@ -363,107 +363,120 @@
 </style>
 <script type="module">
 // ===== FIREBASE REAL-TIME SYNC =====
-import { initializeApp }          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { initializeApp }                          from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, doc, setDoc, onSnapshot, getDoc }
-                                   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+                                                   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-window._fbReady = false;
-window._db      = null;
-window._unsub   = null;
-
-// ===== Firebase Config (hardcoded) =====
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAZOWoDHEiGIxkYIRgRkNWXjNWGLE4wgFQ",
   authDomain: "gas-station-dd6e9.firebaseapp.com",
   projectId: "gas-station-dd6e9",
   storageBucket: "gas-station-dd6e9.firebasestorage.app",
   messagingSenderId: "94552958790",
-  appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747",
-  measurementId: "G-YB0SR5ETT1"
+  appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
 };
 
-window.fbInit = function(cfg) {
-  try {
-    const parsed = (typeof cfg === 'string') ? JSON.parse(cfg) : cfg;
-    const app = initializeApp(parsed, 'gas-'+Date.now());
-    window._db = getFirestore(app);
-    window._fbReady = true;
-    fbStatus('✅ เชื่อมต่อสำเร็จ! กำลังโหลดข้อมูล...', '#3fb950');
-    fbStartSync();
-  } catch(e) {
-    fbStatus('❌ Config ผิด: ' + e.message, '#f85149');
+const app   = initializeApp(FIREBASE_CONFIG);
+const db    = getFirestore(app);
+let _unsub  = null;
+
+window._fbReady  = false;
+window._db       = db;
+
+// expose ให้ autoSaveToFirebase (regular script) ใช้ได้
+window._fbDoc    = doc;
+window._fbSetDoc = setDoc;
+
+function fbStatus(msg, color) {
+  const el = document.getElementById('fb_status');
+  if (el) { el.style.display = 'block'; el.style.color = color; el.innerHTML = msg; }
+}
+
+function setFbDot(on) {
+  const d1 = document.getElementById('fb_live_dot');
+  const d2 = document.getElementById('fb_live_dot_header');
+  if (d1) d1.style.display = on ? 'inline'       : 'none';
+  if (d2) d2.style.display = on ? 'inline-block'  : 'none';
+}
+
+function setFbHeaderBtn(active) {
+  const btn = document.getElementById('fb_header_btn');
+  if (!btn) return;
+  if (active) {
+    btn.style.borderColor = '#f0a500';
+    btn.style.color       = '#f0a500';
+    btn.textContent       = '🔥 Firebase';
+    btn.appendChild(Object.assign(document.createElement('span'), {
+      id: 'fb_live_dot_header',
+      style: 'display:none; width:7px; height:7px; background:#3fb950; border-radius:50%; flex-shrink:0; margin-left:4px;'
+    }));
+  } else {
+    btn.style.borderColor = '#8b949e';
+    btn.style.color       = '#8b949e';
+    btn.textContent       = '⛔ Firebase (หยุด)';
   }
-};
+}
 
-window.fbStartSync = async function() {
-  if (!window._db) return;
-  const docRef = doc(window._db, 'gas_station', 'daily_records');
+async function startSync() {
+  const docRef = doc(db, 'gas_station', 'daily_records');
 
   // โหลดครั้งแรก
-  const snap = await getDoc(docRef);
-  if (snap.exists()) {
-    const loaded = snap.data().records || {};
-    Object.keys(sheetData).forEach(k => delete sheetData[k]);
-    Object.assign(sheetData, loaded);
-    if (typeof renderAllGroups === 'function') renderAllGroups();
-    const keys = Object.keys(loaded);
-    if (keys.length > 0 && typeof loadDate === 'function') loadDate(keys[keys.length-1]);
-    fbStatus('✅ โหลดแล้ว ' + keys.length + ' วัน — Real-time เปิดอยู่ 🟢', '#3fb950');
-  } else {
-    fbStatus('🆕 Firestore ว่าง — จะสร้างใหม่ตอนบันทึก', '#f0a500');
+  try {
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const loaded = snap.data().records || {};
+      Object.keys(sheetData).forEach(k => delete sheetData[k]);
+      Object.assign(sheetData, loaded);
+      if (typeof renderAllGroups === 'function') renderAllGroups();
+      const keys = Object.keys(loaded);
+      if (keys.length > 0 && typeof loadDate === 'function') loadDate(keys[keys.length - 1]);
+      fbStatus('✅ โหลดแล้ว ' + keys.length + ' วัน — Real-time เปิดอยู่ 🟢', '#3fb950');
+    } else {
+      fbStatus('🆕 Firestore ว่าง — จะสร้างใหม่ตอนบันทึก', '#f0a500');
+    }
+  } catch(e) {
+    fbStatus('❌ โหลดไม่ได้: ' + e.message, '#f85149');
+    return;
   }
 
+  window._fbReady = true;
+  setFbDot(true);
+
   // Real-time listener
-  if (window._unsub) window._unsub();
-  window._unsub = onSnapshot(docRef, (snap) => {
+  if (_unsub) _unsub();
+  _unsub = onSnapshot(docRef, (snap) => {
     if (!snap.exists()) return;
     const loaded = snap.data().records || {};
     Object.keys(sheetData).forEach(k => delete sheetData[k]);
     Object.assign(sheetData, loaded);
     if (typeof renderAllGroups === 'function') renderAllGroups();
-    document.getElementById('fb_live_dot').style.display = 'inline';
+    setFbDot(true);
   });
-};
+}
 
 window.fbSave = async function() {
-  if (!window._db) { fbStatus('❌ ยังไม่ได้เชื่อมต่อ Firebase', '#f85149'); return; }
+  if (!window._fbReady) { fbStatus('❌ Firebase ยังไม่พร้อม', '#f85149'); return; }
   if (typeof saveDate === 'function') saveDate(true);
   fbStatus('⏳ กำลังบันทึก...', '#58a6ff');
   try {
-    const docRef = doc(window._db, 'gas_station', 'daily_records');
-    await setDoc(docRef, { records: sheetData, updated: new Date().toISOString() });
+    await setDoc(doc(db, 'gas_station', 'daily_records'),
+      { records: sheetData, updated: new Date().toISOString() });
     fbStatus('✅ บันทึกขึ้น Firestore แล้ว ' + new Date().toLocaleString('th-TH'), '#3fb950');
   } catch(e) {
     fbStatus('❌ ' + e.message, '#f85149');
   }
 };
 
-function fbStatus(msg, color) {
-  const el = document.getElementById('fb_status');
-  if (el) { el.style.display='block'; el.style.color=color; el.innerHTML=msg; }
-}
+window.fbStartSync = async function() {
+  await startSync();
+};
 
 window.fbStop = function() {
-  if (window._unsub) {
-    window._unsub();
-    window._unsub = null;
-  }
+  if (_unsub) { _unsub(); _unsub = null; }
   window._fbReady = false;
-  window._db      = null;
-
-  const dot = document.getElementById('fb_live_dot');
-  if (dot) dot.style.display = 'none';
-
-  // header button → สีเทา แสดงว่าหยุดแล้ว
-  const fbBtn = document.getElementById('fb_header_btn');
-  if (fbBtn) {
-    fbBtn.style.borderColor = '#8b949e';
-    fbBtn.style.color = '#8b949e';
-    fbBtn.textContent = '⛔ Firebase (หยุด)';
-  }
-
+  setFbDot(false);
+  setFbHeaderBtn(false);
   fbStatus('⛔ หยุด Firebase แล้ว — ข้อมูลจะไม่ sync จนกว่าจะกด เริ่มใหม่', '#f85149');
-
   const stopBtn  = document.getElementById('fb_stop_btn');
   const startBtn = document.getElementById('fb_start_btn');
   if (stopBtn)  stopBtn.style.display  = 'none';
@@ -471,33 +484,17 @@ window.fbStop = function() {
 };
 
 window.fbRestart = function() {
-  // คืนสี header button
-  const fbBtn = document.getElementById('fb_header_btn');
-  if (fbBtn) {
-    fbBtn.style.borderColor = '#f0a500';
-    fbBtn.style.color = '#f0a500';
-    fbBtn.textContent = '🔥 Firebase';
-  }
-
+  setFbHeaderBtn(true);
   fbStatus('⏳ กำลังเชื่อมต่อใหม่...', '#58a6ff');
-  window.fbInit(FIREBASE_CONFIG);
-
   const stopBtn  = document.getElementById('fb_stop_btn');
   const startBtn = document.getElementById('fb_start_btn');
   if (stopBtn)  stopBtn.style.display  = 'flex';
   if (startBtn) startBtn.style.display = 'none';
+  startSync();
 };
 
-// Expose doc/setDoc ออกมาให้ autoSaveToFirebase ใช้ได้จาก regular script
-window._fbDoc    = doc;
-window._fbSetDoc = setDoc;
-
-// ===== Auto-connect Firebase on load =====
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    window.fbInit(FIREBASE_CONFIG);
-  }, 500);
-});
+// Auto-connect
+window.addEventListener('load', startSync);
 </script>
 </head>
 <body>
