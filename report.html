@@ -612,6 +612,13 @@ function render() {
     `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${keys.length} วัน`;
 }
 
+function printReport() {
+  document.getElementById('print_subtitle').textContent =
+    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${getFilteredKeys().length} วัน`;
+  window.print();
+}
+</script>
+
 <script type="module">
 // ── Firebase ───────────────────────────────────────────────
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -626,34 +633,33 @@ const FIREBASE_CONFIG = {
   appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
 };
 
-let _db = null;
+const app = initializeApp(FIREBASE_CONFIG);
+const db  = getFirestore(app);
 let _unsub = null;
 
-async function initFirebase() {
-  const app = initializeApp(FIREBASE_CONFIG);
-  _db = getFirestore(app);
+function mergeData(loaded) {
+  // mutate object เดิม ไม่ reassign ให้ regular script เห็นข้อมูลใหม่เสมอ
+  Object.keys(sheetData).forEach(k => delete sheetData[k]);
+  Object.assign(sheetData, loaded);
 }
 
 async function loadFromFirebase() {
-  if (!_db) await initFirebase();
-  const docRef = doc(_db, 'gas_station', 'daily_records');
+  const docRef = doc(db, 'gas_station', 'daily_records');
   const snap = await getDoc(docRef);
   if (!snap.exists()) return {};
   return snap.data().records || {};
 }
 
 function startRealtimeSync() {
-  if (!_db) return;
   if (_unsub) _unsub();
-  const docRef = doc(_db, 'gas_station', 'daily_records');
+  const docRef = doc(db, 'gas_station', 'daily_records');
   _unsub = onSnapshot(docRef, (snap) => {
     if (!snap.exists()) return;
-    const loaded = snap.data().records || {};
-    window.sheetData = loaded;
+    mergeData(snap.data().records || {});
     if (typeof populateMonthFilter === 'function') populateMonthFilter();
     if (typeof render === 'function') render();
     document.getElementById('status_bar').textContent =
-      `🟢 Real-time · ${Object.keys(loaded).length} วัน`;
+      `🟢 Real-time · ${Object.keys(sheetData).length} วัน`;
   });
 }
 
@@ -662,10 +668,10 @@ window.reloadFirebase = async function() {
   btn.textContent = '⏳...';
   btn.disabled = true;
   try {
-    window.sheetData = await loadFromFirebase();
+    mergeData(await loadFromFirebase());
     if (typeof populateMonthFilter === 'function') populateMonthFilter();
     if (typeof render === 'function') render();
-    document.getElementById('loading').style.display = 'none';
+    document.getElementById('loading').style.display   = 'none';
     document.getElementById('filter_bar').style.display = 'flex';
     document.getElementById('report_body').style.display = 'block';
     document.getElementById('setup_card').style.display = 'none';
@@ -680,9 +686,8 @@ window.reloadFirebase = async function() {
 
 async function initLoad() {
   try {
-    await initFirebase();
-    window.sheetData = await loadFromFirebase();
-    document.getElementById('loading').style.display = 'none';
+    mergeData(await loadFromFirebase());
+    document.getElementById('loading').style.display   = 'none';
     document.getElementById('filter_bar').style.display = 'flex';
     document.getElementById('report_body').style.display = 'block';
     if (typeof populateMonthFilter === 'function') populateMonthFilter();
@@ -696,14 +701,6 @@ async function initLoad() {
 }
 
 initLoad();
-</script>
-
-<script>
-function printReport() {
-  document.getElementById('print_subtitle').textContent =
-    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${getFilteredKeys().length} วัน`;
-  window.print();
-}
 </script>
 </body>
 </html>
