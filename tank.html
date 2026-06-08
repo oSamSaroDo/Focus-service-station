@@ -397,7 +397,11 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
       <div class="refill-row1" style="display:grid; grid-template-columns:auto 1fr 1fr 1fr auto; gap:10px; align-items:flex-end; margin-bottom:10px;">
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">วันที่เติม</div>
-          <input type="date" id="refill_date" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:13px; padding:7px 10px;">
+          <div style="display:flex; gap:4px;">
+            <select id="refill_day" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'Sarabun',sans-serif; font-size:13px; padding:7px 5px; width:58px;"></select>
+            <select id="refill_month" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'Sarabun',sans-serif; font-size:13px; padding:7px 5px; flex:1;"></select>
+            <select id="refill_year" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'Sarabun',sans-serif; font-size:13px; padding:7px 5px; width:76px;"></select>
+          </div>
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label" style="color:var(--g95);">G95 (ลิตร)</div>
@@ -457,6 +461,10 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
             <th>เติมเข้า G95</th>
             <th>เติมเข้า G91</th>
             <th>เติมเข้า Diesel</th>
+            <th style="color:var(--g95);">เติม Log G95</th>
+            <th style="color:var(--g91);">เติม Log G91</th>
+            <th style="color:var(--diesel);">เติม Log Diesel</th>
+            <th>รวมเติม Log</th>
           </tr>
         </thead>
         <tbody id="daily_tbody"></tbody>
@@ -588,8 +596,17 @@ function saveRefillLog() {
 // ============================================================
 // REFILL CRUD — each row: { date, g95, g91, d, note, id }
 // ============================================================
+function getRefillDateISO() {
+  const d = parseInt(document.getElementById('refill_day').value);
+  const m = parseInt(document.getElementById('refill_month').value);
+  const yBE = parseInt(document.getElementById('refill_year').value);
+  if (!d || !m || !yBE) return '';
+  const yCE = yBE - 543;
+  return `${yCE}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
 function addRefill() {
-  const dateVal = document.getElementById('refill_date').value;
+  const dateVal = getRefillDateISO();
   const g95Val  = parseFloat(document.getElementById('refill_g95').value) || 0;
   const g91Val  = parseFloat(document.getElementById('refill_g91').value) || 0;
   const dVal    = parseFloat(document.getElementById('refill_d').value)   || 0;
@@ -787,7 +804,7 @@ function calcAll() {
   const dtfoot = document.getElementById('daily_tfoot');
 
   if (keys.length === 0) {
-    dtbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">ยังไม่มีข้อมูลวันทำการ</td></tr>`;
+    dtbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:var(--text-muted); padding:24px;">ยังไม่มีข้อมูลวันทำการ</td></tr>`;
     dtfoot.innerHTML = '';
   } else {
     // Group keys by month-year
@@ -808,6 +825,17 @@ function calcAll() {
     });
 
     let sg95=0, sg91=0, sd=0, stot=0, sin_g95=0, sin_g91=0, sin_d=0;
+    let srf_g95=0, srf_g91=0, srf_d=0;
+
+    // Build refill-log totals per month (key: "YYYY-MM")
+    const rfByMonth = {};
+    refillLog.forEach(r => {
+      const mKey = r.date.substring(0, 7); // "YYYY-MM"
+      if (!rfByMonth[mKey]) rfByMonth[mKey] = {g95:0, g91:0, d:0};
+      rfByMonth[mKey].g95 += r.g95 || 0;
+      rfByMonth[mKey].g91 += r.g91 || 0;
+      rfByMonth[mKey].d   += r.d   || 0;
+    });
 
     dtbody.innerHTML = [...sortedMonths].reverse().map(mKey => {
       const [m, y] = mKey.split('-').map(Number);
@@ -818,8 +846,15 @@ function calcAll() {
         mg95+=c.g95_l; mg91+=c.g91_l; md+=c.d_l;
         min_g95+=c.in_g95; min_g91+=c.in_g91; min_d+=c.in_d;
       });
+      // Refill log for this month (ISO month key "YYYY-MM")
+      const yCE = 2500 + y - 543;
+      const isoMKey = `${yCE}-${String(m).padStart(2,'0')}`;
+      const rf = rfByMonth[isoMKey] || {g95:0, g91:0, d:0};
+      const rfTot = rf.g95 + rf.g91 + rf.d;
+
       sg95+=mg95; sg91+=mg91; sd+=md; stot+=mg95+mg91+md;
       sin_g95+=min_g95; sin_g91+=min_g91; sin_d+=min_d;
+      srf_g95+=rf.g95; srf_g91+=rf.g91; srf_d+=rf.d;
       return `<tr>
         <td>${label}</td>
         <td style="color:var(--g95);">${fmt(mg95,2)}</td>
@@ -829,6 +864,10 @@ function calcAll() {
         <td style="color:var(--g95);">${min_g95>0?fmt(min_g95,2):'—'}</td>
         <td style="color:var(--g91);">${min_g91>0?fmt(min_g91,2):'—'}</td>
         <td style="color:var(--diesel);">${min_d>0?fmt(min_d,2):'—'}</td>
+        <td style="color:var(--g95);">${rf.g95>0?fmt(rf.g95,2):'—'}</td>
+        <td style="color:var(--g91);">${rf.g91>0?fmt(rf.g91,2):'—'}</td>
+        <td style="color:var(--diesel);">${rf.d>0?fmt(rf.d,2):'—'}</td>
+        <td class="hi">${rfTot>0?fmt(rfTot,2):'—'}</td>
       </tr>`;
     }).join('');
 
@@ -841,6 +880,10 @@ function calcAll() {
       <td>${sin_g95>0?fmt(sin_g95,2):'—'}</td>
       <td>${sin_g91>0?fmt(sin_g91,2):'—'}</td>
       <td>${sin_d>0?fmt(sin_d,2):'—'}</td>
+      <td style="color:var(--g95);">${srf_g95>0?fmt(srf_g95,2):'—'}</td>
+      <td style="color:var(--g91);">${srf_g91>0?fmt(srf_g91,2):'—'}</td>
+      <td style="color:var(--diesel);">${srf_d>0?fmt(srf_d,2):'—'}</td>
+      <td>${(srf_g95+srf_g91+srf_d)>0?fmt(srf_g95+srf_g91+srf_d,2):'—'}</td>
     </tr>`;
   }
 
@@ -853,8 +896,42 @@ function calcAll() {
 // ============================================================
 function initDate() {
   const today = new Date();
-  const iso = today.toISOString().split('T')[0];
-  document.getElementById('refill_date').value = iso;
+  const day   = today.getDate();
+  const month = today.getMonth() + 1;
+  const yearBE = today.getFullYear() + 543;
+
+  // Populate day options
+  const dayEl = document.getElementById('refill_day');
+  dayEl.innerHTML = '';
+  for (let d = 1; d <= 31; d++) {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = String(d).padStart(2,'0');
+    if (d === day) opt.selected = true;
+    dayEl.appendChild(opt);
+  }
+
+  // Populate month options (Thai)
+  const monthEl = document.getElementById('refill_month');
+  monthEl.innerHTML = '';
+  for (let m = 1; m <= 12; m++) {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = MONTHS_TH[m];
+    if (m === month) opt.selected = true;
+    monthEl.appendChild(opt);
+  }
+
+  // Populate year options (พ.ศ. ±5 years)
+  const yearEl = document.getElementById('refill_year');
+  yearEl.innerHTML = '';
+  for (let y = yearBE - 3; y <= yearBE + 1; y++) {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    if (y === yearBE) opt.selected = true;
+    yearEl.appendChild(opt);
+  }
 }
 
 // ============================================================
