@@ -391,11 +391,19 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
     <div class="section-label">🚛 บันทึกน้ำมันเติมเข้าแทงค์ (รายวัน)</div>
     <div class="card" style="margin-bottom:20px;">
       <div class="card-title">➕ เพิ่มรายการเติมน้ำมันเข้าแทงค์</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+      <!-- Row 1: วันที่ + หมายเหตุ -->
+      <div style="display:grid; grid-template-columns:1fr 2fr; gap:10px; margin-bottom:10px;">
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">วันที่เติม</div>
           <input type="date" id="refill_date" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:13px; padding:7px 10px;">
         </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">หมายเหตุ (ถ้ามี)</div>
+          <input type="text" id="refill_note" placeholder="เช่น บริษัท ABC จัดส่ง">
+        </div>
+      </div>
+      <!-- Row 2: ปริมาณน้ำมัน + ปุ่มเพิ่ม -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:flex-end;">
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">G95 (ลิตร)</div>
           <input type="number" id="refill_g95" step="0.01" placeholder="0.00">
@@ -409,12 +417,6 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
           <input type="number" id="refill_d" step="0.01" placeholder="0.00">
         </div>
         <button class="btn btn-primary" style="white-space:nowrap; height:36px;" onclick="addRefill()">+ เพิ่ม</button>
-      </div>
-      <div style="margin-top:10px;">
-        <div class="field-group" style="margin-bottom:0;">
-          <div class="field-label">หมายเหตุ (ถ้ามี)</div>
-          <input type="text" id="refill_note" placeholder="เช่น บริษัท ABC จัดส่ง">
-        </div>
       </div>
     </div>
 
