@@ -458,7 +458,16 @@ window.fbStartSync = async function() {
     Object.assign(sheetData, loaded);
     if (typeof renderAllGroups === 'function') renderAllGroups();
     const keys = Object.keys(loaded);
-    if (keys.length > 0 && typeof loadDate === 'function') loadDate(keys[keys.length-1]);
+    if (keys.length > 0 && typeof loadDate === 'function') {
+      // เรียงแล้วโหลดวันล่าสุด
+      keys.sort((a, b) => {
+        const pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+        if (pa[2] !== pb[2]) return pa[2] - pb[2];
+        if (pa[1] !== pb[1]) return pa[1] - pb[1];
+        return pa[0] - pb[0];
+      });
+      loadDate(keys[keys.length - 1]);
+    }
     fbStatus('✅ โหลดแล้ว ' + keys.length + ' วัน — Real-time เปิดอยู่ 🟢', '#3fb950');
   } else {
     fbStatus('🆕 Firestore ว่าง — จะสร้างใหม่ตอนบันทึก', '#f0a500');
@@ -468,10 +477,24 @@ window.fbStartSync = async function() {
   if (window._unsub) window._unsub();
   window._unsub = onSnapshot(docRef, (snap) => {
     if (!snap.exists()) return;
+    // จำ active tab ปัจจุบันไว้ก่อน
+    const activeTab = document.querySelector('.date-tab.active');
+    const activeKey = activeTab ? activeTab.dataset.date : null;
+
     const loaded = snap.data().records || {};
     Object.keys(sheetData).forEach(k => delete sheetData[k]);
     Object.assign(sheetData, loaded);
     if (typeof renderAllGroups === 'function') renderAllGroups();
+
+    // restore active tab และ reload ข้อมูลในฟอร์มโดยไม่ขยับ tab
+    if (activeKey && sheetData[activeKey]) {
+      const restoredTab = document.querySelector(`.date-tab[data-date="${activeKey}"]`);
+      if (restoredTab) {
+        restoredTab.classList.add('active');
+        if (typeof loadDate === 'function') loadDate(activeKey);
+      }
+    }
+
     document.getElementById('fb_live_dot').style.display = 'inline';
   });
 };
@@ -708,8 +731,7 @@ window.addEventListener('load', () => {
     <div class="discount-section">
       <label>เงินทอน (฿)</label>
       <input type="number" id="g_change" value="3700" step="1" oninput="calc()">
-      <label>ส่วนลด/ลิตร (฿)</label>
-      <input type="number" id="g_discount_per_liter" value="0.5" step="0.01" oninput="calc()">
+      <input type="number" id="g_discount_per_liter" value="0.5" step="0.01" style="display:none;" oninput="calc()">
     </div>
 
     <!-- FUEL SECTION -->
@@ -1515,7 +1537,17 @@ function renderAllGroups() {
     groupMap[gk].push(k);
   });
 
-  Object.entries(groupMap).forEach(([gk, keys]) => {
+  // เรียงเดือน/ปีจากน้อยไปมาก
+  const sortedGroups = Object.entries(groupMap).sort(([a], [b]) => {
+    const [am, ay] = a.split('-').map(Number);
+    const [bm, by] = b.split('-').map(Number);
+    if (ay !== by) return ay - by;
+    return am - bm;
+  });
+
+  sortedGroups.forEach(([gk, keys]) => {
+    // เรียงวันในกลุ่มจากน้อยไปมาก
+    keys.sort((a, b) => parseKey(a).day - parseKey(b).day);
     const collapsed = collapsedGroups[gk] || false;
     const div = document.createElement('div');
     div.className = 'month-group';
