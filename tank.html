@@ -440,14 +440,14 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
 
     <div class="divider"></div>
 
-    <!-- DAILY TANK CONSUMPTION FROM METER DATA -->
-    <div class="section-label">📉 การใช้น้ำมันจากมิเตอร์ (รายวัน)</div>
-    <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">ดึงข้อมูลจากบันทึกมิเตอร์ประจำวัน (index.html) อัตโนมัติ</p>
+    <!-- MONTHLY TANK CONSUMPTION FROM METER DATA -->
+    <div class="section-label">📉 การใช้น้ำมันจากมิเตอร์ (รายเดือน)</div>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">ดึงข้อมูลจากบันทึกมิเตอร์ประจำวัน (index.html) อัตโนมัติ — สรุปยอดรายเดือน</p>
     <div class="table-wrap" style="margin-bottom:28px;">
       <table>
         <thead>
           <tr>
-            <th>วันที่</th>
+            <th>เดือน</th>
             <th>G95 ใช้ (ลิตร)</th>
             <th>G91 ใช้ (ลิตร)</th>
             <th>Diesel ใช้ (ลิตร)</th>
@@ -780,7 +780,7 @@ function calcAll() {
     </tr>`;
   }
 
-  // ── Daily usage table ──
+  // ── Monthly usage table ──
   const dtbody = document.getElementById('daily_tbody');
   const dtfoot = document.getElementById('daily_tfoot');
 
@@ -788,25 +788,50 @@ function calcAll() {
     dtbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">ยังไม่มีข้อมูลวันทำการ</td></tr>`;
     dtfoot.innerHTML = '';
   } else {
+    // Group keys by month-year
+    const monthMap = {};
+    keys.forEach(k => {
+      const p = parseKey(k);
+      const mKey = `${p.month}-${p.year2}`;
+      if (!monthMap[mKey]) monthMap[mKey] = [];
+      monthMap[mKey].push(k);
+    });
+
+    // Sort months ascending
+    const sortedMonths = Object.keys(monthMap).sort((a, b) => {
+      const [am, ay] = a.split('-').map(Number);
+      const [bm, by] = b.split('-').map(Number);
+      if (ay !== by) return ay - by;
+      return am - bm;
+    });
+
     let sg95=0, sg91=0, sd=0, stot=0, sin_g95=0, sin_g91=0, sin_d=0;
-    dtbody.innerHTML = [...keys].reverse().map(k => {
-      const c = computeDay(sheetData[k]);
-      sg95+=c.g95_l; sg91+=c.g91_l; sd+=c.d_l;
-      stot+=c.g95_l+c.g91_l+c.d_l;
-      sin_g95+=c.in_g95; sin_g91+=c.in_g91; sin_d+=c.in_d;
+
+    dtbody.innerHTML = [...sortedMonths].reverse().map(mKey => {
+      const [m, y] = mKey.split('-').map(Number);
+      const label = `${MONTHS_TH[m]} 25${String(y).padStart(2,'0')}`;
+      let mg95=0, mg91=0, md=0, min_g95=0, min_g91=0, min_d=0;
+      monthMap[mKey].forEach(k => {
+        const c = computeDay(sheetData[k]);
+        mg95+=c.g95_l; mg91+=c.g91_l; md+=c.d_l;
+        min_g95+=c.in_g95; min_g91+=c.in_g91; min_d+=c.in_d;
+      });
+      sg95+=mg95; sg91+=mg91; sd+=md; stot+=mg95+mg91+md;
+      sin_g95+=min_g95; sin_g91+=min_g91; sin_d+=min_d;
       return `<tr>
-        <td>${fmtKey(k)}</td>
-        <td style="color:var(--g95);">${fmt(c.g95_l,2)}</td>
-        <td style="color:var(--g91);">${fmt(c.g91_l,2)}</td>
-        <td style="color:var(--diesel);">${fmt(c.d_l,2)}</td>
-        <td class="hi">${fmt(c.g95_l+c.g91_l+c.d_l,2)}</td>
-        <td style="color:var(--g95);">${c.in_g95>0?fmt(c.in_g95,2):'—'}</td>
-        <td style="color:var(--g91);">${c.in_g91>0?fmt(c.in_g91,2):'—'}</td>
-        <td style="color:var(--diesel);">${c.in_d>0?fmt(c.in_d,2):'—'}</td>
+        <td>${label}</td>
+        <td style="color:var(--g95);">${fmt(mg95,2)}</td>
+        <td style="color:var(--g91);">${fmt(mg91,2)}</td>
+        <td style="color:var(--diesel);">${fmt(md,2)}</td>
+        <td class="hi">${fmt(mg95+mg91+md,2)}</td>
+        <td style="color:var(--g95);">${min_g95>0?fmt(min_g95,2):'—'}</td>
+        <td style="color:var(--g91);">${min_g91>0?fmt(min_g91,2):'—'}</td>
+        <td style="color:var(--diesel);">${min_d>0?fmt(min_d,2):'—'}</td>
       </tr>`;
     }).join('');
+
     dtfoot.innerHTML = `<tr>
-      <td>รวม ${keys.length} วัน</td>
+      <td>รวม ${sortedMonths.length} เดือน (${keys.length} วัน)</td>
       <td>${fmt(sg95,2)}</td>
       <td>${fmt(sg91,2)}</td>
       <td>${fmt(sd,2)}</td>
