@@ -518,13 +518,11 @@ window.addEventListener('load', () => {
     <button id="fb_header_btn" class="btn btn-ghost" onclick="
   document.getElementById('fb_config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
   document.getElementById('fbModal').style.display='flex';
-" style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">🔥 Firebase</button>
+" style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">
+  🔥 Firebase
+  <span id="fb_live_dot_header" style="display:none; width:7px; height:7px; background:#3fb950; border-radius:50%; flex-shrink:0;"></span>
+</button>
     <button class="btn btn-ghost" onclick="window.location.href='report.html'" style="padding:6px 14px; font-size:12px; border-color:#e05c2a; color:#e05c2a; display:flex; align-items:center; gap:5px;">📊 รายงาน PDF</button>
-<button id="gist_header_btn" class="btn btn-ghost" onclick="openGistModal()" style="padding:6px 14px; font-size:12px; border-color:#8b949e; display:flex; align-items:center; gap:6px;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-      GitHub Sync
-      <span id="gist_dot" style="display:none; width:7px; height:7px; background:#3fb950; border-radius:50; flex-shrink:0;"></span>
-    </button>
   </div>
 </header>
 
@@ -589,55 +587,6 @@ window.addEventListener('load', () => {
         5. คัดลอก <b style="color:#e6edf3;">firebaseConfig</b> (เฉพาะ JSON ข้างใน { }) มาวางด้านบน
       </div>
     </details>
-  </div>
-</div>
-
-<div id="gistModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
-  <div style="background:#161b22; border:1px solid #30363d; border-radius:16px; padding:28px; width:420px; max-width:92vw; box-shadow:0 24px 64px rgba(0,0,0,0.6);">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="#f0a500"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-      <span style="font-size:17px; font-weight:700; color:#e6edf3;">GitHub Gist Sync</span>
-    </div>
-    <div style="font-size:12px; color:#8b949e; margin-bottom:20px; line-height:1.6;">
-      บันทึกและโหลดข้อมูลผ่าน GitHub Gist — เข้าถึงได้ทุกอุปกรณ์แบบ real-time
-    </div>
-
-    <!-- TOKEN -->
-    <div class="field-group" style="margin-bottom:14px;">
-      <div class="field-label" style="font-size:11px; color:#8b949e; margin-bottom:5px;">🔑 GitHub Personal Access Token</div>
-      <input type="password" id="gist_token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-        style="width:100%; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:8px 12px;">
-      <div style="font-size:10px; color:#8b949e; margin-top:4px;">Token ต้องมีสิทธิ์ <code style="color:#f0a500">gist</code> — <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank" style="color:#58a6ff;">สร้าง Token ที่นี่</a></div>
-    </div>
-
-    <!-- GIST ID -->
-    <div class="field-group" style="margin-bottom:20px;">
-      <div class="field-label" style="font-size:11px; color:#8b949e; margin-bottom:5px;">📄 Gist ID <span style="color:#8b949e; font-weight:400;">(เว้นว่างเพื่อสร้างใหม่)</span></div>
-      <input type="text" id="gist_id" placeholder="เช่น a1b2c3d4e5f6... (เว้นว่าง = สร้างใหม่)"
-        style="width:100%; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#e6edf3; font-family:'IBM Plex Mono',monospace; font-size:12px; padding:8px 12px;">
-    </div>
-
-    <!-- GIST STATUS -->
-    <div id="gist_status" style="display:none; background:#0d1117; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:12px; font-family:'IBM Plex Mono',monospace; word-break:break-all;"></div>
-
-    <!-- BUTTONS -->
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
-      <button class="btn" onclick="gistSave()" style="background:#238636; color:#fff; font-size:13px;">
-        ☁️ บันทึก → Gist
-      </button>
-      <button class="btn btn-ghost" onclick="gistLoad()" style="font-size:13px;">
-        ⬇️ โหลด ← Gist
-      </button>
-    </div>
-    <div style="display:flex; gap:10px;">
-      <button class="btn btn-ghost" onclick="gistRememberToken()" style="flex:1; font-size:12px; border-color:#3fb950; color:#3fb950;">
-        💾 จำ Token/ID ไว้
-      </button>
-      <button class="btn btn-ghost" onclick="closeGistModal()" style="flex:1; font-size:12px;">ปิด</button>
-    </div>
-    <div style="margin-top:14px; padding-top:14px; border-top:1px solid #30363d; font-size:11px; color:#8b949e; line-height:1.6;">
-      ⚠️ Token เก็บไว้ใน localStorage ของเบราว์เซอร์เท่านั้น ไม่ได้ส่งไปที่ใดนอกจาก GitHub API
-    </div>
   </div>
 </div>
 
@@ -962,76 +911,13 @@ window.addEventListener('load', () => {
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="clearAll()">🗑 ล้างข้อมูล</button>
       <button class="btn btn-ghost" onclick="downloadHTML()" style="border-color:#58a6ff; color:#58a6ff;">⬇ ดาวน์โหลด HTML</button>
-      <!-- Split Save Button -->
-      <div style="display:flex; border-radius:8px; overflow:hidden; min-width:140px;">
-        <button id="btn_save_main" class="btn btn-primary" onclick="saveDate()" style="background:var(--accent3); border-radius:0; flex:1; white-space:nowrap;">💾 บันทึกข้อมูล</button>
-        <button onclick="openSyncPicker()" style="background:#27a745; border:none; border-left:1px solid rgba(0,0,0,0.25); padding:0 10px; cursor:pointer; color:#fff; font-size:14px; border-radius:0;" title="เลือกช่องทาง sync">▾</button>
-      </div>
+      <button id="btn_save_main" class="btn btn-primary" onclick="saveDate()" style="background:var(--accent3); min-width:140px;">💾 บันทึกข้อมูล</button>
       <button class="btn btn-primary" onclick="window.print()">🖨 พิมพ์ / บันทึก PDF</button>
     </div>
 
   </div><!-- /mainContent -->
 </main>
 
-<!-- ===== SYNC PICKER MODAL ===== -->
-<div id="syncPickerModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:1001; align-items:flex-end; justify-content:center;">
-  <div style="background:#161b22; border:1px solid #30363d; border-radius:16px 16px 0 0; padding:24px; width:100%; max-width:480px; box-shadow:0 -8px 40px rgba(0,0,0,0.6); animation: slideUp 0.22s ease;">
-    <div style="width:36px; height:4px; background:#444d57; border-radius:4px; margin:0 auto 20px;"></div>
-    <div style="font-size:15px; font-weight:700; color:#e6edf3; margin-bottom:6px;">💾 บันทึกข้อมูลผ่าน...</div>
-    <div style="font-size:12px; color:#8b949e; margin-bottom:18px;">เลือกช่องทางที่ต้องการ หรือบันทึกทั้งสองพร้อมกัน</div>
-
-    <!-- Status indicators -->
-    <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
-      <span id="sp_gist_status" style="font-size:11px; padding:3px 10px; border-radius:20px; font-family:'IBM Plex Mono',monospace;"></span>
-      <span id="sp_fb_status"   style="font-size:11px; padding:3px 10px; border-radius:20px; font-family:'IBM Plex Mono',monospace;"></span>
-    </div>
-
-    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
-      <!-- Gist -->
-      <button id="sp_btn_gist" onclick="saveWithSync('gist')" style="display:flex; align-items:center; gap:14px; background:#0d1117; border:1px solid #30363d; border-radius:10px; padding:14px 16px; cursor:pointer; text-align:left; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#3fb950'" onmouseout="this.style.borderColor='#30363d'">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="#8b949e"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        <div style="flex:1;">
-          <div style="font-size:14px; font-weight:600; color:#e6edf3;">GitHub Gist</div>
-          <div style="font-size:11px; color:#8b949e; margin-top:2px;">บันทึกและโหลดข้ามอุปกรณ์ผ่าน Gist</div>
-        </div>
-        <span id="sp_gist_badge" style="font-size:11px; padding:2px 8px; border-radius:20px; font-family:'IBM Plex Mono',monospace; background:rgba(248,81,73,0.15); color:#f85149;">ไม่มี Token</span>
-      </button>
-
-      <!-- Firebase -->
-      <button id="sp_btn_fb" onclick="saveWithSync('firebase')" style="display:flex; align-items:center; gap:14px; background:#0d1117; border:1px solid #30363d; border-radius:10px; padding:14px 16px; cursor:pointer; text-align:left; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#f0a500'" onmouseout="this.style.borderColor='#30363d'">
-        <span style="font-size:22px;">🔥</span>
-        <div style="flex:1;">
-          <div style="font-size:14px; font-weight:600; color:#e6edf3;">Firebase</div>
-          <div style="font-size:11px; color:#8b949e; margin-top:2px;">Real-time sync ทุกอุปกรณ์อัตโนมัติ</div>
-        </div>
-        <span id="sp_fb_badge" style="font-size:11px; padding:2px 8px; border-radius:20px; font-family:'IBM Plex Mono',monospace; background:rgba(248,81,73,0.15); color:#f85149;">ไม่ได้เชื่อมต่อ</span>
-      </button>
-
-      <!-- Both -->
-      <button id="sp_btn_both" onclick="saveWithSync('both')" style="display:flex; align-items:center; gap:14px; background:#0d1117; border:1px solid #30363d; border-radius:10px; padding:14px 16px; cursor:pointer; text-align:left; transition:border-color 0.2s;" onmouseover="this.style.borderColor='#58a6ff'" onmouseout="this.style.borderColor='#30363d'">
-        <span style="font-size:22px;">⚡</span>
-        <div style="flex:1;">
-          <div style="font-size:14px; font-weight:600; color:#e6edf3;">บันทึกทั้งสองพร้อมกัน</div>
-          <div style="font-size:11px; color:#8b949e; margin-top:2px;">Gist + Firebase ในครั้งเดียว</div>
-        </div>
-      </button>
-
-      <!-- Local only -->
-      <button onclick="saveWithSync('local')" style="display:flex; align-items:center; gap:14px; background:#0d1117; border:1px solid #30363d; border-radius:10px; padding:12px 16px; cursor:pointer; text-align:left; transition:border-color 0.2s; opacity:0.7;" onmouseover="this.style.borderColor='#8b949e';this.style.opacity=1" onmouseout="this.style.borderColor='#30363d';this.style.opacity=0.7">
-        <span style="font-size:20px;">💽</span>
-        <div>
-          <div style="font-size:13px; font-weight:600; color:#8b949e;">บันทึกเฉพาะในหน้านี้</div>
-          <div style="font-size:11px; color:#555; margin-top:2px;">ไม่ sync ไปไหน (ข้อมูลอยู่แค่ session นี้)</div>
-        </div>
-      </button>
-    </div>
-
-    <!-- Result message -->
-    <div id="sp_result" style="display:none; font-size:12px; padding:10px 14px; border-radius:8px; font-family:'IBM Plex Mono',monospace; margin-bottom:14px;"></div>
-
-    <button onclick="closeSyncPicker()" style="width:100%; background:#21262d; border:1px solid #30363d; border-radius:8px; padding:11px; color:#8b949e; font-size:14px; cursor:pointer;">ปิด</button>
-  </div>
-</div>
 <style>
 @keyframes slideUp { from { transform: translateY(100%); opacity:0; } to { transform: translateY(0); opacity:1; } }
 </style>
@@ -1345,7 +1231,6 @@ document.getElementById('addDateModal').addEventListener('click', function(e) {
 });
 
 // =================== SAVE DATE ===================
-// collectEntry: รวบรวมค่า input ทั้งหมดแล้วเขียน sheetData
 function collectEntry() {
   const activeTab = document.querySelector('.date-tab.active');
   if (!activeTab) return null;
@@ -1380,7 +1265,6 @@ function collectEntry() {
   });
   entry.cash     = cashData;
   entry.transfer = transferRows.map(r => ({ label: r.label, amount: r.amount || 0 }));
-
   sheetData[dateKey] = entry;
   return dateKey;
 }
@@ -1392,212 +1276,55 @@ function saveDate(silent = false) {
     return;
   }
 
-  const hasFirebase = window._fbReady && window._db;
-  const gistToken   = localStorage.getItem('gist_token') || '';
-  const gistId      = localStorage.getItem('gist_id')    || '';
-  const hasGist     = !!(gistToken && gistId);
-
   const btn = document.getElementById('btn_save_main');
   const origText = btn ? btn.textContent : '';
   const origBg   = btn ? btn.style.background : '';
 
-  function setBtnSaving() { if(btn){btn.textContent='⏳ sync...';btn.style.background='#1f6feb';btn.disabled=true;} }
-  function setBtnDone(msg,ok) { if(btn){btn.textContent=msg;btn.style.background=ok?'var(--green)':'#c0392b';btn.disabled=false;setTimeout(()=>{btn.textContent=origText;btn.style.background=origBg;},2500);} }
-
-  if (hasFirebase || hasGist) {
-    setBtnSaving();
-    const tasks = [];
-    if (hasFirebase) tasks.push(autoSaveToFirebase());
-    if (hasGist)     tasks.push(autoSaveToGist(gistToken, gistId));
-    Promise.allSettled(tasks).then(results => {
-      const allOk = results.every(r => r.status === 'fulfilled');
-      const icons = [];
-      if (hasFirebase) icons.push('🔥');
-      if (hasGist)     icons.push('☁️');
-      setBtnDone(allOk ? icons.join('')+' บันทึกแล้ว!' : '⚠️ sync ล้มเหลว', allOk);
+  if (window._fbReady && window._db) {
+    if (btn) { btn.textContent = '⏳ sync...'; btn.style.background = '#1f6feb'; btn.disabled = true; }
+    autoSaveToFirebase().then(() => {
+      if (btn) {
+        btn.textContent = '🔥 บันทึกแล้ว!';
+        btn.style.background = 'var(--green)';
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = origText; btn.style.background = origBg; }, 2500);
+      }
+    }).catch(e => {
+      if (btn) {
+        btn.textContent = '❌ ล้มเหลว';
+        btn.style.background = '#c0392b';
+        btn.disabled = false;
+        setTimeout(() => { btn.textContent = origText; btn.style.background = origBg; }, 2500);
+      }
     });
   } else {
     if (btn) {
-      btn.textContent = '✅ บันทึกแล้ว!';
+      btn.textContent = '✅ บันทึกแล้ว! (ไม่มี Firebase)';
       btn.style.background = 'var(--green)';
       setTimeout(() => { btn.textContent = origText; btn.style.background = origBg; }, 2500);
     }
   }
 }
 
-// =================== SYNC PICKER ===================
-function openSyncPicker() {
-  const modal = document.getElementById('syncPickerModal');
-  modal.style.display = 'flex';
-
-  // อัปเดต badges ตามสถานะ
-  const hasGist = !!(localStorage.getItem('gist_token') && localStorage.getItem('gist_id'));
-  const hasFb   = !!(window._fbReady && window._db);
-
-  const gistBadge = document.getElementById('sp_gist_badge');
-  const fbBadge   = document.getElementById('sp_fb_badge');
-  const bothBtn   = document.getElementById('sp_btn_both');
-
-  if (gistBadge) {
-    gistBadge.textContent = hasGist ? '✅ พร้อมใช้' : '❌ ไม่มี Token';
-    gistBadge.style.background = hasGist ? 'rgba(63,185,80,0.15)' : 'rgba(248,81,73,0.15)';
-    gistBadge.style.color = hasGist ? '#3fb950' : '#f85149';
-  }
-  if (fbBadge) {
-    fbBadge.textContent = hasFb ? '✅ เชื่อมต่อแล้ว' : '❌ ไม่ได้เชื่อมต่อ';
-    fbBadge.style.background = hasFb ? 'rgba(63,185,80,0.15)' : 'rgba(248,81,73,0.15)';
-    fbBadge.style.color = hasFb ? '#3fb950' : '#f85149';
-  }
-  if (bothBtn) {
-    const canBoth = hasGist && hasFb;
-    bothBtn.style.opacity = canBoth ? '1' : '0.45';
-    bothBtn.style.pointerEvents = canBoth ? 'auto' : 'none';
-  }
-
-  // ซ่อน result เก่า
-  const res = document.getElementById('sp_result');
-  if (res) res.style.display = 'none';
-}
-
-function closeSyncPicker() {
-  document.getElementById('syncPickerModal').style.display = 'none';
-}
-
-document.getElementById('syncPickerModal').addEventListener('click', function(e) {
-  if (e.target === this) closeSyncPicker();
-});
-
-async function saveWithSync(mode) {
-  const dateKey = collectEntry();
-  if (!dateKey) { alert('⚠️ กรุณาเลือกวันที่ก่อนบันทึก'); return; }
-
-  const gistToken = localStorage.getItem('gist_token') || '';
-  const gistId    = localStorage.getItem('gist_id')    || '';
-  const hasGist   = !!(gistToken && gistId);
-  const hasFb     = !!(window._fbReady && window._db);
-
-  const resEl = document.getElementById('sp_result');
-
-  function showResult(msg, ok) {
-    if (!resEl) return;
-    resEl.style.display = 'block';
-    resEl.style.background = ok ? 'rgba(63,185,80,0.1)' : 'rgba(248,81,73,0.1)';
-    resEl.style.color = ok ? '#3fb950' : '#f85149';
-    resEl.style.border = '1px solid ' + (ok ? 'rgba(63,185,80,0.3)' : 'rgba(248,81,73,0.3)');
-    resEl.innerHTML = msg;
-  }
-  function showLoading(msg) {
-    if (!resEl) return;
-    resEl.style.display = 'block';
-    resEl.style.background = 'rgba(88,166,255,0.08)';
-    resEl.style.color = '#58a6ff';
-    resEl.style.border = '1px solid rgba(88,166,255,0.2)';
-    resEl.innerHTML = msg;
-  }
-
-  // local only
-  if (mode === 'local') {
-    showResult('✅ บันทึกในหน้านี้แล้ว (ไม่ได้ sync)', true);
-    return;
-  }
-
-  const tasks = [];
-  const labels = [];
-
-  if ((mode === 'gist' || mode === 'both') && hasGist) {
-    tasks.push(autoSaveToGist(gistToken, gistId));
-    labels.push('GitHub Gist');
-  } else if (mode === 'gist' && !hasGist) {
-    showResult('❌ ยังไม่ได้ตั้งค่า Token/Gist ID<br><small>กดปุ่ม GitHub Sync ในหัวเพื่อตั้งค่า</small>', false);
-    return;
-  }
-
-  if ((mode === 'firebase' || mode === 'both') && hasFb) {
-    tasks.push(autoSaveToFirebase());
-    labels.push('Firebase');
-  } else if (mode === 'firebase' && !hasFb) {
-    showResult('❌ Firebase ยังไม่ได้เชื่อมต่อ<br><small>กดปุ่ม 🔥 Firebase ในหัวเพื่อเชื่อมต่อ</small>', false);
-    return;
-  }
-
-  if (tasks.length === 0) {
-    showResult('⚠️ ไม่มีบริการที่พร้อมใช้ — กรุณาตั้งค่า Gist หรือ Firebase ก่อน', false);
-    return;
-  }
-
-  showLoading('⏳ กำลังบันทึกไปยัง ' + labels.join(' + ') + '...');
-
-  const results = await Promise.allSettled(tasks);
-  const allOk = results.every(r => r.status === 'fulfilled');
-  const failed = results.filter(r => r.status === 'rejected').map(r => r.reason?.message || 'error');
-
-  if (allOk) {
-    showResult('✅ บันทึกสำเร็จ → ' + labels.join(' + ') + '<br><small>' + new Date().toLocaleString('th-TH') + '</small>', true);
-    // อัปเดตปุ่มหลักด้วย
-    const btn = document.getElementById('btn_save_main');
-    if (btn) {
-      const orig = btn.textContent;
-      const origBg = btn.style.background;
-      btn.textContent = (mode==='gist'?'☁️':mode==='firebase'?'🔥':'⚡') + ' บันทึกแล้ว!';
-      btn.style.background = 'var(--green)';
-      setTimeout(() => { btn.textContent = orig; btn.style.background = origBg; }, 2500);
-    }
-    setTimeout(closeSyncPicker, 1800);
-  } else {
-    showResult('⚠️ บางตัวล้มเหลว: ' + failed.join(', '), false);
-  }
-}
-
-// =================== AUTO SAVE TO GIST ===================
-async function autoSaveToGist(token, gistId) {
-  const payload = JSON.stringify(sheetData, null, 2);
-  const res = await fetch('https://api.github.com/gists/' + gistId, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': 'token ' + token,
-      'Content-Type': 'application/json',
-      'Accept': 'application/vnd.github.v3+json'
-    },
-    body: JSON.stringify({
-      description: 'Gas Station Daily Records',
-      files: { [GIST_FILENAME]: { content: payload } }
-    })
-  });
-  if (res.status === 401) throw new Error('Token หมดอายุ/ถูกยกเลิก — กรุณาสร้าง Token ใหม่');
-  if (res.status === 404) throw new Error('ไม่พบ Gist ID — ID อาจผิด');
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error('Gist ' + res.status + ': ' + (err.message || ''));
-  }
-}
-
 async function autoSaveToFirebase() {
-  // รอให้ module expose ฟังก์ชันก่อน (กรณี module โหลดช้า)
   let tries = 0;
   while ((!window._fbDoc || !window._fbSetDoc) && tries < 20) {
     await new Promise(r => setTimeout(r, 200));
     tries++;
   }
-  if (!window._fbDoc || !window._fbSetDoc || !window._db) {
-    console.warn('Firebase not ready for auto-save');
-    return;
-  }
-  try {
-    const docRef = window._fbDoc(window._db, 'gas_station', 'daily_records');
-    await window._fbSetDoc(docRef, { records: sheetData, updated: new Date().toISOString() });
-    // แสดงจุดเขียว
-    const dot = document.getElementById('fb_live_dot');
-    if (dot) dot.style.display = 'inline';
-    // แสดงสถานะ ☁️ ใน header
-    const hd = document.getElementById('header-date');
-    if (hd) {
-      const prev = hd.textContent;
-      hd.textContent = '☁️ บันทึกขึ้น Cloud แล้ว';
-      setTimeout(() => hd.textContent = prev, 2000);
-    }
-  } catch(e) {
-    console.error('Firebase auto-save error:', e.message);
-    alert('❌ บันทึกขึ้น Firebase ไม่สำเร็จ: ' + e.message);
+  if (!window._fbDoc || !window._fbSetDoc || !window._db) throw new Error('Firebase ยังไม่พร้อม');
+  const docRef = window._fbDoc(window._db, 'gas_station', 'daily_records');
+  await window._fbSetDoc(docRef, { records: sheetData, updated: new Date().toISOString() });
+  // อัปเดต header dot
+  const dot = document.getElementById('fb_live_dot');
+  if (dot) dot.style.display = 'inline';
+  const dotH = document.getElementById('fb_live_dot_header');
+  if (dotH) dotH.style.display = 'inline-block';
+  const hd = document.getElementById('header-date');
+  if (hd) {
+    const prev = hd.textContent;
+    hd.textContent = '🔥 บันทึกขึ้น Cloud แล้ว';
+    setTimeout(() => hd.textContent = prev, 2000);
   }
 }
 
@@ -1820,249 +1547,16 @@ function clearAll() {
   document.getElementById('header-date').textContent = 'กรอกข้อมูลใหม่';
 }
 
-// =================== GITHUB GIST SYNC ===================
-const GIST_FILENAME = 'gas-station-data.json';
-
-function openGistModal() {
-  document.getElementById('gistModal').style.display = 'flex';
-  // Load remembered token/id
-  document.getElementById('gist_token').value = localStorage.getItem('gist_token') || '';
-  document.getElementById('gist_id').value = localStorage.getItem('gist_id') || '';
-  document.getElementById('gist_status').style.display = 'none';
-}
-
-function closeGistModal() {
-  document.getElementById('gistModal').style.display = 'none';
-}
-
-document.getElementById('gistModal').addEventListener('click', function(e) {
-  if (e.target === this) closeGistModal();
-});
-
-function gistRememberToken() {
-  const token = document.getElementById('gist_token').value.trim();
-  const id    = document.getElementById('gist_id').value.trim();
-  if (!token || !id) {
-    gistStatus('❌ กรุณากรอก Token และ Gist ID ให้ครบ', '#f85149');
-    return;
-  }
-  localStorage.setItem('gist_token', token);
-  localStorage.setItem('gist_id', id);
-  gistStatus('✅ จำ Token และ Gist ID ไว้แล้ว — จะ sync อัตโนมัติทุกครั้งที่กดบันทึกและรีเว็บ', '#3fb950');
-  // แสดงจุดเขียวบน header
-  const dot = document.getElementById('gist_dot');
-  if (dot) dot.style.display = 'inline-block';
-  const btn = document.getElementById('gist_header_btn');
-  if (btn) btn.style.borderColor = '#3fb950';
-}
-
-function gistStatus(msg, color) {
-  const el = document.getElementById('gist_status');
-  el.style.display = 'block';
-  el.style.color = color || '#e6edf3';
-  el.innerHTML = msg;
-}
-
-async function gistSave() {
-  const token = document.getElementById('gist_token').value.trim();
-  if (!token) { gistStatus('❌ กรุณากรอก GitHub Token', '#f85149'); return; }
-
-  gistStatus('⏳ กำลังบันทึก...', '#58a6ff');
-
-  const payload = JSON.stringify(sheetData, null, 2);
-  const gistId  = document.getElementById('gist_id').value.trim();
-
-  try {
-    let url = 'https://api.github.com/gists';
-    let method = 'POST';
-    if (gistId) { url += '/' + gistId; method = 'PATCH'; }
-
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'Authorization': 'token ' + token,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
-      },
-      body: JSON.stringify({
-        description: 'Gas Station Daily Records',
-        public: false,
-        files: { [GIST_FILENAME]: { content: payload } }
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      gistStatus('❌ Error: ' + (err.message || res.status), '#f85149');
-      return;
-    }
-
-    const data = await res.json();
-    document.getElementById('gist_id').value = data.id;
-    localStorage.setItem('gist_id', data.id);
-    if (token) localStorage.setItem('gist_token', token);
-
-    const savedDate = new Date().toLocaleString('th-TH');
-    gistStatus(`✅ บันทึกสำเร็จ! (${savedDate})<br>
-      🔗 <a href="${data.html_url}" target="_blank" style="color:#58a6ff;">ดู Gist</a> &nbsp;|&nbsp;
-      <span style="color:#8b949e;">ID: ${data.id}</span>`, '#3fb950');
-  } catch(e) {
-    gistStatus('❌ Network error: ' + e.message, '#f85149');
-  }
-}
-
-async function gistLoad() {
-  const token  = document.getElementById('gist_token').value.trim();
-  const gistId = document.getElementById('gist_id').value.trim();
-  if (!token)  { gistStatus('❌ กรุณากรอก GitHub Token', '#f85149'); return; }
-  if (!gistId) { gistStatus('❌ กรุณากรอก Gist ID', '#f85149'); return; }
-
-  gistStatus('⏳ กำลังโหลด...', '#58a6ff');
-
-  try {
-    const loaded = await loadFromGist(token, gistId);
-
-    Object.keys(sheetData).forEach(k => delete sheetData[k]);
-    Object.assign(sheetData, loaded);
-    renderAllGroups();
-
-    const keys = Object.keys(loaded);
-    if (keys.length > 0) loadDate(keys[keys.length - 1]);
-
-    gistStatus(`✅ โหลดสำเร็จ! พบ ${keys.length} วัน (${new Date().toLocaleString('th-TH')})`, '#3fb950');
-  } catch(e) {
-    gistStatus('❌ ' + e.message, '#f85149');
-  }
-}
-
-// =================== GIST LOADER (shared) ===================
-async function loadFromGist(token, gistId) {
-  const res = await fetch('https://api.github.com/gists/' + gistId, {
-    headers: {
-      'Authorization': 'token ' + token,
-      'Accept': 'application/vnd.github.v3+json'
-    }
-  });
-
-  if (res.status === 401) throw new Error('Token ไม่ถูกต้องหรือหมดอายุ (401) — กรุณาสร้าง Token ใหม่');
-  if (res.status === 403) throw new Error('Token ไม่มีสิทธิ์ gist (403) — ต้องเลือก scope: gist ตอนสร้าง Token');
-  if (res.status === 404) throw new Error('ไม่พบ Gist ID นี้ (404) — ID อาจผิดหรือถูกลบไปแล้ว');
-  if (!res.ok) {
-    let msg = 'HTTP ' + res.status;
-    try { const j = await res.json(); msg += ': ' + (j.message || ''); } catch(_) {}
-    throw new Error(msg);
-  }
-
-  const data = await res.json();
-
-  // content อาจถูก truncate ถ้า Gist ใหญ่ — ใช้ raw_url แทน
-  const fileEntry = data.files[GIST_FILENAME];
-  if (!fileEntry) throw new Error('ไม่พบไฟล์ "' + GIST_FILENAME + '" ใน Gist นี้');
-
-  let content = fileEntry.content;
-  if (fileEntry.truncated) {
-    const rawRes = await fetch(fileEntry.raw_url);
-    if (!rawRes.ok) throw new Error('โหลด raw content ไม่สำเร็จ: HTTP ' + rawRes.status);
-    content = await rawRes.text();
-  }
-
-  const loaded = JSON.parse(content);
-  if (typeof loaded !== 'object' || Array.isArray(loaded)) throw new Error('ข้อมูลใน Gist ผิดรูปแบบ');
-  return loaded;
-}
-
 // =================== INIT ===================
-async function init() {
+function init() {
   renderAllGroups();
   renderTransfer();
   renderCash();
   calc();
-
-  const savedToken = localStorage.getItem('gist_token');
-  const savedId    = localStorage.getItem('gist_id');
-  if (!savedToken || !savedId) return;
-
-  // แสดงจุดเขียวบน header
-  const dot     = document.getElementById('gist_dot');
-  const gistBtn = document.getElementById('gist_header_btn');
-  if (dot)     dot.style.display = 'inline-block';
-  if (gistBtn) gistBtn.style.borderColor = '#3fb950';
-
-  const hd   = document.getElementById('header-date');
-  const prev = hd ? hd.textContent : '';
-  if (hd) hd.textContent = '⏳ กำลังโหลดจาก Gist...';
-
-  try {
-    const loaded = await loadFromGist(savedToken, savedId);
-
-    Object.keys(sheetData).forEach(k => delete sheetData[k]);
-    Object.assign(sheetData, loaded);
-    renderAllGroups();
-
-    const keys = Object.keys(loaded);
-    if (keys.length > 0) loadDate(keys[keys.length - 1]);
-
-    if (hd) {
-      hd.textContent = '☁️ โหลดจาก Gist แล้ว (' + keys.length + ' วัน)';
-      setTimeout(() => hd.textContent = keys[keys.length - 1] || prev, 2500);
-    }
-  } catch(e) {
-    console.error('Auto-load Gist failed:', e.message);
-    if (hd) {
-      // แสดง error จริงๆ ใน header 6 วินาที แล้วค่อยกลับ
-      hd.textContent = '❌ ' + e.message;
-      hd.title = e.message;
-      // แสดง toast แจ้ง error พร้อมปุ่มเปิด modal
-      showGistErrorToast(e.message);
-      setTimeout(() => { hd.textContent = prev; hd.title = ''; }, 6000);
-    }
-    // เปลี่ยน dot เป็นสีแดง
-    if (dot)     dot.style.background = '#f85149';
-    if (gistBtn) gistBtn.style.borderColor = '#f85149';
-  }
-}
-
-function showGistErrorToast(msg) {
-  // ลบ toast เก่า
-  const old = document.getElementById('gist_error_toast');
-  if (old) old.remove();
-
-  const toast = document.createElement('div');
-  toast.id = 'gist_error_toast';
-  toast.style.cssText = `
-    position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-    background:#1c2330; border:1px solid #f85149; border-radius:12px;
-    padding:14px 18px; z-index:2000; max-width:92vw; width:360px;
-    box-shadow:0 8px 32px rgba(0,0,0,0.6); animation: slideUp 0.25s ease;
-  `;
-  toast.innerHTML = `
-    <div style="display:flex; align-items:flex-start; gap:10px;">
-      <span style="font-size:18px; flex-shrink:0;">⚠️</span>
-      <div style="flex:1;">
-        <div style="font-size:13px; font-weight:700; color:#f85149; margin-bottom:4px;">โหลด Gist ไม่สำเร็จ</div>
-        <div style="font-size:11px; color:#8b949e; line-height:1.5; font-family:'IBM Plex Mono',monospace;">${msg}</div>
-      </div>
-      <button onclick="this.closest('#gist_error_toast').remove()" style="background:none; border:none; color:#8b949e; cursor:pointer; font-size:16px; padding:0; flex-shrink:0;">✕</button>
-    </div>
-    <div style="display:flex; gap:8px; margin-top:12px;">
-      <button onclick="openGistModal(); document.getElementById('gist_error_toast').remove();"
-        style="flex:1; background:#238636; border:none; border-radius:6px; padding:8px; color:#fff; font-size:12px; font-weight:600; cursor:pointer;">
-        🔑 แก้ไข Token/ID
-      </button>
-      <button onclick="document.getElementById('gist_error_toast').remove()"
-        style="flex:1; background:#21262d; border:1px solid #30363d; border-radius:6px; padding:8px; color:#8b949e; font-size:12px; cursor:pointer;">
-        ปิด
-      </button>
-    </div>
-  `;
-  document.body.appendChild(toast);
-  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 10000);
+  // Firebase เชื่อมต่ออัตโนมัติผ่าน FIREBASE_CONFIG ที่ฝังไว้แล้ว (auto-connect ใน module script)
 }
 
 init();
-
-  // Firebase เชื่อมต่ออัตโนมัติผ่าน FIREBASE_CONFIG ที่ฝังไว้แล้ว
-  // (ไม่ต้องโหลดจาก localStorage อีกต่อไป)
 </script>
 </body>
 </html>
