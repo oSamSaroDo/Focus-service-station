@@ -972,10 +972,7 @@ window.addEventListener('load', () => {
     </div>
 
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="clearAll()">🗑 ล้างข้อมูล</button>
-      <button class="btn btn-ghost" onclick="downloadHTML()" style="border-color:#58a6ff; color:#58a6ff;">⬇ ดาวน์โหลด HTML</button>
       <button id="btn_save_main" class="btn btn-primary" onclick="saveDate()" style="background:var(--accent3); min-width:140px;">💾 บันทึกข้อมูล</button>
-      <button class="btn btn-primary" onclick="window.print()">🖨 พิมพ์ / บันทึก PDF</button>
     </div>
 
   </div><!-- /mainContent -->
@@ -1337,15 +1334,21 @@ function confirmAddDate() {
     g95_price:'', g91_price:'', d_price:'', d4_price:'',
     air_liter:'', change:3700, disc:0.5 };
 
-  // re-render groups
+  // re-render groups then close modal
   renderAllGroups();
   closeAddDate();
-  // load the new blank date and clear form ready to type
-  loadDate(key);
+
+  // 1) ล้างฟอร์มทั้งหมดให้ว่าง
   clearAll();
-  // re-mark the new tab as active after clearAll removes all active classes
+
+  // 2) set default values สำหรับวันใหม่
+  document.getElementById('g_change').value = 3700;
+  document.getElementById('g_discount_per_liter').value = 0.5;
+
+  // 3) mark tab ใหม่ active และ update header
   document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
-  document.querySelector(`.date-tab[data-date="${key}"]`)?.classList.add('active');
+  const newTab = document.querySelector(`.date-tab[data-date="${key}"]`);
+  if (newTab) newTab.classList.add('active');
   document.getElementById('header-date').textContent = key;
 }
 
