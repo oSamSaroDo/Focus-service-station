@@ -458,13 +458,7 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
             <th>G91 ใช้ (ลิตร)</th>
             <th>Diesel ใช้ (ลิตร)</th>
             <th>รวมใช้ (ลิตร)</th>
-            <th>เติมเข้า G95</th>
-            <th>เติมเข้า G91</th>
-            <th>เติมเข้า Diesel</th>
-            <th style="color:var(--g95);">เติม Log G95</th>
-            <th style="color:var(--g91);">เติม Log G91</th>
-            <th style="color:var(--diesel);">เติม Log Diesel</th>
-            <th>รวมเติม Log</th>
+
           </tr>
         </thead>
         <tbody id="daily_tbody"></tbody>
@@ -804,7 +798,7 @@ function calcAll() {
   const dtfoot = document.getElementById('daily_tfoot');
 
   if (keys.length === 0) {
-    dtbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:var(--text-muted); padding:24px;">ยังไม่มีข้อมูลวันทำการ</td></tr>`;
+    dtbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">ยังไม่มีข้อมูลวันทำการ</td></tr>`;
     dtfoot.innerHTML = '';
   } else {
     // Group keys by month-year
@@ -861,13 +855,7 @@ function calcAll() {
         <td style="color:var(--g91);">${fmt(mg91,2)}</td>
         <td style="color:var(--diesel);">${fmt(md,2)}</td>
         <td class="hi">${fmt(mg95+mg91+md,2)}</td>
-        <td style="color:var(--g95);">${min_g95>0?fmt(min_g95,2):'—'}</td>
-        <td style="color:var(--g91);">${min_g91>0?fmt(min_g91,2):'—'}</td>
-        <td style="color:var(--diesel);">${min_d>0?fmt(min_d,2):'—'}</td>
-        <td style="color:var(--g95);">${rf.g95>0?fmt(rf.g95,2):'—'}</td>
-        <td style="color:var(--g91);">${rf.g91>0?fmt(rf.g91,2):'—'}</td>
-        <td style="color:var(--diesel);">${rf.d>0?fmt(rf.d,2):'—'}</td>
-        <td class="hi">${rfTot>0?fmt(rfTot,2):'—'}</td>
+
       </tr>`;
     }).join('');
 
@@ -877,13 +865,7 @@ function calcAll() {
       <td>${fmt(sg91,2)}</td>
       <td>${fmt(sd,2)}</td>
       <td>${fmt(stot,2)}</td>
-      <td>${sin_g95>0?fmt(sin_g95,2):'—'}</td>
-      <td>${sin_g91>0?fmt(sin_g91,2):'—'}</td>
-      <td>${sin_d>0?fmt(sin_d,2):'—'}</td>
-      <td style="color:var(--g95);">${srf_g95>0?fmt(srf_g95,2):'—'}</td>
-      <td style="color:var(--g91);">${srf_g91>0?fmt(srf_g91,2):'—'}</td>
-      <td style="color:var(--diesel);">${srf_d>0?fmt(srf_d,2):'—'}</td>
-      <td>${(srf_g95+srf_g91+srf_d)>0?fmt(srf_g95+srf_g91+srf_d,2):'—'}</td>
+
     </tr>`;
   }
 
