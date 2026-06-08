@@ -688,6 +688,23 @@ window.addEventListener('load', () => {
     </div>
   </div>
 
+  <!-- CLEAR ALL HISTORY MODAL -->
+  <div id="clearAllModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:999; align-items:center; justify-content:center;">
+    <div style="background:var(--surface); border:1px solid #f85149; border-radius:16px; padding:28px; width:340px; max-width:90vw; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+      <div style="font-size:28px; text-align:center; margin-bottom:10px;">⚠️</div>
+      <div style="font-size:16px; font-weight:700; text-align:center; margin-bottom:10px; color:var(--red);">ล้างประวัติทั้งหมด?</div>
+      <div style="font-size:13px; color:var(--text-muted); text-align:center; line-height:1.6; margin-bottom:22px;">
+        ข้อมูลทุกวันจะถูกลบออกทั้งหมด<br>
+        รวมถึงข้อมูลบน Cloud (Firebase)<br>
+        <span style="color:#f85149; font-weight:600;">ไม่สามารถย้อนกลับได้!</span>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" style="flex:1;" onclick="closeClearAll()">ยกเลิก</button>
+        <button class="btn" style="flex:1; background:#f85149; color:#fff; font-weight:700;" onclick="doClearAll()">🗑️ ล้างทั้งหมด</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ADD DATE MODAL -->
   <div id="addDateModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:999; align-items:center; justify-content:center;">
     <div style="background:var(--surface); border:1px solid var(--accent); border-radius:20px; padding:28px; width:340px; max-width:92vw; box-shadow:0 24px 64px rgba(0,0,0,0.6);">
@@ -990,6 +1007,7 @@ window.addEventListener('load', () => {
     </div>
 
     <div class="btn-row">
+      <button class="btn btn-ghost" onclick="confirmClearAll()" style="border-color:var(--red); color:var(--red); min-width:160px;">🗑️ ล้างประวัติทั้งหมด</button>
       <button id="btn_save_main" class="btn btn-primary" onclick="saveDate()" style="background:var(--accent3); min-width:140px;">💾 บันทึกข้อมูล</button>
     </div>
 
@@ -1330,7 +1348,48 @@ function doDeleteDate() {
 document.addEventListener('click', function(e) {
   const modal = document.getElementById('deleteDateModal');
   if (e.target === modal) closeDeleteDate();
+  const modal2 = document.getElementById('clearAllModal');
+  if (e.target === modal2) closeClearAll();
 });
+
+// =================== CLEAR ALL HISTORY ===================
+function confirmClearAll() {
+  document.getElementById('clearAllModal').style.display = 'flex';
+}
+
+function closeClearAll() {
+  document.getElementById('clearAllModal').style.display = 'none';
+}
+
+async function doClearAll() {
+  // 1) ล้าง sheetData ใน memory
+  Object.keys(sheetData).forEach(k => delete sheetData[k]);
+
+  // 2) ล้าง Firebase (ถ้าเชื่อมต่ออยู่)
+  if (window._fbReady && window._db && window._fbDoc && window._fbSetDoc) {
+    try {
+      const docRef = window._fbDoc(window._db, 'gas_station', 'daily_records');
+      await window._fbSetDoc(docRef, { records: {}, updated: new Date().toISOString() });
+    } catch(e) {
+      console.warn('Firebase clear failed:', e);
+    }
+  }
+
+  // 3) ล้าง UI
+  closeClearAll();
+  clearAll();
+  renderAllGroups();
+
+  // 4) แจ้งผลลัพธ์
+  const btn = document.getElementById('btn_save_main');
+  const orig = btn ? btn.textContent : '';
+  const origBg = btn ? btn.style.background : '';
+  if (btn) {
+    btn.textContent = '✅ ล้างประวัติแล้ว';
+    btn.style.background = 'var(--red)';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = origBg; }, 2500);
+  }
+}
 
 function confirmAddDate() {
   const day   = parseInt(document.getElementById('nd_day').value);
