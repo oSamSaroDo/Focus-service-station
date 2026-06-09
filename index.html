@@ -461,10 +461,12 @@ window.fbStartSync = async function() {
     if (keys.length > 0 && typeof loadDate === 'function') {
       // เรียงแล้วโหลดวันล่าสุด
       keys.sort((a, b) => {
-        const pa = a.split('-').map(Number), pb = b.split('-').map(Number);
-        if (pa[2] !== pb[2]) return pa[2] - pb[2];
-        if (pa[1] !== pb[1]) return pa[1] - pb[1];
-        return pa[0] - pb[0];
+        const pa = parseKey(a), pb = parseKey(b);
+        if (pa.year2 !== pb.year2) return pa.year2 - pb.year2;
+        if (pa.month !== pb.month) return pa.month - pb.month;
+        if (pa.day !== pb.day) return pa.day - pb.day;
+        const shiftOrder = { 'm': 0, 'e': 1, '': 0 };
+        return (shiftOrder[pa.shift]||0) - (shiftOrder[pb.shift]||0);
       });
       loadDate(keys[keys.length - 1]);
     }
@@ -733,6 +735,19 @@ window.addEventListener('load', () => {
         <div class="field-group" style="flex:2">
           <div class="field-label">ปี พ.ศ.</div>
           <select id="nd_year" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'IBM Plex Mono',monospace; font-size:14px; padding:8px 10px; cursor:pointer; appearance:none; -webkit-appearance:none;"></select>
+        </div>
+      </div>
+
+      <!-- Shift selector -->
+      <div style="margin-bottom:16px;">
+        <div class="field-label" style="margin-bottom:6px;">กะ</div>
+        <div style="display:flex; gap:8px;">
+          <button id="nd_shift_m" onclick="selectShift('m')" style="flex:1; padding:10px; border-radius:8px; border:2px solid var(--accent); background:rgba(240,165,0,0.15); color:var(--accent); font-family:'Sarabun',sans-serif; font-size:14px; font-weight:700; cursor:pointer;">
+            ☀️ กะเช้า
+          </button>
+          <button id="nd_shift_e" onclick="selectShift('e')" style="flex:1; padding:10px; border-radius:8px; border:2px solid var(--border); background:var(--surface2); color:var(--text-muted); font-family:'Sarabun',sans-serif; font-size:14px; font-weight:700; cursor:pointer;">
+            🌙 กะเย็น
+          </button>
         </div>
       </div>
 
@@ -1258,8 +1273,27 @@ function calc() {
 }
 
 // =================== ADD DATE ===================
+let _selectedShift = 'm'; // default กะเช้า
+
+function selectShift(s) {
+  _selectedShift = s;
+  const mBtn = document.getElementById('nd_shift_m');
+  const eBtn = document.getElementById('nd_shift_e');
+  if (s === 'm') {
+    mBtn.style.borderColor = 'var(--accent)'; mBtn.style.background = 'rgba(240,165,0,0.15)'; mBtn.style.color = 'var(--accent)';
+    eBtn.style.borderColor = 'var(--border)';  eBtn.style.background = 'var(--surface2)';      eBtn.style.color = 'var(--text-muted)';
+  } else {
+    eBtn.style.borderColor = '#58a6ff'; eBtn.style.background = 'rgba(88,166,255,0.12)'; eBtn.style.color = '#58a6ff';
+    mBtn.style.borderColor = 'var(--border)'; mBtn.style.background = 'var(--surface2)'; mBtn.style.color = 'var(--text-muted)';
+  }
+  updateDatePreview();
+}
+
 function openAddDate() {
+  _selectedShift = 'm';
   const modal = document.getElementById('addDateModal');
+  // reset shift buttons
+  setTimeout(() => selectShift('m'), 0);
 
   // Populate day select (1-31)
   const dayEl = document.getElementById('nd_day');
@@ -1310,13 +1344,16 @@ function updateDatePreview() {
   const year  = parseInt(document.getElementById('nd_year').value);
   const preview = document.getElementById('nd_preview');
   if (!day || !month || !year) { preview.textContent = ''; return; }
-  const key = `${day}-${month}-${year % 100}`;
+  const baseKey = `${day}-${month}-${year % 100}`;
+  const shift = typeof _selectedShift !== 'undefined' ? _selectedShift : 'm';
+  const key = `${baseKey}-${shift}`;
   const exists = sheetData[key];
   const MONTHS_TH2 = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const ceYear = year - 543;
   const jsDate = new Date(ceYear, month - 1, day);
   const DAY_TH_FULL = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-  const label = `วัน${DAY_TH_FULL[jsDate.getDay()]}ที่ ${day} ${MONTHS_TH2[month]} ${year}`;
+  const shiftLabel = shift === 'm' ? '☀️ กะเช้า' : '🌙 กะเย็น';
+  const label = `วัน${DAY_TH_FULL[jsDate.getDay()]}ที่ ${day} ${MONTHS_TH2[month]} ${year} · ${shiftLabel}`;
   preview.textContent = exists ? `⚠️ ${key} มีอยู่แล้ว` : label;
   preview.style.color = exists ? '#f85149' : 'var(--accent)';
 }
@@ -1409,9 +1446,11 @@ function confirmAddDate() {
     alert('กรุณาเลือกวัน เดือน ปี ให้ครบ');
     return;
   }
-  const key = `${day}-${month}-${year % 100}`;
+  const baseKey = `${day}-${month}-${year % 100}`;
+  const shift = typeof _selectedShift !== 'undefined' ? _selectedShift : 'm';
+  const key = `${baseKey}-${shift}`;
   if (sheetData[key]) {
-    alert(`วันที่ "${key}" มีอยู่แล้ว`);
+    alert(`${key} มีอยู่แล้ว`);
     return;
   }
   // create blank entry
@@ -1437,7 +1476,8 @@ function confirmAddDate() {
   document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
   const newTab = document.querySelector(`.date-tab[data-date="${key}"]`);
   if (newTab) newTab.classList.add('active');
-  document.getElementById('header-date').textContent = key;
+  const _cShift = shift === 'm' ? ' ☀️' : shift === 'e' ? ' 🌙' : '';
+  document.getElementById('header-date').textContent = key + _cShift;
 }
 
 // Close modal on backdrop click
@@ -1569,10 +1609,15 @@ function downloadHTML() {
 // =================== DATE TABS WITH MONTH GROUPS ===================
 const dates = Object.keys(sheetData);
 
-// Parse key "d-m-yy" → { day, month, year2 }
+// Parse key "d-m-yy" or "d-m-yy-s" → { day, month, year2, shift }
 function parseKey(k) {
   const parts = k.split('-');
-  return { day: parseInt(parts[0]), month: parseInt(parts[1]), year2: parseInt(parts[2]) };
+  return {
+    day: parseInt(parts[0]),
+    month: parseInt(parts[1]),
+    year2: parseInt(parts[2]),
+    shift: parts[3] || ''   // 'm', 'e', or '' for legacy
+  };
 }
 
 function monthGroupKey(k) {
@@ -1613,7 +1658,13 @@ function renderAllGroups() {
 
   sortedGroups.forEach(([gk, keys]) => {
     // เรียงวันในกลุ่มจากน้อยไปมาก
-    keys.sort((a, b) => parseKey(a).day - parseKey(b).day);
+    keys.sort((a, b) => {
+      const pa = parseKey(a), pb = parseKey(b);
+      if (pa.day !== pb.day) return pa.day - pb.day;
+      // same day: กะเช้า (m) ก่อน กะเย็น (e)
+      const shiftOrder = { 'm': 0, 'e': 1, '': 0 };
+      return (shiftOrder[pa.shift]||0) - (shiftOrder[pb.shift]||0);
+    });
     const collapsed = collapsedGroups[gk] || false;
     const div = document.createElement('div');
     div.className = 'month-group';
@@ -1649,12 +1700,15 @@ function renderAllGroups() {
       const wrap = document.createElement('div');
       wrap.style.cssText = 'position:relative; display:inline-flex; align-items:flex-start;';
 
+      const shiftIcon = p.shift === 'e' ? '🌙' : (p.shift === 'm' ? '☀️' : '');
+      const shiftStyle = p.shift === 'e' ? 'border-color:rgba(88,166,255,0.5);' : '';
       const btn = document.createElement('button');
       btn.className = 'date-tab';
       btn.dataset.date = k;
       btn.title = k;
+      btn.style.cssText = shiftStyle;
       btn.innerHTML = `
-        <span class="dt-dayname">${dayName}</span>
+        <span class="dt-dayname">${dayName}${shiftIcon ? ' ' + shiftIcon : ''}</span>
         <span class="dt-num">${p.day}</span>
         <span class="dt-month">${monthShort}</span>
       `;
@@ -1697,7 +1751,9 @@ function renderAllGroups() {
 function loadDate(dateKey) {
   document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.date-tab[data-date="${dateKey}"]`)?.classList.add('active');
-  document.getElementById('header-date').textContent = dateKey;
+  const _pk = parseKey(dateKey);
+  const _shiftTxt = _pk.shift === 'm' ? ' ☀️' : _pk.shift === 'e' ? ' 🌙' : '';
+  document.getElementById('header-date').textContent = dateKey + _shiftTxt;
 
   const d = sheetData[dateKey];
 
