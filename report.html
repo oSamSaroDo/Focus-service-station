@@ -233,6 +233,7 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
   </div>
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
+    <button class="btn btn-ghost" onclick="window.location.href='tank.html'" style="border-color:#58a6ff;color:#58a6ff;">🛢 แทงค์น้ำมัน</button>
     <button class="btn btn-ghost" onclick="reloadFirebase()" id="btn_reload">🔄 โหลดใหม่</button>
     <button class="btn btn-pdf no-print" onclick="printReport()">⬇ ดาวน์โหลด PDF</button>
   </div>
@@ -364,6 +365,11 @@ function computeDay(d) {
   const mustSend  = cashTotal - change;
   const diff      = mustSend - totalFuelFull;
 
+  // tank_in fields (ปริมาณน้ำมันเติมแทงค์ประจำวัน)
+  const in_g95 = d.in_g95 || 0;
+  const in_g91 = d.in_g91 || 0;
+  const in_d   = d.in_d   || 0;
+
   return {
     g95_l, g95_sale,
     g91_l, g91_sale,
@@ -372,7 +378,8 @@ function computeDay(d) {
     air_l, air_net,
     totalFuelFull, totalLiter,
     cashTotal, mustSend, diff,
-    change, disc
+    change, disc,
+    in_g95, in_g91, in_d
   };
 }
 
