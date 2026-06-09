@@ -234,8 +234,6 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="window.location.href='index.html'" style="border-color:#3fb950;color:#3fb950;">⛽ หน้าหลัก</button>
     <button class="btn btn-ghost" onclick="window.location.href='tank.html'" style="border-color:#58a6ff;color:#58a6ff;">🛢 แทงค์น้ำมัน</button>
-    <button class="btn btn-ghost" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
-    <button class="btn btn-ghost" onclick="window.location.href='tank.html'" style="border-color:#58a6ff;color:#58a6ff;">🛢 แทงค์น้ำมัน</button>
     <button class="btn btn-ghost" onclick="reloadFirebase()" id="btn_reload">🔄 โหลดใหม่</button>
     <button class="btn btn-pdf no-print" onclick="printReport()">⬇ ดาวน์โหลด PDF</button>
   </div>
@@ -310,9 +308,7 @@ function keyToDate(k) {
 function fmtKey(k) {
   const p = parseKey(k);
   const shiftIcon = p.shift === 'm' ? ' ☀️' : p.shift === 'e' ? ' 🌙' : '';
-  return `${String(p.day).padStart(2,'0')} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}${shiftIcon}`;
-}
-return `${String(p.day).padStart(2,'0')} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}`;
+  return String(p.day).padStart(2,'0') + ' ' + MONTHS_TH[p.month] + ' 25' + String(p.year2).padStart(2,'0') + shiftIcon;
 }
 
 function monthGroupKey(k) {
@@ -670,7 +666,7 @@ const FIREBASE_CONFIG = {
   appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
 };
 
-const app = initializeApp(FIREBASE_CONFIG);
+const app = initializeApp(FIREBASE_CONFIG, 'report-' + Date.now());
 const db  = getFirestore(app);
 let _unsub = null;
 
@@ -722,18 +718,30 @@ window.reloadFirebase = async function() {
 };
 
 async function initLoad() {
-  try {
-    mergeData(await loadFromFirebase());
-    document.getElementById('loading').style.display   = 'none';
-    document.getElementById('filter_bar').style.display = 'flex';
-    document.getElementById('report_body').style.display = 'block';
-    if (typeof populateMonthFilter === 'function') populateMonthFilter();
-    if (typeof render === 'function') render();
-    startRealtimeSync();
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('setup_card').style.display = 'block';
-    document.getElementById('setup_error').textContent = '❌ ' + e.message;
+  // retry up to 3 times with delay
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      mergeData(await loadFromFirebase());
+      document.getElementById('loading').style.display    = 'none';
+      document.getElementById('filter_bar').style.display = 'flex';
+      document.getElementById('report_body').style.display = 'block';
+      document.getElementById('setup_card').style.display  = 'none';
+      if (typeof populateMonthFilter === 'function') populateMonthFilter();
+      if (typeof render === 'function') render();
+      startRealtimeSync();
+      return; // success
+    } catch(e) {
+      if (attempt < 3) {
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+        continue;
+      }
+      document.getElementById('loading').style.display   = 'none';
+      document.getElementById('setup_card').style.display = 'block';
+      const errEl = document.getElementById('setup_error');
+      if (errEl) errEl.innerHTML =
+        '❌ ' + e.message +
+        '<br><small style="color:#8b949e;">ลองใหม่อีกครั้ง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</small>';
+    }
   }
 }
 
