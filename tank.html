@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แทงค์น้ำมัน — ปั๊มน้ำมัน</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2330;
+  --border: #30363d;
+  --accent: #f0a500;
+  --accent2: #e05c2a;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --red: #f85149;
+  --green: #3fb950;
+  --blue: #58a6ff;
+  --g95: #f85149;
+  --g91: #3fb950;
+  --diesel: #58a6ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Sarabun', sans-serif; font-size: 15px; min-height: 100vh;
+}
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(12px); flex-wrap: wrap; gap: 10px;
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.logo-icon {
+  width: 40px; height: 40px; background: var(--blue);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.logo-text { font-size: 18px; font-weight: 700; }
+.logo-sub  { font-size: 12px; color: var(--text-muted); }
+
+/* BUTTONS */
+.btn {
+  padding: 8px 18px; border-radius: 8px; border: none;
+  cursor: pointer; font-family: 'Sarabun', sans-serif;
+  font-size: 13px; font-weight: 600; transition: all 0.18s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--accent); color: #0d1117; }
+.btn-primary:hover { background: #fbb628; transform: translateY(-1px); }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { background: rgba(248,81,73,0.12); color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover { background: rgba(248,81,73,0.25); }
+
+main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+/* SECTION */
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* GRID */
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+/* CARD */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 20px; transition: border-color 0.2s;
+}
+.card:hover { border-color: #444d57; }
+.card-title {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+  color: var(--text-muted); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+/* TANK GAUGE */
+.tank-gauge-wrap {
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.tank-gauge-bg {
+  flex: 1; height: 22px; background: var(--surface2);
+  border-radius: 11px; overflow: hidden;
+  border: 1px solid var(--border); position: relative;
+}
+.tank-gauge-fill {
+  height: 100%; border-radius: 11px;
+  transition: width 0.5s ease, background 0.3s;
+  min-width: 0; position: relative;
+}
+.tank-gauge-fill::after {
+  content: attr(data-pct);
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  font-weight: 700; color: rgba(255,255,255,0.9);
+  white-space: nowrap;
+}
+.tank-gauge-icon { font-size: 22px; }
+
+/* INPUT FIELDS */
+.field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.field-label { font-size: 10px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
+input[type="number"], input[type="text"] {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text);
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  padding: 7px 10px; transition: border-color 0.2s, box-shadow 0.2s;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type="number"]:focus, input[type="text"]:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(240,165,0,0.12);
+}
+input.computed {
+  color: var(--green); border-color: rgba(63,185,80,0.3);
+  background: rgba(63,185,80,0.05); cursor: default;
+}
+input.warning { color: var(--accent) !important; border-color: rgba(240,165,0,0.4) !important; background: rgba(240,165,0,0.05) !important; }
+input.danger  { color: var(--red)    !important; border-color: rgba(248,81,73,0.4)  !important; background: rgba(248,81,73,0.05)  !important; }
+
+/* BIG NUMBER */
+.big-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 28px; font-weight: 700; letter-spacing: -0.5px;
+}
+.big-unit { font-size: 13px; color: var(--text-muted); margin-left: 4px; }
+.big-sub  { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* STATUS BADGE */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; font-family: 'IBM Plex Mono', monospace;
+}
+.badge-ok  { background: rgba(63,185,80,0.15);  color: var(--green); }
+.badge-warn{ background: rgba(240,165,0,0.15);   color: var(--accent); }
+.badge-low { background: rgba(248,81,73,0.15);   color: var(--red); }
+
+/* HISTORY TABLE */
+.table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th {
+  background: var(--surface2); padding: 10px 14px; text-align: right;
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+  letter-spacing: 0.5px; white-space: nowrap; border-bottom: 1px solid var(--border);
+}
+thead th:first-child { text-align: left; }
+tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody td {
+  padding: 9px 14px; text-align: right;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text-muted);
+}
+tbody td:first-child {
+  text-align: left; font-family: 'Sarabun', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--accent);
+  white-space: nowrap;
+}
+tbody td.hi { color: var(--text); }
+tbody td.green { color: var(--green); }
+tbody td.red   { color: var(--red);   }
+tbody td.warn  { color: var(--accent);}
+tfoot td {
+  padding: 10px 14px; text-align: right;
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700;
+  background: var(--surface2); color: var(--accent);
+  border-top: 2px solid var(--accent);
+}
+tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; font-size: 13px; }
+
+/* SUMMARY TOTAL */
+.summary-total {
+  background: linear-gradient(135deg, #1c2330, #1a2033);
+  border: 1px solid var(--accent); border-radius: 12px;
+  padding: 22px 24px; text-align: center; position: relative; overflow: hidden;
+}
+.summary-total::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+}
+
+/* BALANCE ROW */
+.balance-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; font-size: 14px; border-bottom: 1px solid var(--border);
+}
+.balance-row:last-child { border-bottom: none; }
+.balance-key { color: var(--text-muted); }
+.balance-val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 14px; }
+.balance-box {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px;
+}
+
+/* STATUS BAR */
+#status_bar { font-size: 12px; color: var(--text-muted); font-family: 'IBM Plex Mono', monospace; }
+
+/* LOADING */
+#loading { text-align: center; padding: 60px 24px; color: var(--text-muted); font-size: 15px; }
+.spinner {
+  width: 36px; height: 36px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ALERT */
+.alert-row {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.3);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 8px;
+  font-size: 13px;
+}
+.alert-row.warn {
+  background: rgba(240,165,0,0.08); border-color: rgba(240,165,0,0.3);
+}
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+@media (max-width: 800px) {
+  .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  header { padding: 16px; }
+  main { padding: 20px 14px; }
+  .refill-row1 { grid-template-columns: 1fr 1fr !important; }
+  .refill-row1 .btn-primary { grid-column: span 2; height: 38px !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛢</div>
+    <div>
+      <div class="logo-text">แทงค์น้ำมัน</div>
+      <div class="logo-sub">Tank Management System</div>
+    </div>
+  </div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+    <span id="status_bar">—</span>
+    <button class="btn btn-ghost" onclick="reloadFirebase()" id="btn_reload">🔄 โหลดใหม่</button>
+    <button class="btn btn-ghost" onclick="window.location.href='index.html'" style="border-color:#3fb950; color:#3fb950; padding:6px 14px; font-size:12px;">⛽ หน้าหลัก</button>
+    <button class="btn btn-ghost" onclick="window.location.href='report.html'" style="border-color:#e05c2a; color:#e05c2a; padding:6px 14px; font-size:12px;">📊 รายงาน PDF</button>
+  </div>
+</header>
+
+<main>
+  <div id="loading"><div class="spinner"></div>กำลังโหลดข้อมูล...</div>
+  <div id="tank_content" style="display:none;">
+
+    <!-- ALERT AREA -->
+    <div id="alert_area" style="margin-bottom:20px;"></div>
+
+    <!-- TANK CAPACITY SETTINGS -->
+    <div class="section-label">⚙️ ตั้งค่าความจุแทงค์</div>
+    <div class="grid-3" style="margin-bottom:8px;">
+      <div class="card" style="border-color:rgba(248,81,73,0.3);">
+        <div class="card-title"><span class="dot" style="background:var(--g95)"></span> G95 — ความจุแทงค์</div>
+        <div class="field-group">
+          <div class="field-label">ความจุรวม (ลิตร)</div>
+          <input type="number" id="cap_g95" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
+          <input type="number" id="open_g95" step="1" placeholder="0" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
+          <input type="number" id="warn_g95" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(63,185,80,0.3);">
+        <div class="card-title"><span class="dot" style="background:var(--g91)"></span> G91 — ความจุแทงค์</div>
+        <div class="field-group">
+          <div class="field-label">ความจุรวม (ลิตร)</div>
+          <input type="number" id="cap_g91" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
+          <input type="number" id="open_g91" step="1" placeholder="0" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
+          <input type="number" id="warn_g91" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+      </div>
+      <div class="card" style="border-color:rgba(88,166,255,0.3);">
+        <div class="card-title"><span class="dot" style="background:var(--diesel)"></span> Diesel — ความจุแทงค์</div>
+        <div class="field-group">
+          <div class="field-label">ความจุรวม (ลิตร)</div>
+          <input type="number" id="cap_d" step="1" placeholder="เช่น 20000" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
+          <input type="number" id="open_d" step="1" placeholder="0" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
+          <input type="number" id="warn_d" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+        </div>
+      </div>
+    </div>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:24px;">⚠️ ค่าความจุแทงค์บันทึกไว้ในเครื่องนี้ (localStorage) และใช้คำนวณ % คงเหลือ</p>
+
+    <!-- CURRENT STOCK -->
+    <div class="section-label">📊 สถานะแทงค์ปัจจุบัน</div>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">คำนวณจากวันล่าสุดในฐานข้อมูล: <span id="latest_date_label" style="color:var(--accent); font-family:'IBM Plex Mono',monospace;">—</span></p>
+    <div class="grid-3">
+
+      <!-- G95 -->
+      <div class="card" style="border-color:rgba(248,81,73,0.4);">
+        <div class="card-title"><span class="dot" style="background:var(--g95)"></span> G95</div>
+        <div class="tank-gauge-wrap">
+          <span class="tank-gauge-icon">⛽</span>
+          <div class="tank-gauge-bg">
+            <div class="tank-gauge-fill" id="gauge_g95" style="width:0%;background:var(--g95);" data-pct=""></div>
+          </div>
+        </div>
+        <div class="balance-box">
+          <div class="balance-row">
+            <span class="balance-key">คงเหลือในแทงค์</span>
+            <span class="balance-val" id="rem_g95_val" style="color:var(--g95)">— ลิตร</span>
+          </div>
+          <div class="balance-row">
+            <span class="balance-key">ความจุแทงค์</span>
+            <span class="balance-val" id="cap_g95_disp">— ลิตร</span>
+          </div>
+          <div class="balance-row" style="border-bottom:none;">
+            <span class="balance-key">สถานะ</span>
+            <span id="status_g95"><span class="badge badge-ok">— %</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- G91 -->
+      <div class="card" style="border-color:rgba(63,185,80,0.4);">
+        <div class="card-title"><span class="dot" style="background:var(--g91)"></span> G91</div>
+        <div class="tank-gauge-wrap">
+          <span class="tank-gauge-icon">⛽</span>
+          <div class="tank-gauge-bg">
+            <div class="tank-gauge-fill" id="gauge_g91" style="width:0%;background:var(--g91);" data-pct=""></div>
+          </div>
+        </div>
+        <div class="balance-box">
+          <div class="balance-row">
+            <span class="balance-key">คงเหลือในแทงค์</span>
+            <span class="balance-val" id="rem_g91_val" style="color:var(--g91)">— ลิตร</span>
+          </div>
+          <div class="balance-row">
+            <span class="balance-key">ความจุแทงค์</span>
+            <span class="balance-val" id="cap_g91_disp">— ลิตร</span>
+          </div>
+          <div class="balance-row" style="border-bottom:none;">
+            <span class="balance-key">สถานะ</span>
+            <span id="status_g91"><span class="badge badge-ok">— %</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIESEL -->
+      <div class="card" style="border-color:rgba(88,166,255,0.4);">
+        <div class="card-title"><span class="dot" style="background:var(--diesel)"></span> Diesel (ตู้ 3+4)</div>
+        <div class="tank-gauge-wrap">
+          <span class="tank-gauge-icon">⛽</span>
+          <div class="tank-gauge-bg">
+            <div class="tank-gauge-fill" id="gauge_d" style="width:0%;background:var(--diesel);" data-pct=""></div>
+          </div>
+        </div>
+        <div class="balance-box">
+          <div class="balance-row">
+            <span class="balance-key">คงเหลือในแทงค์</span>
+            <span class="balance-val" id="rem_d_val" style="color:var(--diesel)">— ลิตร</span>
+          </div>
+          <div class="balance-row">
+            <span class="balance-key">ความจุแทงค์</span>
+            <span class="balance-val" id="cap_d_disp">— ลิตร</span>
+          </div>
+          <div class="balance-row" style="border-bottom:none;">
+            <span class="balance-key">สถานะ</span>
+            <span id="status_d"><span class="badge badge-ok">— %</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REFILL LOG -->
+    <div class="section-label">🚛 บันทึกน้ำมันเติมเข้าแทงค์ (รายวัน)</div>
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">➕ เพิ่มรายการเติมน้ำมันเข้าแทงค์</div>
+      <!-- Row 1: วันที่ + ปริมาณน้ำมัน + ปุ่มเพิ่ม -->
+      <div class="refill-row1" style="display:grid; grid-template-columns:auto 1fr 1fr 1fr auto; gap:10px; align-items:flex-end; margin-bottom:10px;">
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label">วันที่เติม</div>
+          <div style="display:flex; gap:4px;">
+            <select id="refill_day" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'Sarabun',sans-serif; font-size:13px; padding:7px 5px; width:58px;"></select>
+            <select id="refill_month" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'Sarabun',sans-serif; font-size:13px; padding:7px 5px; flex:1;"></select>
+            <select id="refill_year" style="background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-family:'Sarabun',sans-serif; font-size:13px; padding:7px 5px; width:76px;"></select>
+          </div>
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label" style="color:var(--g95);">G95 (ลิตร)</div>
+          <input type="number" id="refill_g95" step="0.01" placeholder="0.00" style="border-color:rgba(248,81,73,0.3);" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label" style="color:var(--g91);">G91 (ลิตร)</div>
+          <input type="number" id="refill_g91" step="0.01" placeholder="0.00" style="border-color:rgba(63,185,80,0.3);" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="field-group" style="margin-bottom:0;">
+          <div class="field-label" style="color:var(--diesel);">Diesel (ลิตร)</div>
+          <input type="number" id="refill_d" step="0.01" placeholder="0.00" style="border-color:rgba(88,166,255,0.3);" inputmode="decimal" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" style="white-space:nowrap; height:36px;" onclick="addRefill()">+ เพิ่ม</button>
+      </div>
+      <!-- Row 2: หมายเหตุ -->
+      <div class="field-group" style="margin-bottom:0;">
+        <div class="field-label">📝 หมายเหตุ (ถ้ามี)</div>
+        <input type="text" id="refill_note" placeholder="เช่น บริษัท ABC จัดส่ง, รถบรรทุกทะเบียน...">
+      </div>
+    </div>
+
+    <!-- REFILL HISTORY TABLE -->
+    <div class="section-label">📋 ประวัติการเติมน้ำมันเข้าแทงค์</div>
+    <div class="table-wrap" style="margin-bottom:28px;">
+      <table>
+        <thead>
+          <tr>
+            <th>วันที่</th>
+            <th>G95 (ลิตร)</th>
+            <th>G91 (ลิตร)</th>
+            <th>Diesel (ลิตร)</th>
+            <th>รวม (ลิตร)</th>
+            <th>หมายเหตุ</th>
+            <th style="text-align:center;">ลบ</th>
+          </tr>
+        </thead>
+        <tbody id="refill_tbody"></tbody>
+        <tfoot id="refill_tfoot"></tfoot>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- MONTHLY TANK CONSUMPTION FROM METER DATA -->
+    <div class="section-label">📉 การใช้น้ำมันจากมิเตอร์ (รายเดือน)</div>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">ดึงข้อมูลจากบันทึกมิเตอร์ประจำวัน (index.html) อัตโนมัติ — สรุปยอดรายเดือน</p>
+    <div class="table-wrap" style="margin-bottom:28px;">
+      <table>
+        <thead>
+          <tr>
+            <th>เดือน</th>
+            <th>G95 ใช้ (ลิตร)</th>
+            <th>G91 ใช้ (ลิตร)</th>
+            <th>Diesel ใช้ (ลิตร)</th>
+            <th>รวมใช้ (ลิตร)</th>
+
+          </tr>
+        </thead>
+        <tbody id="daily_tbody"></tbody>
+        <tfoot id="daily_tfoot"></tfoot>
+      </table>
+    </div>
+
+    <!-- FIREBASE ERROR -->
+    <div id="setup_card" style="display:none;">
+      <div style="background:var(--surface);border:1px solid var(--red);border-radius:12px;padding:28px;max-width:460px;margin:40px auto;text-align:center;">
+        <div style="font-size:32px;margin-bottom:14px;">🔥</div>
+        <h2 style="font-size:18px;margin-bottom:10px;">ไม่สามารถเชื่อมต่อ Firebase</h2>
+        <p style="font-size:13px;color:var(--text-muted);line-height:1.6;" id="setup_error"></p>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:16px;" onclick="reloadFirebase()">🔄 ลองใหม่</button>
+      </div>
+    </div>
+
+  </div><!-- /tank_content -->
+</main>
+
+<script>
+// ============================================================
+// CONSTANTS & STATE
+// ============================================================
+const MONTHS_TH = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+var sheetData = {}; // loaded from Firebase
+
+// Refill log stored in localStorage (ไม่ได้เก็บใน Firebase)
+var refillLog = [];
+
+// ============================================================
+// HELPERS
+// ============================================================
+function fmt(n, dec = 2) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return n.toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function parseKey(k) {
+  const p = k.split('-');
+  return { day: parseInt(p[0]), month: parseInt(p[1]), year2: parseInt(p[2]), shift: p[3] || '' };
+}
+
+function keyToDate(k) {
+  const p = parseKey(k);
+  const year = p.year2 < 100 ? 2500 + p.year2 - 543 : p.year2 - 543;
+  return new Date(year, p.month - 1, p.day);
+}
+
+function fmtKey(k) {
+  const p = parseKey(k);
+  const shiftIcon = p.shift === 'm' ? ' ☀️' : p.shift === 'e' ? ' 🌙' : '';
+  return `${String(p.day).padStart(2,'0')} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}${shiftIcon}`;
+} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}`;
+}
+
+function getSortedKeys() {
+  return Object.keys(sheetData).sort((a,b) => {
+    const pa = parseKey(a), pb = parseKey(b);
+    if (pa.year2 !== pb.year2) return pa.year2 - pb.year2;
+    if (pa.month !== pb.month) return pa.month - pb.month;
+    if (pa.day !== pb.day) return pa.day - pb.day;
+    const so = { 'm': 0, 'e': 1, '': 0 };
+    return (so[pa.shift]||0) - (so[pb.shift]||0);
+  });
+}
+
+function computeDay(d) {
+  const g95n_l = Math.max(0, (d.g95n_close||0) - (d.g95n_open||0));
+  const g95l_l = Math.max(0, (d.g95l_close||0) - (d.g95l_open||0));
+  const g95_l  = g95n_l + g95l_l;
+  const g91n_l = Math.max(0, (d.g91n_close||0) - (d.g91n_open||0));
+  const g91l_l = Math.max(0, (d.g91l_close||0) - (d.g91l_open||0));
+  const g91_l  = g91n_l + g91l_l;
+  const dn_l   = Math.max(0, (d.dn_close||0)  - (d.dn_open||0));
+  const dl_l   = Math.max(0, (d.dl_close||0)  - (d.dl_open||0));
+  const d4n_l  = Math.max(0, (d.d4n_close||0) - (d.d4n_open||0));
+  const d4l_l  = Math.max(0, (d.d4l_close||0) - (d.d4l_open||0));
+  const d_l    = dn_l + dl_l + d4n_l + d4l_l;
+  // tank_in fields (บันทึกจากหน้า index)
+  const in_g95 = d.tank_in_g95 || 0;
+  const in_g91 = d.tank_in_g91 || 0;
+  const in_d   = d.tank_in_d   || 0;
+  return { g95_l, g91_l, d_l, in_g95, in_g91, in_d };
+}
+
+// ============================================================
+// LOCAL STORAGE — CAP & REFILL
+// ============================================================
+function loadCap() {
+  // ── Defaults ──
+  const DEF = { cap_g95:10000, cap_g91:10000, cap_d:20000,
+                open_g95:4200, open_g91:0, open_d:7400,
+                warn_g95:20, warn_g91:20, warn_d:20 };
+  try {
+    const raw = localStorage.getItem('tank_caps');
+    const c = raw ? JSON.parse(raw) : {};
+    const v = k => (c[k] !== undefined ? c[k] : DEF[k]);
+    document.getElementById('cap_g95').value  = v('cap_g95');
+    document.getElementById('cap_g91').value  = v('cap_g91');
+    document.getElementById('cap_d').value    = v('cap_d');
+    document.getElementById('open_g95').value = v('open_g95');
+    document.getElementById('open_g91').value = v('open_g91');
+    document.getElementById('open_d').value   = v('open_d');
+    document.getElementById('warn_g95').value = v('warn_g95');
+    document.getElementById('warn_g91').value = v('warn_g91');
+    document.getElementById('warn_d').value   = v('warn_d');
+  } catch(e) {
+    document.getElementById('cap_g95').value  = DEF.cap_g95;
+    document.getElementById('cap_g91').value  = DEF.cap_g91;
+    document.getElementById('cap_d').value    = DEF.cap_d;
+    document.getElementById('open_g95').value = DEF.open_g95;
+    document.getElementById('open_g91').value = DEF.open_g91;
+    document.getElementById('open_d').value   = DEF.open_d;
+  }
+}
+
+function saveCap() {
+  try {
+    localStorage.setItem('tank_caps', JSON.stringify({
+      cap_g95:  parseFloat(document.getElementById('cap_g95').value)  || 0,
+      cap_g91:  parseFloat(document.getElementById('cap_g91').value)  || 0,
+      cap_d:    parseFloat(document.getElementById('cap_d').value)    || 0,
+      open_g95: parseFloat(document.getElementById('open_g95').value) || 0,
+      open_g91: parseFloat(document.getElementById('open_g91').value) || 0,
+      open_d:   parseFloat(document.getElementById('open_d').value)   || 0,
+      warn_g95: parseFloat(document.getElementById('warn_g95').value) || 20,
+      warn_g91: parseFloat(document.getElementById('warn_g91').value) || 20,
+      warn_d:   parseFloat(document.getElementById('warn_d').value)   || 20,
+    }));
+  } catch(e) {}
+}
+
+function loadRefillLog() {
+  try {
+    const s = localStorage.getItem('tank_refill_log');
+    if (s) {
+      refillLog = JSON.parse(s);
+    } else {
+      // Seed: การซื้อน้ำมันครั้งล่าสุด (ตั้งต้น)
+      const today = new Date().toISOString().slice(0,10);
+      refillLog = [
+        { date: today, g95: 3000, g91: 0, d: 4000, note: 'ซื้อเติมแทงค์ (ยอดตั้งต้น)', id: 1 }
+      ];
+      saveRefillLog();
+    }
+  } catch(e) { refillLog = []; }
+}
+
+function saveRefillLog() {
+  try { localStorage.setItem('tank_refill_log', JSON.stringify(refillLog)); } catch(e) {}
+}
+
+// ============================================================
+// REFILL CRUD
+// ============================================================
+// ============================================================
+// REFILL CRUD — each row: { date, g95, g91, d, note, id }
+// ============================================================
+function getRefillDateISO() {
+  const d = parseInt(document.getElementById('refill_day').value);
+  const m = parseInt(document.getElementById('refill_month').value);
+  const yBE = parseInt(document.getElementById('refill_year').value);
+  if (!d || !m || !yBE) return '';
+  const yCE = yBE - 543;
+  return `${yCE}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function addRefill() {
+  const dateVal = getRefillDateISO();
+  const g95Val  = parseFloat(document.getElementById('refill_g95').value) || 0;
+  const g91Val  = parseFloat(document.getElementById('refill_g91').value) || 0;
+  const dVal    = parseFloat(document.getElementById('refill_d').value)   || 0;
+  const noteVal = document.getElementById('refill_note').value.trim();
+
+  if (!dateVal) { alert('กรุณาระบุวันที่'); return; }
+  if (g95Val <= 0 && g91Val <= 0 && dVal <= 0) { alert('กรุณาระบุปริมาณน้ำมันอย่างน้อย 1 ชนิด'); return; }
+
+  refillLog.push({ date: dateVal, g95: g95Val, g91: g91Val, d: dVal, note: noteVal, id: Date.now() });
+  refillLog.sort((a,b) => a.date.localeCompare(b.date));
+  saveRefillLog();
+
+  // clear inputs
+  document.getElementById('refill_g95').value  = '';
+  document.getElementById('refill_g91').value  = '';
+  document.getElementById('refill_d').value    = '';
+  document.getElementById('refill_note').value = '';
+
+  calcAll();
+}
+
+function deleteRefill(id) {
+  if (!confirm('ลบรายการนี้?')) return;
+  refillLog = refillLog.filter(r => r.id !== id);
+  saveRefillLog();
+  calcAll();
+}
+
+// ============================================================
+// MAIN CALC & RENDER
+// ============================================================
+function calcAll() {
+  const keys = getSortedKeys();
+
+  // Cap & warn thresholds
+  const cap_g95  = parseFloat(document.getElementById('cap_g95').value)  || 0;
+  const cap_g91  = parseFloat(document.getElementById('cap_g91').value)  || 0;
+  const cap_d    = parseFloat(document.getElementById('cap_d').value)    || 0;
+  const warn_g95 = (parseFloat(document.getElementById('warn_g95').value) || 20) / 100;
+  const warn_g91 = (parseFloat(document.getElementById('warn_g91').value) || 20) / 100;
+  const warn_d   = (parseFloat(document.getElementById('warn_d').value)   || 20) / 100;
+
+  // Cap display
+  document.getElementById('cap_g95_disp').textContent = cap_g95 > 0 ? fmt(cap_g95, 0) + ' ลิตร' : '— ลิตร';
+  document.getElementById('cap_g91_disp').textContent = cap_g91 > 0 ? fmt(cap_g91, 0) + ' ลิตร' : '— ลิตร';
+  document.getElementById('cap_d_disp').textContent   = cap_d   > 0 ? fmt(cap_d,   0) + ' ลิตร' : '— ลิตร';
+
+  // Latest date label
+  const latestKey = keys.length > 0 ? keys[keys.length - 1] : null;
+  document.getElementById('latest_date_label').textContent = latestKey ? fmtKey(latestKey) : '(ยังไม่มีข้อมูล)';
+
+  // ── Compute running balance from meter data (all days) ──
+  // สะสมลิตรขาย + สะสมลิตรเติม (จาก tank_in ใน sheetData)
+  let tot_used_g95 = 0, tot_used_g91 = 0, tot_used_d = 0;
+  let tot_tankIn_g95 = 0, tot_tankIn_g91 = 0, tot_tankIn_d = 0;
+
+  keys.forEach(k => {
+    const c = computeDay(sheetData[k]);
+    tot_used_g95 += c.g95_l;
+    tot_used_g91 += c.g91_l;
+    tot_used_d   += c.d_l;
+    tot_tankIn_g95 += c.in_g95;
+    tot_tankIn_g91 += c.in_g91;
+    tot_tankIn_d   += c.in_d;
+  });
+
+  // Refill log totals
+  let rf_g95 = 0, rf_g91 = 0, rf_d = 0;
+  refillLog.forEach(r => {
+    rf_g95 += r.g95 || (r.type==='g95' ? r.liter : 0);
+    rf_g91 += r.g91 || (r.type==='g91' ? r.liter : 0);
+    rf_d   += r.d   || (r.type==='d'   ? r.liter : 0);
+  });
+
+  // Opening stock (ยอดยกมา) จากการตั้งค่า
+  const open_g95 = parseFloat(document.getElementById('open_g95').value) || 0;
+  const open_g91 = parseFloat(document.getElementById('open_g91').value) || 0;
+  const open_d   = parseFloat(document.getElementById('open_d').value)   || 0;
+
+  // Final remaining = opening stock + refill log + tank_in − total used
+  const rem_g95 = open_g95 + rf_g95 + tot_tankIn_g95 - tot_used_g95;
+  const rem_g91 = open_g91 + rf_g91 + tot_tankIn_g91 - tot_used_g91;
+  const rem_d   = open_d   + rf_d   + tot_tankIn_d   - tot_used_d;
+
+  const srcLabel = refillLog.length > 0 ? 'จากบันทึกเติมแทงค์' : 'จากยอดยกมา';
+
+  // ── Gauge & status ──
+  function updateTank(gaugeId, statusId, remValId, rem, cap, warnPct) {
+    const pct = cap > 0 ? Math.min(100, Math.max(0, (rem / cap) * 100)) : null;
+    const gauge = document.getElementById(gaugeId);
+    const remEl = document.getElementById(remValId);
+    const statusEl = document.getElementById(statusId);
+
+    if (remEl) remEl.textContent = fmt(rem, 2) + ' ลิตร';
+
+    if (gauge) {
+      gauge.style.width = pct !== null ? pct.toFixed(1) + '%' : '0%';
+      gauge.setAttribute('data-pct', pct !== null ? pct.toFixed(1) + '%' : '');
+      if (pct === null) {
+        gauge.style.background = 'var(--text-muted)';
+      } else if (pct < warnPct * 100 * 0.5) {
+        gauge.style.background = 'var(--red)';
+      } else if (pct < warnPct * 100) {
+        gauge.style.background = 'var(--accent)';
+      } else {
+        gauge.style.background = gaugeId.includes('g95') ? 'var(--g95)' :
+                                  gaugeId.includes('g91') ? 'var(--g91)' : 'var(--diesel)';
+      }
+    }
+
+    if (statusEl) {
+      if (pct === null) {
+        statusEl.innerHTML = '<span class="badge badge-ok">ยังไม่ตั้งค่าความจุ</span>';
+      } else if (pct < warnPct * 100 * 0.5) {
+        statusEl.innerHTML = `<span class="badge badge-low">🔴 วิกฤต ${pct.toFixed(1)}%</span>`;
+      } else if (pct < warnPct * 100) {
+        statusEl.innerHTML = `<span class="badge badge-warn">🟡 เหลือน้อย ${pct.toFixed(1)}%</span>`;
+      } else {
+        statusEl.innerHTML = `<span class="badge badge-ok">🟢 ปกติ ${pct.toFixed(1)}%</span>`;
+      }
+    }
+  }
+
+  updateTank('gauge_g95', 'status_g95', 'rem_g95_val', rem_g95, cap_g95, warn_g95);
+  updateTank('gauge_g91', 'status_g91', 'rem_g91_val', rem_g91, cap_g91, warn_g91);
+  updateTank('gauge_d',   'status_d',   'rem_d_val',   rem_d,   cap_d,   warn_d);
+
+  // ── Alerts ──
+  const alertArea = document.getElementById('alert_area');
+  alertArea.innerHTML = '';
+  function addAlert(msg, isWarn) {
+    const div = document.createElement('div');
+    div.className = 'alert-row' + (isWarn ? ' warn' : '');
+    div.innerHTML = isWarn ? `⚠️ ${msg}` : `🚨 ${msg}`;
+    alertArea.appendChild(div);
+  }
+  const warnPct_g95 = (parseFloat(document.getElementById('warn_g95').value)||20);
+  const warnPct_g91 = (parseFloat(document.getElementById('warn_g91').value)||20);
+  const warnPct_d   = (parseFloat(document.getElementById('warn_d').value)||20);
+  if (cap_g95 > 0) {
+    const pct = (rem_g95/cap_g95)*100;
+    if (pct < warnPct_g95/2) addAlert(`G95 เหลือน้อยมาก (${pct.toFixed(1)}%) — ต้องเติมด่วน!`, false);
+    else if (pct < warnPct_g95) addAlert(`G95 เหลือน้อย (${pct.toFixed(1)}%) — ควรเติมเร็วๆ นี้`, true);
+  }
+  if (cap_g91 > 0) {
+    const pct = (rem_g91/cap_g91)*100;
+    if (pct < warnPct_g91/2) addAlert(`G91 เหลือน้อยมาก (${pct.toFixed(1)}%) — ต้องเติมด่วน!`, false);
+    else if (pct < warnPct_g91) addAlert(`G91 เหลือน้อย (${pct.toFixed(1)}%) — ควรเติมเร็วๆ นี้`, true);
+  }
+  if (cap_d > 0) {
+    const pct = (rem_d/cap_d)*100;
+    if (pct < warnPct_d/2) addAlert(`Diesel เหลือน้อยมาก (${pct.toFixed(1)}%) — ต้องเติมด่วน!`, false);
+    else if (pct < warnPct_d) addAlert(`Diesel เหลือน้อย (${pct.toFixed(1)}%) — ควรเติมเร็วๆ นี้`, true);
+  }
+
+  // ── Refill totals summary ──
+  const totRef = rf_g95 + rf_g91 + rf_d;
+
+  // ── Refill history table ──
+  const tbody = document.getElementById('refill_tbody');
+  const tfoot = document.getElementById('refill_tfoot');
+
+  if (refillLog.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">ยังไม่มีรายการเติมน้ำมัน — กรอกด้านบนเพื่อเพิ่ม</td></tr>`;
+    tfoot.innerHTML = '';
+  } else {
+    tbody.innerHTML = [...refillLog].reverse().map(r => {
+      const g95v = r.g95 || (r.type==='g95'?r.liter:0) || 0;
+      const g91v = r.g91 || (r.type==='g91'?r.liter:0) || 0;
+      const dv   = r.d   || (r.type==='d'  ?r.liter:0) || 0;
+      const tot  = g95v + g91v + dv;
+      return `<tr>
+        <td>${r.date}</td>
+        <td style="color:var(--g95);">${g95v > 0 ? fmt(g95v,2) : '—'}</td>
+        <td style="color:var(--g91);">${g91v > 0 ? fmt(g91v,2) : '—'}</td>
+        <td style="color:var(--diesel);">${dv > 0 ? fmt(dv,2) : '—'}</td>
+        <td class="hi">${fmt(tot,2)}</td>
+        <td style="text-align:left; color:var(--text-muted);">${r.note || '—'}</td>
+        <td style="text-align:center;">
+          <button onclick="deleteRefill(${r.id})"
+            style="background:none; border:none; color:var(--red); cursor:pointer; font-size:14px; padding:2px 6px;">✕</button>
+        </td>
+      </tr>`;
+    }).join('');
+    tfoot.innerHTML = `<tr>
+      <td>รวม ${refillLog.length} รายการ</td>
+      <td style="color:var(--g95);">${fmt(rf_g95,2)}</td>
+      <td style="color:var(--g91);">${fmt(rf_g91,2)}</td>
+      <td style="color:var(--diesel);">${fmt(rf_d,2)}</td>
+      <td>${fmt(totRef,2)}</td>
+      <td></td><td></td>
+    </tr>`;
+  }
+
+  // ── Monthly usage table ──
+  const dtbody = document.getElementById('daily_tbody');
+  const dtfoot = document.getElementById('daily_tfoot');
+
+  if (keys.length === 0) {
+    dtbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:24px;">ยังไม่มีข้อมูลวันทำการ</td></tr>`;
+    dtfoot.innerHTML = '';
+  } else {
+    // Group keys by month-year
+    const monthMap = {};
+    keys.forEach(k => {
+      const p = parseKey(k);
+      const mKey = `${p.month}-${p.year2}`;
+      if (!monthMap[mKey]) monthMap[mKey] = [];
+      monthMap[mKey].push(k);
+    });
+
+    // Sort months ascending
+    const sortedMonths = Object.keys(monthMap).sort((a, b) => {
+      const [am, ay] = a.split('-').map(Number);
+      const [bm, by] = b.split('-').map(Number);
+      if (ay !== by) return ay - by;
+      return am - bm;
+    });
+
+    let sg95=0, sg91=0, sd=0, stot=0, sin_g95=0, sin_g91=0, sin_d=0;
+    let srf_g95=0, srf_g91=0, srf_d=0;
+
+    // Build refill-log totals per month (key: "YYYY-MM")
+    const rfByMonth = {};
+    refillLog.forEach(r => {
+      const mKey = r.date.substring(0, 7); // "YYYY-MM"
+      if (!rfByMonth[mKey]) rfByMonth[mKey] = {g95:0, g91:0, d:0};
+      rfByMonth[mKey].g95 += r.g95 || 0;
+      rfByMonth[mKey].g91 += r.g91 || 0;
+      rfByMonth[mKey].d   += r.d   || 0;
+    });
+
+    dtbody.innerHTML = [...sortedMonths].reverse().map(mKey => {
+      const [m, y] = mKey.split('-').map(Number);
+      const label = `${MONTHS_TH[m]} 25${String(y).padStart(2,'0')}`;
+      let mg95=0, mg91=0, md=0, min_g95=0, min_g91=0, min_d=0;
+      monthMap[mKey].forEach(k => {
+        const c = computeDay(sheetData[k]);
+        mg95+=c.g95_l; mg91+=c.g91_l; md+=c.d_l;
+        min_g95+=c.in_g95; min_g91+=c.in_g91; min_d+=c.in_d;
+      });
+      // Refill log for this month (ISO month key "YYYY-MM")
+      const yCE = 2500 + y - 543;
+      const isoMKey = `${yCE}-${String(m).padStart(2,'0')}`;
+      const rf = rfByMonth[isoMKey] || {g95:0, g91:0, d:0};
+      const rfTot = rf.g95 + rf.g91 + rf.d;
+
+      sg95+=mg95; sg91+=mg91; sd+=md; stot+=mg95+mg91+md;
+      sin_g95+=min_g95; sin_g91+=min_g91; sin_d+=min_d;
+      srf_g95+=rf.g95; srf_g91+=rf.g91; srf_d+=rf.d;
+      return `<tr>
+        <td>${label}</td>
+        <td style="color:var(--g95);">${fmt(mg95,2)}</td>
+        <td style="color:var(--g91);">${fmt(mg91,2)}</td>
+        <td style="color:var(--diesel);">${fmt(md,2)}</td>
+        <td class="hi">${fmt(mg95+mg91+md,2)}</td>
+
+      </tr>`;
+    }).join('');
+
+    dtfoot.innerHTML = `<tr>
+      <td>รวม ${sortedMonths.length} เดือน (${keys.length} วัน)</td>
+      <td>${fmt(sg95,2)}</td>
+      <td>${fmt(sg91,2)}</td>
+      <td>${fmt(sd,2)}</td>
+      <td>${fmt(stot,2)}</td>
+
+    </tr>`;
+  }
+
+  // Status bar
+  document.getElementById('status_bar').textContent = `🟢 Real-time · ${keys.length} วัน · ${srcLabel}`;
+}
+
+// ============================================================
+// INIT DATE
+// ============================================================
+function initDate() {
+  const today = new Date();
+  const day   = today.getDate();
+  const month = today.getMonth() + 1;
+  const yearBE = today.getFullYear() + 543;
+
+  // Populate day options
+  const dayEl = document.getElementById('refill_day');
+  dayEl.innerHTML = '';
+  for (let d = 1; d <= 31; d++) {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = String(d).padStart(2,'0');
+    if (d === day) opt.selected = true;
+    dayEl.appendChild(opt);
+  }
+
+  // Populate month options (Thai)
+  const monthEl = document.getElementById('refill_month');
+  monthEl.innerHTML = '';
+  for (let m = 1; m <= 12; m++) {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = MONTHS_TH[m];
+    if (m === month) opt.selected = true;
+    monthEl.appendChild(opt);
+  }
+
+  // Populate year options (พ.ศ. ±5 years)
+  const yearEl = document.getElementById('refill_year');
+  yearEl.innerHTML = '';
+  for (let y = yearBE - 3; y <= yearBE + 1; y++) {
+    const opt = document.createElement('option');
+    opt.value = y;
+    opt.textContent = y;
+    if (y === yearBE) opt.selected = true;
+    yearEl.appendChild(opt);
+  }
+}
+
+// ============================================================
+// FIREBASE
+// ============================================================
+window.reloadFirebase = async function() {
+  const btn = document.getElementById('btn_reload');
+  const orig = btn.textContent;
+  btn.textContent = '⏳...'; btn.disabled = true;
+  try {
+    if (window._fbLoadFn) await window._fbLoadFn();
+    calcAll();
+    btn.textContent = '✅ โหลดแล้ว';
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1500);
+  } catch(e) {
+    btn.textContent = '❌ ล้มเหลว'; btn.disabled = false;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+  }
+};
+</script>
+
+<script type="module">
+import { initializeApp }    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, getDoc, onSnapshot }
+                             from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAZOWoDHEiGIxkYIRgRkNWXjNWGLE4wgFQ",
+  authDomain: "gas-station-dd6e9.firebaseapp.com",
+  projectId: "gas-station-dd6e9",
+  storageBucket: "gas-station-dd6e9.firebasestorage.app",
+  messagingSenderId: "94552958790",
+  appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
+};
+
+const app = initializeApp(FIREBASE_CONFIG);
+const db  = getFirestore(app);
+let _unsub = null;
+
+function mergeData(loaded) {
+  Object.keys(sheetData).forEach(k => delete sheetData[k]);
+  Object.assign(sheetData, loaded);
+}
+
+async function loadFromFirebase() {
+  const docRef = doc(db, 'gas_station', 'daily_records');
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) return {};
+  return snap.data().records || {};
+}
+
+window._fbLoadFn = async function() {
+  mergeData(await loadFromFirebase());
+};
+
+function startSync() {
+  if (_unsub) _unsub();
+  const docRef = doc(db, 'gas_station', 'daily_records');
+  _unsub = onSnapshot(docRef, snap => {
+    if (!snap.exists()) return;
+    mergeData(snap.data().records || {});
+    calcAll();
+  });
+}
+
+async function initLoad() {
+  try {
+    mergeData(await loadFromFirebase());
+    document.getElementById('loading').style.display      = 'none';
+    document.getElementById('tank_content').style.display = 'block';
+    loadCap();
+    loadRefillLog();
+    initDate();
+    calcAll();
+    startSync();
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup_card').style.display = 'block';
+    document.getElementById('setup_error').textContent = '❌ ' + e.message;
+  }
+}
+
+initLoad();
+</script>
+</body>
+</html>
