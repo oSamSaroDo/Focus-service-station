@@ -116,7 +116,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
 input[type="number"], input[type="text"] {
   width: 100%; background: var(--bg); border: 1px solid var(--border);
   border-radius: 6px; color: var(--text);
-  font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 16px;
   padding: 7px 10px; transition: border-color 0.2s, box-shadow 0.2s;
   -moz-appearance: textfield;
 }
@@ -257,8 +257,8 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
   <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
     <span id="status_bar">—</span>
     <button class="btn btn-ghost" onclick="reloadFirebase()" id="btn_reload">🔄 โหลดใหม่</button>
-    <button class="btn btn-ghost" onclick="window.location.href='index.html'" style="border-color:#3fb950; color:#3fb950; padding:6px 14px; font-size:12px;">⛽ หน้าหลัก</button>
-    <button class="btn btn-ghost" onclick="window.location.href='report.html'" style="border-color:#e05c2a; color:#e05c2a; padding:6px 14px; font-size:12px;">📊 รายงาน PDF</button>
+    <button class="btn btn-ghost" onclick="window.location.href='index.html'">← หน้าหลัก</button>
+    <button class="btn btn-ghost" onclick="window.location.href='report.html'" style="border-color:#e05c2a; color:#e05c2a;">📊 รายงาน</button>
   </div>
 </header>
 
@@ -276,45 +276,45 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
         <div class="card-title"><span class="dot" style="background:var(--g95)"></span> G95 — ความจุแทงค์</div>
         <div class="field-group">
           <div class="field-label">ความจุรวม (ลิตร)</div>
-          <input type="number" id="cap_g95" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="cap_g95" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();">
         </div>
         <div class="field-group">
           <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
-          <input type="number" id="open_g95" step="1" placeholder="0" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="open_g95" step="1" placeholder="0" oninput="saveCap(); calcAll();">
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
-          <input type="number" id="warn_g95" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="warn_g95" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();">
         </div>
       </div>
       <div class="card" style="border-color:rgba(63,185,80,0.3);">
         <div class="card-title"><span class="dot" style="background:var(--g91)"></span> G91 — ความจุแทงค์</div>
         <div class="field-group">
           <div class="field-label">ความจุรวม (ลิตร)</div>
-          <input type="number" id="cap_g91" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="cap_g91" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();">
         </div>
         <div class="field-group">
           <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
-          <input type="number" id="open_g91" step="1" placeholder="0" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="open_g91" step="1" placeholder="0" oninput="saveCap(); calcAll();">
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
-          <input type="number" id="warn_g91" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="warn_g91" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();">
         </div>
       </div>
       <div class="card" style="border-color:rgba(88,166,255,0.3);">
         <div class="card-title"><span class="dot" style="background:var(--diesel)"></span> Diesel — ความจุแทงค์</div>
         <div class="field-group">
           <div class="field-label">ความจุรวม (ลิตร)</div>
-          <input type="number" id="cap_d" step="1" placeholder="เช่น 20000" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="cap_d" step="1" placeholder="เช่น 20000" oninput="saveCap(); calcAll();">
         </div>
         <div class="field-group">
           <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
-          <input type="number" id="open_d" step="1" placeholder="0" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="open_d" step="1" placeholder="0" oninput="saveCap(); calcAll();">
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
-          <input type="number" id="warn_d" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();" inputmode="decimal" autocomplete="off">
+          <input type="number" id="warn_d" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();">
         </div>
       </div>
     </div>
@@ -417,15 +417,15 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label" style="color:var(--g95);">G95 (ลิตร)</div>
-          <input type="number" id="refill_g95" step="0.01" placeholder="0.00" style="border-color:rgba(248,81,73,0.3);" inputmode="decimal" autocomplete="off">
+          <input type="number" id="refill_g95" step="0.01" placeholder="0.00" style="border-color:rgba(248,81,73,0.3);">
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label" style="color:var(--g91);">G91 (ลิตร)</div>
-          <input type="number" id="refill_g91" step="0.01" placeholder="0.00" style="border-color:rgba(63,185,80,0.3);" inputmode="decimal" autocomplete="off">
+          <input type="number" id="refill_g91" step="0.01" placeholder="0.00" style="border-color:rgba(63,185,80,0.3);">
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label" style="color:var(--diesel);">Diesel (ลิตร)</div>
-          <input type="number" id="refill_d" step="0.01" placeholder="0.00" style="border-color:rgba(88,166,255,0.3);" inputmode="decimal" autocomplete="off">
+          <input type="number" id="refill_d" step="0.01" placeholder="0.00" style="border-color:rgba(88,166,255,0.3);">
         </div>
         <button class="btn btn-primary" style="white-space:nowrap; height:36px;" onclick="addRefill()">+ เพิ่ม</button>
       </div>
@@ -512,19 +512,26 @@ function fmt(n, dec = 2) {
 
 function parseKey(k) {
   const p = k.split('-');
-  return { day: parseInt(p[0]), month: parseInt(p[1]), year2: parseInt(p[2]), shift: p[3] || '' };
+  // รองรับ key แบบใหม่ "d-m-yy-m"/"d-m-yy-e" และ key เก่า "d-m-yy"
+  return {
+    day:   parseInt(p[0]),
+    month: parseInt(p[1]),
+    year2: parseInt(p[2]),
+    shift: p[3] || ''
+  };
 }
 
 function keyToDate(k) {
   const p = parseKey(k);
-  const year = p.year2 < 100 ? 2500 + p.year2 - 543 : p.year2 - 543;
-  return new Date(year, p.month - 1, p.day);
+  // year2 เป็น 2 หลักท้ายของ พ.ศ. เช่น 69 = พ.ศ. 2569 = ค.ศ. 2026
+  const yearCE = (p.year2 < 100 ? 2500 + p.year2 : p.year2) - 543;
+  return new Date(yearCE, p.month - 1, p.day);
 }
 
 function fmtKey(k) {
-  var p = parseKey(k);
-  var si = p.shift === 'm' ? ' ☀️' : p.shift === 'e' ? ' 🌙' : '';
-  return String(p.day).padStart(2,'0') + ' ' + (MONTHS_TH[p.month]||'') + ' 25' + String(p.year2).padStart(2,'0') + si;
+  const p = parseKey(k);
+  const shiftLabel = p.shift === 'm' ? ' ☀️' : p.shift === 'e' ? ' 🌙' : '';
+  return `${String(p.day).padStart(2,'0')} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}${shiftLabel}`;
 }
 
 function getSortedKeys() {
@@ -533,6 +540,7 @@ function getSortedKeys() {
     if (pa.year2 !== pb.year2) return pa.year2 - pb.year2;
     if (pa.month !== pb.month) return pa.month - pb.month;
     if (pa.day !== pb.day) return pa.day - pb.day;
+    // กะเช้า (m) ก่อน กะเย็น (e)
     const so = { 'm': 0, 'e': 1, '': 0 };
     return (so[pa.shift]||0) - (so[pb.shift]||0);
   });
@@ -558,70 +566,65 @@ function computeDay(d) {
 }
 
 // ============================================================
+// iOS-SAFE STORAGE WRAPPER
+// iOS Safari Private Mode blocks localStorage → fallback to memory
+// ============================================================
+const _memStore = {};
+function storeGet(key) {
+  try { return localStorage.getItem(key); } catch(e) { return _memStore[key] || null; }
+}
+function storeSet(key, val) {
+  try { localStorage.setItem(key, val); } catch(e) { _memStore[key] = val; }
+}
+
+// ============================================================
 // LOCAL STORAGE — CAP & REFILL
 // ============================================================
 function loadCap() {
-  // ── Defaults ──
   const DEF = { cap_g95:10000, cap_g91:10000, cap_d:20000,
-                open_g95:4200, open_g91:0, open_d:7400,
+                open_g95:0, open_g91:0, open_d:0,
                 warn_g95:20, warn_g91:20, warn_d:20 };
+  let c = {};
   try {
-    const raw = localStorage.getItem('tank_caps');
-    const c = raw ? JSON.parse(raw) : {};
-    const v = k => (c[k] !== undefined ? c[k] : DEF[k]);
-    document.getElementById('cap_g95').value  = v('cap_g95');
-    document.getElementById('cap_g91').value  = v('cap_g91');
-    document.getElementById('cap_d').value    = v('cap_d');
-    document.getElementById('open_g95').value = v('open_g95');
-    document.getElementById('open_g91').value = v('open_g91');
-    document.getElementById('open_d').value   = v('open_d');
-    document.getElementById('warn_g95').value = v('warn_g95');
-    document.getElementById('warn_g91').value = v('warn_g91');
-    document.getElementById('warn_d').value   = v('warn_d');
-  } catch(e) {
-    document.getElementById('cap_g95').value  = DEF.cap_g95;
-    document.getElementById('cap_g91').value  = DEF.cap_g91;
-    document.getElementById('cap_d').value    = DEF.cap_d;
-    document.getElementById('open_g95').value = DEF.open_g95;
-    document.getElementById('open_g91').value = DEF.open_g91;
-    document.getElementById('open_d').value   = DEF.open_d;
-  }
+    const raw = storeGet('tank_caps');
+    c = raw ? JSON.parse(raw) : {};
+  } catch(e) { c = {}; }
+  const val = k => (c[k] !== undefined && c[k] !== null ? c[k] : DEF[k]);
+  document.getElementById('cap_g95').value  = val('cap_g95');
+  document.getElementById('cap_g91').value  = val('cap_g91');
+  document.getElementById('cap_d').value    = val('cap_d');
+  document.getElementById('open_g95').value = val('open_g95');
+  document.getElementById('open_g91').value = val('open_g91');
+  document.getElementById('open_d').value   = val('open_d');
+  document.getElementById('warn_g95').value = val('warn_g95');
+  document.getElementById('warn_g91').value = val('warn_g91');
+  document.getElementById('warn_d').value   = val('warn_d');
 }
 
 function saveCap() {
-  try {
-    localStorage.setItem('tank_caps', JSON.stringify({
-      cap_g95:  parseFloat(document.getElementById('cap_g95').value)  || 0,
-      cap_g91:  parseFloat(document.getElementById('cap_g91').value)  || 0,
-      cap_d:    parseFloat(document.getElementById('cap_d').value)    || 0,
-      open_g95: parseFloat(document.getElementById('open_g95').value) || 0,
-      open_g91: parseFloat(document.getElementById('open_g91').value) || 0,
-      open_d:   parseFloat(document.getElementById('open_d').value)   || 0,
-      warn_g95: parseFloat(document.getElementById('warn_g95').value) || 20,
-      warn_g91: parseFloat(document.getElementById('warn_g91').value) || 20,
-      warn_d:   parseFloat(document.getElementById('warn_d').value)   || 20,
-    }));
-  } catch(e) {}
+  storeSet('tank_caps', JSON.stringify({
+    cap_g95:  parseFloat(document.getElementById('cap_g95').value)  || 0,
+    cap_g91:  parseFloat(document.getElementById('cap_g91').value)  || 0,
+    cap_d:    parseFloat(document.getElementById('cap_d').value)    || 0,
+    open_g95: parseFloat(document.getElementById('open_g95').value) || 0,
+    open_g91: parseFloat(document.getElementById('open_g91').value) || 0,
+    open_d:   parseFloat(document.getElementById('open_d').value)   || 0,
+    warn_g95: parseFloat(document.getElementById('warn_g95').value) || 20,
+    warn_g91: parseFloat(document.getElementById('warn_g91').value) || 20,
+    warn_d:   parseFloat(document.getElementById('warn_d').value)   || 20,
+  }));
 }
 
 function loadRefillLog() {
   try {
-    const s = localStorage.getItem('tank_refill_log');
-    if (s) {
-      refillLog = JSON.parse(s);
-    } else {
-      // Seed: การซื้อน้ำมันครั้งล่าสุด (ตั้งต้น)
-      const today = new Date().toISOString().slice(0,10);
-      refillLog = [
-        { date: today, g95: 3000, g91: 0, d: 4000, note: 'ซื้อเติมแทงค์ (ยอดตั้งต้น)', id: 1 }
-      ];
-      saveRefillLog();
-    }
+    const s = storeGet('tank_refill_log');
+    // ถ้ามีข้อมูลใน storage ให้โหลด ถ้าไม่มีให้เริ่มด้วย array ว่าง (ไม่ seed อัตโนมัติ)
+    refillLog = s ? JSON.parse(s) : [];
   } catch(e) { refillLog = []; }
 }
 
 function saveRefillLog() {
-  try { localStorage.setItem('tank_refill_log', JSON.stringify(refillLog)); } catch(e) {}
+  storeSet('tank_refill_log', JSON.stringify(refillLog));
 }
 
 // ============================================================
@@ -882,6 +885,10 @@ function calcAll() {
         mg95+=c.g95_l; mg91+=c.g91_l; md+=c.d_l;
         min_g95+=c.in_g95; min_g91+=c.in_g91; min_d+=c.in_d;
       });
+      // นับวันจริง (unique d-m-y ไม่นับ shift ซ้ำ)
+      const uniqueDays = new Set(monthMap[mKey].map(k => {
+        const p = parseKey(k); return `${p.day}-${p.month}-${p.year2}`;
+      })).size;
       // Refill log for this month (ISO month key "YYYY-MM")
       const yCE = 2500 + y - 543;
       const isoMKey = `${yCE}-${String(m).padStart(2,'0')}`;
@@ -892,7 +899,7 @@ function calcAll() {
       sin_g95+=min_g95; sin_g91+=min_g91; sin_d+=min_d;
       srf_g95+=rf.g95; srf_g91+=rf.g91; srf_d+=rf.d;
       return `<tr>
-        <td>${label}</td>
+        <td>${label} <span style="font-size:11px;color:var(--text-muted);">(${uniqueDays} วัน)</span></td>
         <td style="color:var(--g95);">${fmt(mg95,2)}</td>
         <td style="color:var(--g91);">${fmt(mg91,2)}</td>
         <td style="color:var(--diesel);">${fmt(md,2)}</td>
@@ -901,8 +908,12 @@ function calcAll() {
       </tr>`;
     }).join('');
 
+    // นับวันจริงทั้งหมด (unique)
+    const totalUniqueDays = new Set(keys.map(k => {
+      const p = parseKey(k); return `${p.day}-${p.month}-${p.year2}`;
+    })).size;
     dtfoot.innerHTML = `<tr>
-      <td>รวม ${sortedMonths.length} เดือน (${keys.length} วัน)</td>
+      <td>รวม ${sortedMonths.length} เดือน (${totalUniqueDays} วัน)</td>
       <td>${fmt(sg95,2)}</td>
       <td>${fmt(sg91,2)}</td>
       <td>${fmt(sd,2)}</td>
@@ -963,30 +974,16 @@ function initDate() {
 // ============================================================
 window.reloadFirebase = async function() {
   const btn = document.getElementById('btn_reload');
-  const orig = btn ? btn.textContent : '🔄 โหลดใหม่';
-  if (btn) { btn.textContent = '⏳...'; btn.disabled = true; }
-  // ซ่อน setup_card และแสดง spinner
-  const setupEl = document.getElementById('setup_card');
-  const loadEl  = document.getElementById('loading');
-  if (setupEl) setupEl.style.display = 'none';
-  if (loadEl)  { loadEl.innerHTML = '<div class="spinner"></div>กำลังโหลด...'; loadEl.style.display = 'block'; }
+  const orig = btn.textContent;
+  btn.textContent = '⏳...'; btn.disabled = true;
   try {
     if (window._fbLoadFn) await window._fbLoadFn();
-    if (loadEl)  loadEl.style.display = 'none';
-    const tcEl = document.getElementById('tank_content');
-    if (tcEl) tcEl.style.display = 'block';
     calcAll();
-    if (btn) { btn.textContent = '✅ โหลดแล้ว'; }
-    setTimeout(() => { if(btn){btn.textContent = orig; btn.disabled = false;} }, 1500);
+    btn.textContent = '✅ โหลดแล้ว';
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1500);
   } catch(e) {
-    if (loadEl) loadEl.style.display = 'none';
-    if (setupEl) {
-      setupEl.style.display = 'block';
-      const errEl = document.getElementById('setup_error');
-      if (errEl) errEl.innerHTML = '❌ ' + e.message + '<br><small style="color:#8b949e;">ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่</small>';
-    }
-    if (btn) { btn.textContent = '❌ ล้มเหลว'; btn.disabled = false; }
-    setTimeout(() => { if(btn){btn.textContent = orig;} }, 2000);
+    btn.textContent = '❌ ล้มเหลว'; btn.disabled = false;
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
   }
 };
 </script>
@@ -1005,7 +1002,7 @@ const FIREBASE_CONFIG = {
   appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
 };
 
-const app = initializeApp(FIREBASE_CONFIG, 'tank-' + Date.now());
+const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
 let _unsub = null;
 
@@ -1036,32 +1033,19 @@ function startSync() {
 }
 
 async function initLoad() {
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      mergeData(await loadFromFirebase());
-      document.getElementById('loading').style.display      = 'none';
-      document.getElementById('tank_content').style.display = 'block';
-      document.getElementById('setup_card').style.display   = 'none';
-      loadCap();
-      loadRefillLog();
-      initDate();
-      calcAll();
-      startSync();
-      return;
-    } catch(e) {
-      if (attempt < 3) {
-        document.getElementById('loading').innerHTML =
-          '<div class="spinner"></div>กำลังลองใหม่ (' + attempt + '/3)...';
-        await new Promise(r => setTimeout(r, 1500 * attempt));
-        continue;
-      }
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('setup_card').style.display = 'block';
-      const errEl = document.getElementById('setup_error');
-      if (errEl) errEl.innerHTML =
-        '❌ ' + e.message +
-        '<br><small style="color:#8b949e;">ลองใหม่อีกครั้ง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</small>';
-    }
+  try {
+    mergeData(await loadFromFirebase());
+    document.getElementById('loading').style.display      = 'none';
+    document.getElementById('tank_content').style.display = 'block';
+    loadCap();
+    loadRefillLog();
+    initDate();
+    calcAll();
+    startSync();
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup_card').style.display = 'block';
+    document.getElementById('setup_error').textContent = '❌ ' + e.message;
   }
 }
 
