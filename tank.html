@@ -722,7 +722,7 @@ function calcAll() {
   const rem_g91 = open_g91 + rf_g91 + tot_tankIn_g91 - tot_used_g91;
   const rem_d   = open_d   + rf_d   + tot_tankIn_d   - tot_used_d;
 
-  const srcLabel = hasRefillLog ? 'จากบันทึกเติมแทงค์' : 'จากช่อง tank_in ประจำวัน';
+  const srcLabel = refillLog.length > 0 ? 'จากบันทึกเติมแทงค์' : 'จากยอดยกมา';
 
   // ── Gauge & status ──
   function updateTank(gaugeId, statusId, remValId, rem, cap, warnPct) {
