@@ -461,10 +461,12 @@ window.fbStartSync = async function() {
     if (keys.length > 0 && typeof loadDate === 'function') {
       // เรียงแล้วโหลดวันล่าสุด
       keys.sort((a, b) => {
-        const pa = a.split('-').map(Number), pb = b.split('-').map(Number);
-        if (pa[2] !== pb[2]) return pa[2] - pb[2];
-        if (pa[1] !== pb[1]) return pa[1] - pb[1];
-        return pa[0] - pb[0];
+        const pa = parseKey(a), pb = parseKey(b);
+        if (pa.year2 !== pb.year2) return pa.year2 - pb.year2;
+        if (pa.month !== pb.month) return pa.month - pb.month;
+        if (pa.day !== pb.day) return pa.day - pb.day;
+        const shiftOrder = { 'm': 0, 'e': 1, '': 0 };
+        return (shiftOrder[pa.shift]||0) - (shiftOrder[pb.shift]||0);
       });
       loadDate(keys[keys.length - 1]);
     }
@@ -473,9 +475,11 @@ window.fbStartSync = async function() {
     fbStatus('🆕 Firestore ว่าง — จะสร้างใหม่ตอนบันทึก', '#f0a500');
   }
 
-  // Real-time listener
+  // Real-time listener (ข้าม fire ครั้งแรกที่ซ้ำกับ getDoc)
   if (window._unsub) window._unsub();
+  let _firstSnap = true;
   window._unsub = onSnapshot(docRef, (snap) => {
+    if (_firstSnap) { _firstSnap = false; return; } // skip duplicate of getDoc
     if (!snap.exists()) return;
     // จำ active tab ปัจจุบันไว้ก่อน
     const activeTab = document.querySelector('.date-tab.active');
@@ -565,6 +569,8 @@ window.fbRestart = function() {
 // Expose doc/setDoc ออกมาให้ autoSaveToFirebase ใช้ได้จาก regular script
 window._fbDoc    = doc;
 window._fbSetDoc = setDoc;
+// Expose FIREBASE_CONFIG ให้ onclick ใน HTML ใช้ได้
+window.FIREBASE_CONFIG = FIREBASE_CONFIG;
 
 // ===== Auto-connect Firebase on load =====
 window.addEventListener('load', () => {
@@ -590,7 +596,7 @@ window.addEventListener('load', () => {
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <div class="header-date" id="header-date">—</div>
     <button id="fb_header_btn" class="btn btn-ghost" onclick="
-  document.getElementById('fb_config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
+  document.getElementById('fb_config').value = JSON.stringify(window.FIREBASE_CONFIG||{}, null, 2);
   document.getElementById('fbModal').style.display='flex';
 " style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">
   🔥 Firebase
@@ -732,6 +738,19 @@ window.addEventListener('load', () => {
         </div>
       </div>
 
+      <!-- Shift selector -->
+      <div style="margin-bottom:16px;">
+        <div class="field-label" style="margin-bottom:6px;">กะ</div>
+        <div style="display:flex; gap:8px;">
+          <button id="nd_shift_m" onclick="selectShift('m')" style="flex:1; padding:10px; border-radius:8px; border:2px solid var(--accent); background:rgba(240,165,0,0.15); color:var(--accent); font-family:'Sarabun',sans-serif; font-size:14px; font-weight:700; cursor:pointer;">
+            ☀️ กะเช้า
+          </button>
+          <button id="nd_shift_e" onclick="selectShift('e')" style="flex:1; padding:10px; border-radius:8px; border:2px solid var(--border); background:var(--surface2); color:var(--text-muted); font-family:'Sarabun',sans-serif; font-size:14px; font-weight:700; cursor:pointer;">
+            🌙 กะเย็น
+          </button>
+        </div>
+      </div>
+
       <!-- Preview label -->
       <div id="nd_preview" style="font-size:13px; color:var(--accent); font-family:'IBM Plex Mono',monospace; min-height:20px; margin-bottom:20px; letter-spacing:0.3px;"></div>
 
@@ -764,7 +783,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g95n_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g95n_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="g95n_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="g95n_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
@@ -772,7 +791,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g95l_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g95l_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="g95l_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="g95l_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
@@ -789,7 +808,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g91n_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g91n_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="g91n_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="g91n_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
@@ -797,7 +816,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g91l_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g91l_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="g91l_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="g91l_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
@@ -814,7 +833,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="dn_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="dn_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="dn_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="dn_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
@@ -822,7 +841,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="dl_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="dl_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="dl_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="dl_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
@@ -839,7 +858,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="d4n_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="d4n_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="d4n_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="d4n_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
@@ -847,7 +866,7 @@ window.addEventListener('load', () => {
           <div class="fuel-fields">
             <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="d4l_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="d4l_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
-            <div class="field-group"><div class="field-label">ลิตร</div><input type="number" id="d4l_liter" class="computed" readonly tabindex="-1"></div>
+            <div class="field-group"><div class="field-label">ลิตร</div><div id="d4l_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
@@ -1105,12 +1124,22 @@ function calcCash() {
 }
 
 // =================== HELPERS ===================
-function v(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+function v(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  // iOS Safari: number input อาจคืนค่าว่าง ใช้ getAttribute เป็น fallback
+  const val = el.value !== '' ? el.value : (el.getAttribute('value') || '');
+  return parseFloat(val) || 0;
+}
 function set(id, val) {
   const el = document.getElementById(id);
   if(!el) return;
-  if(el.tagName === 'INPUT') el.value = val === null ? '' : val;
-  else el.textContent = val === null ? '—' : val;
+  if(el.tagName === 'INPUT') {
+    el.value = (val === null || val === '') ? '' : val;
+    el.setAttribute('value', (val === null || val === '') ? '' : String(val));
+  } else {
+    el.textContent = (val === null || val === '' || val === undefined) ? '—' : val;
+  }
 }
 function setHTML(id, html) { const el = document.getElementById(id); if(el) el.innerHTML = html; }
 
@@ -1247,32 +1276,28 @@ function calc() {
   }
 }
 
-// =================== PREV DATE HELPER ===================
-// แปลง key "d-m-yy" เป็น timestamp เพื่อเรียงลำดับ
-function keyToTimestamp(k) {
-  const p = parseKey(k);
-  const ceYear = p.year2 + 2500 - 543;
-  return new Date(ceYear, p.month - 1, p.day).getTime();
-}
-
-// หา key ของวันก่อนหน้าที่ใกล้ที่สุด (น้อยกว่า targetTs)
-function getPreviousDateKey(targetKey) {
-  const targetTs = keyToTimestamp(targetKey);
-  let bestKey = null;
-  let bestTs  = -Infinity;
-  Object.keys(sheetData).forEach(k => {
-    const ts = keyToTimestamp(k);
-    if (ts < targetTs && ts > bestTs) {
-      bestTs  = ts;
-      bestKey = k;
-    }
-  });
-  return bestKey;
-}
-
 // =================== ADD DATE ===================
+let _selectedShift = 'm'; // default กะเช้า
+
+function selectShift(s) {
+  _selectedShift = s;
+  const mBtn = document.getElementById('nd_shift_m');
+  const eBtn = document.getElementById('nd_shift_e');
+  if (s === 'm') {
+    mBtn.style.borderColor = 'var(--accent)'; mBtn.style.background = 'rgba(240,165,0,0.15)'; mBtn.style.color = 'var(--accent)';
+    eBtn.style.borderColor = 'var(--border)';  eBtn.style.background = 'var(--surface2)';      eBtn.style.color = 'var(--text-muted)';
+  } else {
+    eBtn.style.borderColor = '#58a6ff'; eBtn.style.background = 'rgba(88,166,255,0.12)'; eBtn.style.color = '#58a6ff';
+    mBtn.style.borderColor = 'var(--border)'; mBtn.style.background = 'var(--surface2)'; mBtn.style.color = 'var(--text-muted)';
+  }
+  updateDatePreview();
+}
+
 function openAddDate() {
+  _selectedShift = 'm';
   const modal = document.getElementById('addDateModal');
+  // reset shift buttons
+  setTimeout(() => selectShift('m'), 0);
 
   // Populate day select (1-31)
   const dayEl = document.getElementById('nd_day');
@@ -1323,13 +1348,16 @@ function updateDatePreview() {
   const year  = parseInt(document.getElementById('nd_year').value);
   const preview = document.getElementById('nd_preview');
   if (!day || !month || !year) { preview.textContent = ''; return; }
-  const key = `${day}-${month}-${year % 100}`;
+  const baseKey = `${day}-${month}-${year % 100}`;
+  const shift = typeof _selectedShift !== 'undefined' ? _selectedShift : 'm';
+  const key = `${baseKey}-${shift}`;
   const exists = sheetData[key];
   const MONTHS_TH2 = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   const ceYear = year - 543;
   const jsDate = new Date(ceYear, month - 1, day);
   const DAY_TH_FULL = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-  const label = `วัน${DAY_TH_FULL[jsDate.getDay()]}ที่ ${day} ${MONTHS_TH2[month]} ${year}`;
+  const shiftLabel = shift === 'm' ? '☀️ กะเช้า' : '🌙 กะเย็น';
+  const label = `วัน${DAY_TH_FULL[jsDate.getDay()]}ที่ ${day} ${MONTHS_TH2[month]} ${year} · ${shiftLabel}`;
   preview.textContent = exists ? `⚠️ ${key} มีอยู่แล้ว` : label;
   preview.style.color = exists ? '#f85149' : 'var(--accent)';
 }
@@ -1422,49 +1450,38 @@ function confirmAddDate() {
     alert('กรุณาเลือกวัน เดือน ปี ให้ครบ');
     return;
   }
-  const key = `${day}-${month}-${year % 100}`;
+  const baseKey = `${day}-${month}-${year % 100}`;
+  const shift = typeof _selectedShift !== 'undefined' ? _selectedShift : 'm';
+  const key = `${baseKey}-${shift}`;
   if (sheetData[key]) {
-    alert(`วันที่ "${key}" มีอยู่แล้ว`);
+    alert(`${key} มีอยู่แล้ว`);
     return;
   }
-
-  // ── หาวันก่อนหน้าเพื่อนำค่า มิเตอร์ปิด มาเป็น มิเตอร์เปิด ──────────────
-  // (ต้องทำก่อน insert key ใหม่ลง sheetData)
-  const prevKey  = getPreviousDateKey(key);
-  const prevData = prevKey ? sheetData[prevKey] : null;
-
-  // create entry — ถ้ามีวันก่อนหน้า ให้ copy close→open และ copy ราคา
-  sheetData[key] = {
-    g95n_open:  prevData ? (prevData.g95n_close || '') : '',
-    g95n_close: '',
-    g95l_open:  prevData ? (prevData.g95l_close || '') : '',
-    g95l_close: '',
-    g91n_open:  prevData ? (prevData.g91n_close || '') : '',
-    g91n_close: '',
-    g91l_open:  prevData ? (prevData.g91l_close || '') : '',
-    g91l_close: '',
-    dn_open:    prevData ? (prevData.dn_close  || '') : '',
-    dn_close:   '',
-    dl_open:    prevData ? (prevData.dl_close  || '') : '',
-    dl_close:   '',
-    d4n_open:   prevData ? (prevData.d4n_close || '') : '',
-    d4n_close:  '',
-    d4l_open:   prevData ? (prevData.d4l_close || '') : '',
-    d4l_close:  '',
-    // copy ราคาน้ำมันจากวันก่อนหน้า
-    g95_price:  prevData ? (prevData.g95_price || '') : '',
-    g91_price:  prevData ? (prevData.g91_price || '') : '',
-    d_price:    prevData ? (prevData.d_price   || '') : '',
-    d4_price:   prevData ? (prevData.d4_price  || '') : '',
-    air_liter: '', change: 3700, disc: 0.5
-  };
+  // create blank entry
+  sheetData[key] = { g95n_open:'', g95n_close:'', g95l_open:'', g95l_close:'',
+    g91n_open:'', g91n_close:'', g91l_open:'', g91l_close:'',
+    dn_open:'', dn_close:'', dl_open:'', dl_close:'',
+    d4n_open:'', d4n_close:'', d4l_open:'', d4l_close:'',
+    g95_price:'', g91_price:'', d_price:'', d4_price:'',
+    air_liter:'', change:3700, disc:0.5 };
 
   // re-render groups then close modal
   renderAllGroups();
   closeAddDate();
 
-  // 1) โหลดข้อมูลวันใหม่ (จะแสดงค่า open ที่ copy มาจากวันก่อน)
-  loadDate(key);
+  // 1) ล้างฟอร์มทั้งหมดให้ว่าง
+  clearAll();
+
+  // 2) set default values สำหรับวันใหม่
+  document.getElementById('g_change').value = 3700;
+  document.getElementById('g_discount_per_liter').value = 0.5;
+
+  // 3) mark tab ใหม่ active และ update header
+  document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
+  const newTab = document.querySelector(`.date-tab[data-date="${key}"]`);
+  if (newTab) newTab.classList.add('active');
+  const _cShift = shift === 'm' ? ' ☀️' : shift === 'e' ? ' 🌙' : '';
+  document.getElementById('header-date').textContent = key + _cShift;
 }
 
 // Close modal on backdrop click
@@ -1596,10 +1613,15 @@ function downloadHTML() {
 // =================== DATE TABS WITH MONTH GROUPS ===================
 const dates = Object.keys(sheetData);
 
-// Parse key "d-m-yy" → { day, month, year2 }
+// Parse key "d-m-yy" or "d-m-yy-s" → { day, month, year2, shift }
 function parseKey(k) {
   const parts = k.split('-');
-  return { day: parseInt(parts[0]), month: parseInt(parts[1]), year2: parseInt(parts[2]) };
+  return {
+    day: parseInt(parts[0]),
+    month: parseInt(parts[1]),
+    year2: parseInt(parts[2]),
+    shift: parts[3] || ''   // 'm', 'e', or '' for legacy
+  };
 }
 
 function monthGroupKey(k) {
@@ -1640,7 +1662,13 @@ function renderAllGroups() {
 
   sortedGroups.forEach(([gk, keys]) => {
     // เรียงวันในกลุ่มจากน้อยไปมาก
-    keys.sort((a, b) => parseKey(a).day - parseKey(b).day);
+    keys.sort((a, b) => {
+      const pa = parseKey(a), pb = parseKey(b);
+      if (pa.day !== pb.day) return pa.day - pb.day;
+      // same day: กะเช้า (m) ก่อน กะเย็น (e)
+      const shiftOrder = { 'm': 0, 'e': 1, '': 0 };
+      return (shiftOrder[pa.shift]||0) - (shiftOrder[pb.shift]||0);
+    });
     const collapsed = collapsedGroups[gk] || false;
     const div = document.createElement('div');
     div.className = 'month-group';
@@ -1676,12 +1704,15 @@ function renderAllGroups() {
       const wrap = document.createElement('div');
       wrap.style.cssText = 'position:relative; display:inline-flex; align-items:flex-start;';
 
+      const shiftIcon = p.shift === 'e' ? '🌙' : (p.shift === 'm' ? '☀️' : '');
+      const shiftStyle = p.shift === 'e' ? 'border-color:rgba(88,166,255,0.5);' : '';
       const btn = document.createElement('button');
       btn.className = 'date-tab';
       btn.dataset.date = k;
       btn.title = k;
+      btn.style.cssText = shiftStyle;
       btn.innerHTML = `
-        <span class="dt-dayname">${dayName}</span>
+        <span class="dt-dayname">${dayName}${shiftIcon ? ' ' + shiftIcon : ''}</span>
         <span class="dt-num">${p.day}</span>
         <span class="dt-month">${monthShort}</span>
       `;
@@ -1724,7 +1755,9 @@ function renderAllGroups() {
 function loadDate(dateKey) {
   document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.date-tab[data-date="${dateKey}"]`)?.classList.add('active');
-  document.getElementById('header-date').textContent = dateKey;
+  const _pk = parseKey(dateKey);
+  const _shiftTxt = _pk.shift === 'm' ? ' ☀️' : _pk.shift === 'e' ? ' 🌙' : '';
+  document.getElementById('header-date').textContent = dateKey + _shiftTxt;
 
   const d = sheetData[dateKey];
 
@@ -1740,15 +1773,17 @@ function loadDate(dateKey) {
     if (!el) return;
     if (val === '' || val === undefined || val === null || val === false) {
       el.value = '';
+      el.setAttribute('value', '');
       return;
     }
     const num = parseFloat(val);
-    if (isNaN(num)) { el.value = ''; return; }
-    // set ทั้งสองวิธีให้ iOS Safari รับแน่นอน
-    el.value = String(num);
+    if (isNaN(num)) { el.value = ''; el.setAttribute('value', ''); return; }
+    // set หลายวิธีให้ iOS Safari รับแน่นอน
     if (el.type === 'number') {
       try { el.valueAsNumber = num; } catch(e) {}
     }
+    el.value = String(num);
+    el.setAttribute('value', String(num));
   }
 
   fields.forEach(f => {
@@ -1790,7 +1825,8 @@ function loadDate(dateKey) {
   }
   renderTransfer();
 
-  calc();
+  // iOS Safari: delay calc เล็กน้อยเพื่อให้ DOM commit ค่า input ทั้งหมดก่อน
+  requestAnimationFrame(() => requestAnimationFrame(() => calc()));
 }
 
 function clearAll() {
