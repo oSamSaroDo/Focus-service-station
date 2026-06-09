@@ -565,6 +565,8 @@ window.fbRestart = function() {
 // Expose doc/setDoc ออกมาให้ autoSaveToFirebase ใช้ได้จาก regular script
 window._fbDoc    = doc;
 window._fbSetDoc = setDoc;
+// Expose FIREBASE_CONFIG ให้ onclick ใน HTML ใช้ได้
+window.FIREBASE_CONFIG = FIREBASE_CONFIG;
 
 // ===== Auto-connect Firebase on load =====
 window.addEventListener('load', () => {
@@ -590,7 +592,7 @@ window.addEventListener('load', () => {
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <div class="header-date" id="header-date">—</div>
     <button id="fb_header_btn" class="btn btn-ghost" onclick="
-  document.getElementById('fb_config').value = JSON.stringify(FIREBASE_CONFIG, null, 2);
+  document.getElementById('fb_config').value = JSON.stringify(window.FIREBASE_CONFIG||{}, null, 2);
   document.getElementById('fbModal').style.display='flex';
 " style="padding:6px 14px; font-size:12px; border-color:#f0a500; color:#f0a500; display:flex; align-items:center; gap:5px;">
   🔥 Firebase
