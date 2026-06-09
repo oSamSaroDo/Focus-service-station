@@ -473,9 +473,11 @@ window.fbStartSync = async function() {
     fbStatus('🆕 Firestore ว่าง — จะสร้างใหม่ตอนบันทึก', '#f0a500');
   }
 
-  // Real-time listener
+  // Real-time listener (ข้าม fire ครั้งแรกที่ซ้ำกับ getDoc)
   if (window._unsub) window._unsub();
+  let _firstSnap = true;
   window._unsub = onSnapshot(docRef, (snap) => {
+    if (_firstSnap) { _firstSnap = false; return; } // skip duplicate of getDoc
     if (!snap.exists()) return;
     // จำ active tab ปัจจุบันไว้ก่อน
     const activeTab = document.querySelector('.date-tab.active');
@@ -1705,15 +1707,17 @@ function loadDate(dateKey) {
     if (!el) return;
     if (val === '' || val === undefined || val === null || val === false) {
       el.value = '';
+      el.setAttribute('value', '');
       return;
     }
     const num = parseFloat(val);
-    if (isNaN(num)) { el.value = ''; return; }
-    // set ทั้งสองวิธีให้ iOS Safari รับแน่นอน
-    el.value = String(num);
+    if (isNaN(num)) { el.value = ''; el.setAttribute('value', ''); return; }
+    // set หลายวิธีให้ iOS Safari รับแน่นอน
     if (el.type === 'number') {
       try { el.valueAsNumber = num; } catch(e) {}
     }
+    el.value = String(num);
+    el.setAttribute('value', String(num));
   }
 
   fields.forEach(f => {
@@ -1755,7 +1759,8 @@ function loadDate(dateKey) {
   }
   renderTransfer();
 
-  calc();
+  // iOS Safari: delay calc เล็กน้อยเพื่อให้ DOM commit ค่า input ทั้งหมดก่อน
+  requestAnimationFrame(() => requestAnimationFrame(() => calc()));
 }
 
 function clearAll() {
