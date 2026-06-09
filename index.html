@@ -196,21 +196,13 @@
     border-radius: 6px;
     color: var(--text);
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 16px; /* iOS: ต้องการ ≥16px ถึงจะไม่ zoom */
+    font-size: 16px; /* iOS Safari: ต้อง ≥16px ป้องกัน auto-zoom เมื่อ focus */
     padding: 7px 10px;
     transition: border-color 0.2s, box-shadow 0.2s;
     -moz-appearance: textfield;
-    -webkit-appearance: none;
-    appearance: none;
-    /* iOS Safari rendering fix */
-    -webkit-text-fill-color: var(--text);
-    opacity: 1;
-  }
-  @media (min-width: 600px) {
-    input[type="number"], input[type="text"] { font-size: 13px; }
   }
   input[type="number"]::-webkit-outer-spin-button,
-  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
   input[type="number"]:focus, input[type="text"]:focus {
     outline: none;
     border-color: var(--accent);
@@ -418,6 +410,9 @@
     header { padding: 16px; }
     main { padding: 20px 16px; }
     .fuel-fields { flex-direction: column; }
+    /* iOS: ลด font-size ให้ดูสวยขึ้นบน mobile แต่ยังคง ≥16px ป้องกัน zoom */
+    input[type="number"], input[type="text"] { font-size: 16px; }
+    #shift_badge { font-size: 12px; padding: 4px 10px; }
   }
 </style>
 <script type="module">
@@ -603,6 +598,8 @@ window.addEventListener('load', () => {
   </div>
   <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
     <div class="header-date" id="header-date">—</div>
+    <!-- กะเช้า/กะเย็น badge -->
+    <div id="shift_badge" style="display:none; font-size:13px; font-weight:700; padding:5px 12px; border-radius:20px; border:1.5px solid; font-family:'Sarabun',sans-serif;"></div>
     <button id="fb_header_btn" class="btn btn-ghost" onclick="
   document.getElementById('fb_config').value = JSON.stringify(window.FIREBASE_CONFIG||{}, null, 2);
   document.getElementById('fbModal').style.display='flex';
@@ -776,7 +773,7 @@ window.addEventListener('load', () => {
     <div class="discount-section">
       <label style="white-space:nowrap;">เงินทอน (฿)</label>
       <div style="display:flex; flex-direction:column; gap:3px;">
-        <input type="number" id="g_change" value="3700" step="1" placeholder="3700" oninput="calc()" style="width:130px;" inputmode="decimal" autocomplete="off">
+        <input type="number" id="g_change" value="3700" step="1" placeholder="3700" oninput="calc()" style="width:130px;">
         <span style="font-size:10px; color:var(--text-muted);">ปรับได้ตามต้องการ</span>
       </div>
       <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
@@ -787,7 +784,7 @@ window.addEventListener('load', () => {
         <button type="button" onclick="document.getElementById('g_change').value=10000;calc();"
           style="padding:4px 10px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); color:var(--text-muted); font-size:11px; cursor:pointer; font-family:'IBM Plex Mono',monospace;">10,000</button>
       </div>
-      <input type="number" id="g_discount_per_liter" value="0.5" step="0.01" style="display:none;" oninput="calc()" inputmode="decimal" autocomplete="off">
+      <input type="number" id="g_discount_per_liter" value="0.5" step="0.01" style="display:none;" oninput="calc()">
     </div>
 
     <!-- FUEL SECTION -->
@@ -800,22 +797,22 @@ window.addEventListener('load', () => {
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--g95-color)">ตู้ 1 · G95 หน้า</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g95n_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g95n_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g95n_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g95n_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="g95n_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--g95-color)">ตู้ 1 · G95 หลัง</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g95l_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g95l_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g95l_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g95l_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="g95l_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
           <div class="field-label">ราคา/ลิตร (฿)</div>
-          <input type="number" id="g95_price" step="0.01" placeholder="45.86" oninput="calc()" inputmode="decimal" autocomplete="off">
+          <input type="number" id="g95_price" step="0.01" placeholder="45.86" oninput="calc()">
         </div>
       </div>
 
@@ -825,22 +822,22 @@ window.addEventListener('load', () => {
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--g91-color)">ตู้ 2 · G91 หน้า</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g91n_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g91n_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g91n_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g91n_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="g91n_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--g91-color)">ตู้ 2 · G91 หลัง</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g91l_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g91l_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="g91l_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="g91l_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="g91l_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
           <div class="field-label">ราคา/ลิตร (฿)</div>
-          <input type="number" id="g91_price" step="0.01" placeholder="45.35" oninput="calc()" inputmode="decimal" autocomplete="off">
+          <input type="number" id="g91_price" step="0.01" placeholder="45.35" oninput="calc()">
         </div>
       </div>
 
@@ -850,22 +847,22 @@ window.addEventListener('load', () => {
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--diesel-color)">ตู้ 3 · D หน้า</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="dn_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="dn_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="dn_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="dn_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="dn_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--diesel-color)">ตู้ 3 · D หลัง</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="dl_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="dl_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="dl_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="dl_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="dl_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
           <div class="field-label">ราคา/ลิตร (฿)</div>
-          <input type="number" id="d_price" step="0.01" placeholder="40.95" oninput="calc()" inputmode="decimal" autocomplete="off">
+          <input type="number" id="d_price" step="0.01" placeholder="40.95" oninput="calc()">
         </div>
       </div>
 
@@ -875,22 +872,22 @@ window.addEventListener('load', () => {
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--diesel2-color)">ตู้ 4 · D หน้า</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="d4n_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="d4n_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="d4n_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="d4n_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="d4n_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="fuel-row">
           <div class="fuel-label" style="color:var(--diesel2-color)">ตู้ 4 · D หลัง</div>
           <div class="fuel-fields">
-            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="d4l_open" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
-            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="d4l_close" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์เปิด</div><input type="number" id="d4l_open" step="0.01" placeholder="0.00" oninput="calc()"></div>
+            <div class="field-group"><div class="field-label">มิเตอร์ปิด</div><input type="number" id="d4l_close" step="0.01" placeholder="0.00" oninput="calc()"></div>
             <div class="field-group"><div class="field-label">ลิตร</div><div id="d4l_liter" class="computed" style="width:100%;background:rgba(63,185,80,0.05);border:1px solid rgba(63,185,80,0.3);border-radius:6px;color:var(--green);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:7px 10px;min-height:32px;">—</div></div>
           </div>
         </div>
         <div class="field-group" style="margin-top:10px">
           <div class="field-label">ราคา/ลิตร (฿) — ถ้าเว้นว่างใช้ราคาตู้ 3</div>
-          <input type="number" id="d4_price" step="0.01" placeholder="เช่น 40.95" oninput="calc()" inputmode="decimal" autocomplete="off">
+          <input type="number" id="d4_price" step="0.01" placeholder="เช่น 40.95" oninput="calc()">
         </div>
         <!-- Promotion -->
         <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;">
@@ -898,17 +895,17 @@ window.addEventListener('load', () => {
           <div style="display:flex; gap:8px; margin-bottom:8px;">
             <div class="field-group" style="flex:1.4">
               <div class="field-label">จำนวนลิตร</div>
-              <input type="number" id="air_liter" step="0.01" placeholder="0.00" oninput="calc()" inputmode="decimal" autocomplete="off">
+              <input type="number" id="air_liter" step="0.01" placeholder="0.00" oninput="calc()">
             </div>
             <div class="field-group" style="flex:1">
               <div class="field-label">ราคา/ลิตร (฿)</div>
-              <input type="number" id="air_price_custom" step="0.01" placeholder="ใช้ราคา D" oninput="calc()" inputmode="decimal" autocomplete="off">
+              <input type="number" id="air_price_custom" step="0.01" placeholder="ใช้ราคา D" oninput="calc()">
             </div>
           </div>
           <div style="margin-bottom:8px;">
             <div class="field-group">
               <div class="field-label">ส่วนลด/ลิตร (฿) — เว้นว่างใช้ค่าเริ่มต้น</div>
-              <input type="number" id="air_disc_custom" step="0.01" placeholder="ใช้ส่วนลดทั่วไป" oninput="calc()" inputmode="decimal" autocomplete="off">
+              <input type="number" id="air_disc_custom" step="0.01" placeholder="ใช้ส่วนลดทั่วไป" oninput="calc()">
             </div>
           </div>
           <div class="balance-box" style="padding:10px 14px;">
@@ -1093,7 +1090,7 @@ function renderTransfer() {
       <input type="text" placeholder="ชื่อรายการ" value="${r.label}" style="flex:1"
         oninput="transferRows[${i}].label=this.value">
       <input type="number" placeholder="0" value="${r.amount||''}" style="width:110px; font-family:'IBM Plex Mono',monospace"
-        oninput="transferRows[${i}].amount=parseFloat(this.value)||0; calc()" inputmode="decimal" autocomplete="off">
+        oninput="transferRows[${i}].amount=parseFloat(this.value)||0; calc()">
       <button onclick="transferRows.splice(${i},1); renderTransfer(); calc();"
         style="background:none; border:none; color:var(--red); cursor:pointer; font-size:16px; padding:0 4px;">✕</button>
     `;
@@ -1121,7 +1118,7 @@ function renderCash() {
       <span class="cash-denom">${d.label}</span>
       <span class="cash-x">×</span>
       <input type="number" class="cash-input" min="0" step="${d.value===1?0.01:1}" placeholder="0"
-        id="cash_${d.value}" oninput="calcCash()" inputmode="decimal" autocomplete="off">
+        id="cash_${d.value}" oninput="calcCash()">
       <span class="cash-eq">=</span>
       <span class="cash-subtotal" id="csub_${d.value}">0</span>
     `;
@@ -1146,28 +1143,21 @@ function calcCash() {
 function v(id) {
   const el = document.getElementById(id);
   if (!el) return 0;
-  // iOS Safari: el.value อาจว่าง ดึง valueAsNumber หรือ getAttribute แทน
-  let raw = el.value;
-  if (raw === '' || raw === undefined) raw = el.getAttribute('value') || '';
-  // แปลง comma เป็น dot สำหรับ keyboard บางแบบ
-  raw = String(raw).trim().replace(',', '.');
-  const n = parseFloat(raw);
-  if (!isNaN(n)) return n;
-  // fallback valueAsNumber
-  if (el.valueAsNumber !== undefined && !isNaN(el.valueAsNumber)) return el.valueAsNumber;
-  return 0;
+  // iOS Safari: ลอง valueAsNumber ก่อน (ถ้า type=number)
+  if (el.type === 'number') {
+    const vn = el.valueAsNumber;
+    if (!isNaN(vn)) return vn;
+  }
+  // fallback: อ่าน .value → getAttribute → 0
+  const raw = el.value !== '' ? el.value : (el.getAttribute('value') || '');
+  return parseFloat(raw) || 0;
 }
 function set(id, val) {
   const el = document.getElementById(id);
   if(!el) return;
   if(el.tagName === 'INPUT') {
-    const s = (val === null || val === '' || val === undefined) ? '' : String(val);
-    el.value = s;
-    el.setAttribute('value', s);
-    // iOS Safari: set valueAsNumber เพื่อให้แน่ใจ
-    if (el.type === 'number' && s !== '') {
-      try { el.valueAsNumber = parseFloat(s); } catch(e) {}
-    }
+    el.value = (val === null || val === '') ? '' : val;
+    el.setAttribute('value', (val === null || val === '') ? '' : String(val));
   } else {
     el.textContent = (val === null || val === '' || val === undefined) ? '—' : val;
   }
@@ -1777,10 +1767,47 @@ function loadDate(dateKey) {
   document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
   document.querySelector(`.date-tab[data-date="${dateKey}"]`)?.classList.add('active');
   const _pk = parseKey(dateKey);
-  const _shiftTxt = _pk.shift === 'm' ? ' ☀️' : _pk.shift === 'e' ? ' 🌙' : '';
-  document.getElementById('header-date').textContent = dateKey + _shiftTxt;
+  const _shiftTxt = _pk.shift === 'm' ? ' ☀️ กะเช้า' : _pk.shift === 'e' ? ' 🌙 กะเย็น' : '';
+  document.getElementById('header-date').textContent = dateKey;
+
+  // อัพเดต shift badge ใน header
+  const shiftBadge = document.getElementById('shift_badge');
+  if (shiftBadge) {
+    if (_pk.shift === 'm') {
+      shiftBadge.style.display = 'block';
+      shiftBadge.style.borderColor = '#f0a500';
+      shiftBadge.style.color = '#f0a500';
+      shiftBadge.style.background = 'rgba(240,165,0,0.1)';
+      shiftBadge.textContent = '☀️ กะเช้า';
+    } else if (_pk.shift === 'e') {
+      shiftBadge.style.display = 'block';
+      shiftBadge.style.borderColor = '#58a6ff';
+      shiftBadge.style.color = '#58a6ff';
+      shiftBadge.style.background = 'rgba(88,166,255,0.1)';
+      shiftBadge.textContent = '🌙 กะเย็น';
+    } else {
+      shiftBadge.style.display = 'none';
+    }
+  }
 
   const d = sheetData[dateKey];
+
+  // === CRITICAL BUG FIX: reset input ทุกช่องก่อนเสมอ ===
+  // ป้องกันค่าเก่าค้างจากวันที่เคยโหลด (iOS/Android ไม่ clear DOM input อัตโนมัติ)
+  const allFields = ['g95n_open','g95n_close','g95l_open','g95l_close',
+    'g91n_open','g91n_close','g91l_open','g91l_close',
+    'dn_open','dn_close','dl_open','dl_close',
+    'd4n_open','d4n_close','d4l_open','d4l_close',
+    'g95_price','g91_price','d_price','d4_price','air_liter','air_price_custom','air_disc_custom','must_send_input'];
+  allFields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el) { el.value = ''; el.setAttribute('value', ''); }
+  });
+  // reset computed displays
+  ['g95n_liter','g95l_liter','g91n_liter','g91l_liter','dn_liter','dl_liter','d4n_liter','d4l_liter'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '—';
+  });
 
   // set inputs
   const fields = ['g95n_open','g95n_close','g95l_open','g95l_close',
@@ -1790,21 +1817,40 @@ function loadDate(dateKey) {
     'g95_price','g91_price','d_price','d4_price','air_liter','air_price_custom','air_disc_custom','must_send_input'];
 
   // ฟังก์ชัน set ค่า input ที่ทำงานได้ทั้ง iOS Safari และ browser อื่น
+  // iOS WebKit bug: el.value = x บางครั้งไม่ commit ใน number input
+  // ต้อง dispatch input event เพื่อบังคับ re-render
   function setNum(el, val) {
     if (!el) return;
     if (val === '' || val === undefined || val === null || val === false) {
       el.value = '';
       el.setAttribute('value', '');
+      el.dispatchEvent(new Event('change', { bubbles: false }));
       return;
     }
     const num = parseFloat(val);
-    if (isNaN(num)) { el.value = ''; el.setAttribute('value', ''); return; }
-    // set หลายวิธีให้ iOS Safari รับแน่นอน
-    if (el.type === 'number') {
-      try { el.valueAsNumber = num; } catch(e) {}
+    if (isNaN(num)) {
+      el.value = '';
+      el.setAttribute('value', '');
+      el.dispatchEvent(new Event('change', { bubbles: false }));
+      return;
     }
-    el.value = String(num);
-    el.setAttribute('value', String(num));
+    const s = String(num);
+    // iOS: ใช้ nativeInputValueSetter ถ้าเป็นไปได้
+    try {
+      const nativeSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype, 'value'
+      );
+      if (nativeSetter && nativeSetter.set) {
+        nativeSetter.set.call(el, s);
+      } else {
+        el.value = s;
+      }
+    } catch(e) {
+      el.value = s;
+    }
+    el.setAttribute('value', s);
+    // dispatch change (ไม่ใช่ input เพื่อไม่ trigger calc ซ้ำ)
+    el.dispatchEvent(new Event('change', { bubbles: false }));
   }
 
   fields.forEach(f => {
@@ -1822,8 +1868,14 @@ function loadDate(dateKey) {
       ? (d.cash[String(denom.value)] ?? d.cash[denom.value] ?? 0)
       : 0;
     if (el) {
-      if (el.type === 'number') { el.valueAsNumber = qty > 0 ? qty : NaN; }
-      else { el.value = qty > 0 ? qty : ''; }
+      // iOS: ใช้ nativeSetter เพื่อ commit ค่าใหม่ให้ DOM รับแน่นอน
+      const s = qty > 0 ? String(qty) : '';
+      try {
+        const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
+        if (nativeSetter && nativeSetter.set) nativeSetter.set.call(el, s);
+        else el.value = s;
+      } catch(e) { el.value = s; }
+      el.setAttribute('value', s);
     }
     if (sub) sub.textContent = qty > 0 ? fmt(qty * denom.value) : '0';
   });
@@ -1846,8 +1898,11 @@ function loadDate(dateKey) {
   }
   renderTransfer();
 
-  // iOS Safari: delay calc เล็กน้อยเพื่อให้ DOM commit ค่า input ทั้งหมดก่อน
-  requestAnimationFrame(() => requestAnimationFrame(() => calc()));
+  // iOS Safari: delay ให้ DOM flush ค่า input ทั้งหมดก่อน calc
+  // double-rAF + setTimeout 80ms คือ pattern ที่เชื่อถือได้ที่สุดบน WebKit
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    setTimeout(() => calc(), 80);
+  }));
 }
 
 function clearAll() {
