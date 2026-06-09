@@ -278,6 +278,10 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
           <div class="field-label">ความจุรวม (ลิตร)</div>
           <input type="number" id="cap_g95" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();">
         </div>
+        <div class="field-group">
+          <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
+          <input type="number" id="open_g95" step="1" placeholder="0" oninput="saveCap(); calcAll();">
+        </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
           <input type="number" id="warn_g95" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();">
@@ -289,6 +293,10 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
           <div class="field-label">ความจุรวม (ลิตร)</div>
           <input type="number" id="cap_g91" step="1" placeholder="เช่น 10000" oninput="saveCap(); calcAll();">
         </div>
+        <div class="field-group">
+          <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
+          <input type="number" id="open_g91" step="1" placeholder="0" oninput="saveCap(); calcAll();">
+        </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
           <input type="number" id="warn_g91" step="1" min="1" max="50" value="20" oninput="saveCap(); calcAll();">
@@ -299,6 +307,10 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
         <div class="field-group">
           <div class="field-label">ความจุรวม (ลิตร)</div>
           <input type="number" id="cap_d" step="1" placeholder="เช่น 20000" oninput="saveCap(); calcAll();">
+        </div>
+        <div class="field-group">
+          <div class="field-label">ยอดยกมา / คงเหลือปัจจุบัน (ลิตร)</div>
+          <input type="number" id="open_d" step="1" placeholder="0" oninput="saveCap(); calcAll();">
         </div>
         <div class="field-group" style="margin-bottom:0;">
           <div class="field-label">แจ้งเตือนเมื่อเหลือน้อยกว่า (%)</div>
@@ -546,26 +558,42 @@ function computeDay(d) {
 // LOCAL STORAGE — CAP & REFILL
 // ============================================================
 function loadCap() {
+  // ── Defaults ──
+  const DEF = { cap_g95:10000, cap_g91:10000, cap_d:20000,
+                open_g95:4200, open_g91:0, open_d:7400,
+                warn_g95:20, warn_g91:20, warn_d:20 };
   try {
-    const s = localStorage.getItem('tank_caps');
-    if (s) {
-      const c = JSON.parse(s);
-      if (c.cap_g95) document.getElementById('cap_g95').value = c.cap_g95;
-      if (c.cap_g91) document.getElementById('cap_g91').value = c.cap_g91;
-      if (c.cap_d)   document.getElementById('cap_d').value   = c.cap_d;
-      if (c.warn_g95) document.getElementById('warn_g95').value = c.warn_g95;
-      if (c.warn_g91) document.getElementById('warn_g91').value = c.warn_g91;
-      if (c.warn_d)   document.getElementById('warn_d').value   = c.warn_d;
-    }
-  } catch(e) {}
+    const raw = localStorage.getItem('tank_caps');
+    const c = raw ? JSON.parse(raw) : {};
+    const v = k => (c[k] !== undefined ? c[k] : DEF[k]);
+    document.getElementById('cap_g95').value  = v('cap_g95');
+    document.getElementById('cap_g91').value  = v('cap_g91');
+    document.getElementById('cap_d').value    = v('cap_d');
+    document.getElementById('open_g95').value = v('open_g95');
+    document.getElementById('open_g91').value = v('open_g91');
+    document.getElementById('open_d').value   = v('open_d');
+    document.getElementById('warn_g95').value = v('warn_g95');
+    document.getElementById('warn_g91').value = v('warn_g91');
+    document.getElementById('warn_d').value   = v('warn_d');
+  } catch(e) {
+    document.getElementById('cap_g95').value  = DEF.cap_g95;
+    document.getElementById('cap_g91').value  = DEF.cap_g91;
+    document.getElementById('cap_d').value    = DEF.cap_d;
+    document.getElementById('open_g95').value = DEF.open_g95;
+    document.getElementById('open_g91').value = DEF.open_g91;
+    document.getElementById('open_d').value   = DEF.open_d;
+  }
 }
 
 function saveCap() {
   try {
     localStorage.setItem('tank_caps', JSON.stringify({
-      cap_g95:  parseFloat(document.getElementById('cap_g95').value) || 0,
-      cap_g91:  parseFloat(document.getElementById('cap_g91').value) || 0,
-      cap_d:    parseFloat(document.getElementById('cap_d').value)   || 0,
+      cap_g95:  parseFloat(document.getElementById('cap_g95').value)  || 0,
+      cap_g91:  parseFloat(document.getElementById('cap_g91').value)  || 0,
+      cap_d:    parseFloat(document.getElementById('cap_d').value)    || 0,
+      open_g95: parseFloat(document.getElementById('open_g95').value) || 0,
+      open_g91: parseFloat(document.getElementById('open_g91').value) || 0,
+      open_d:   parseFloat(document.getElementById('open_d').value)   || 0,
       warn_g95: parseFloat(document.getElementById('warn_g95').value) || 20,
       warn_g91: parseFloat(document.getElementById('warn_g91').value) || 20,
       warn_d:   parseFloat(document.getElementById('warn_d').value)   || 20,
@@ -576,7 +604,16 @@ function saveCap() {
 function loadRefillLog() {
   try {
     const s = localStorage.getItem('tank_refill_log');
-    refillLog = s ? JSON.parse(s) : [];
+    if (s) {
+      refillLog = JSON.parse(s);
+    } else {
+      // Seed: การซื้อน้ำมันครั้งล่าสุด (ตั้งต้น)
+      const today = new Date().toISOString().slice(0,10);
+      refillLog = [
+        { date: today, g95: 3000, g91: 0, d: 4000, note: 'ซื้อเติมแทงค์ (ยอดตั้งต้น)', id: 1 }
+      ];
+      saveRefillLog();
+    }
   } catch(e) { refillLog = []; }
 }
 
@@ -675,13 +712,15 @@ function calcAll() {
     rf_d   += r.d   || (r.type==='d'   ? r.liter : 0);
   });
 
-  // Use refill log as primary source (more accurate),
-  // but also show tank_in from daily records as alternate
-  // Final remaining = refill log total − total used from meters
-  const hasRefillLog = refillLog.length > 0;
-  const rem_g95 = hasRefillLog ? (rf_g95 - tot_used_g95) : (tot_tankIn_g95 - tot_used_g95);
-  const rem_g91 = hasRefillLog ? (rf_g91 - tot_used_g91) : (tot_tankIn_g91 - tot_used_g91);
-  const rem_d   = hasRefillLog ? (rf_d   - tot_used_d)   : (tot_tankIn_d   - tot_used_d);
+  // Opening stock (ยอดยกมา) จากการตั้งค่า
+  const open_g95 = parseFloat(document.getElementById('open_g95').value) || 0;
+  const open_g91 = parseFloat(document.getElementById('open_g91').value) || 0;
+  const open_d   = parseFloat(document.getElementById('open_d').value)   || 0;
+
+  // Final remaining = opening stock + refill log + tank_in − total used
+  const rem_g95 = open_g95 + rf_g95 + tot_tankIn_g95 - tot_used_g95;
+  const rem_g91 = open_g91 + rf_g91 + tot_tankIn_g91 - tot_used_g91;
+  const rem_d   = open_d   + rf_d   + tot_tankIn_d   - tot_used_d;
 
   const srcLabel = hasRefillLog ? 'จากบันทึกเติมแทงค์' : 'จากช่อง tank_in ประจำวัน';
 
