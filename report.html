@@ -74,7 +74,7 @@ body {
 .filter-bar label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .filter-bar select, .filter-bar input[type="date"] {
   background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
-  color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 16px;
+  color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 12px;
   padding: 6px 10px; cursor: pointer;
 }
 .filter-bar select:focus, .filter-bar input[type="date"]:focus {
@@ -232,7 +232,7 @@ tfoot td:first-child { text-align: left; font-family: 'Sarabun', sans-serif; fon
     </div>
   </div>
   <div class="header-actions">
-    <button class="btn btn-ghost" onclick="window.location.href='index.html'" style="border-color:#3fb950;color:#3fb950;">⛽ หน้าหลัก</button>
+    <button class="btn btn-ghost" onclick="window.location.href='index.html'">← กลับหน้าหลัก</button>
     <button class="btn btn-ghost" onclick="window.location.href='tank.html'" style="border-color:#58a6ff;color:#58a6ff;">🛢 แทงค์น้ำมัน</button>
     <button class="btn btn-ghost" onclick="reloadFirebase()" id="btn_reload">🔄 โหลดใหม่</button>
     <button class="btn btn-pdf no-print" onclick="printReport()">⬇ ดาวน์โหลด PDF</button>
@@ -295,20 +295,28 @@ function fmt(n, dec = 2) {
 
 function parseKey(k) {
   const p = k.split('-');
-  return { day: parseInt(p[0]), month: parseInt(p[1]), year2: parseInt(p[2]), shift: p[3] || '' };
+  // รองรับ key "d-m-yy-m"/"d-m-yy-e" (มี shift) และ key เก่า "d-m-yy"
+  return {
+    day:   parseInt(p[0]),
+    month: parseInt(p[1]),
+    year2: parseInt(p[2]),
+    shift: p[3] || ''   // 'm' = กะเช้า, 'e' = กะเย็น, '' = legacy
+  };
 }
 
-// Convert "d-m-yy" → Date object for comparison
+// Convert "d-m-yy[-shift]" → Date object (local midnight) for date-range comparison
 function keyToDate(k) {
   const p = parseKey(k);
-  const year = p.year2 < 100 ? 2500 + p.year2 - 543 : p.year2 - 543; // พ.ศ. → ค.ศ.
-  return new Date(year, p.month - 1, p.day);
+  // year2 เป็น 2 หลักท้ายของ พ.ศ. เช่น 69 = พ.ศ. 2569 = ค.ศ. 2026
+  const yearCE = (p.year2 < 100 ? 2500 + p.year2 : p.year2) - 543;
+  // ใช้ local midnight (ไม่ใช่ UTC) ป้องกัน timezone offset bug ตอน filter
+  return new Date(yearCE, p.month - 1, p.day);
 }
 
 function fmtKey(k) {
   const p = parseKey(k);
   const shiftIcon = p.shift === 'm' ? ' ☀️' : p.shift === 'e' ? ' 🌙' : '';
-  return String(p.day).padStart(2,'0') + ' ' + MONTHS_TH[p.month] + ' 25' + String(p.year2).padStart(2,'0') + shiftIcon;
+  return `${String(p.day).padStart(2,'0')} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}${shiftIcon}`;
 }
 
 function monthGroupKey(k) {
@@ -352,10 +360,13 @@ function computeDay(d) {
   const d4p   = d.d4_price || dp;
   const d4_sale = d4_l * d4p;
 
-  // Promotion
+  // Promotion — air_disc_custom: ตรวจสอบด้วย !== undefined && !== '' (ไม่ใช่ || เพราะ 0 เป็น valid)
   const air_l    = d.air_liter || 0;
   const air_p    = d.air_price_custom || dp;
-  const air_d    = (d.air_disc_custom !== '' && d.air_disc_custom !== undefined) ? (d.air_disc_custom || 0) : disc;
+  const _airDisc = d.air_disc_custom;
+  const air_d    = (_airDisc !== undefined && _airDisc !== '' && _airDisc !== null)
+                    ? parseFloat(_airDisc) || 0
+                    : disc;
   const air_net  = air_l * (air_p - air_d);
 
   const totalFuelFull = g95_sale + g91_sale + d3_sale + d4_sale;
@@ -366,10 +377,10 @@ function computeDay(d) {
   const mustSend  = cashTotal - change;
   const diff      = mustSend - totalFuelFull;
 
-  // tank_in fields (ปริมาณน้ำมันเติมแทงค์ประจำวัน)
-  const in_g95 = d.in_g95 || 0;
-  const in_g91 = d.in_g91 || 0;
-  const in_d   = d.in_d   || 0;
+  // tank_in fields — index.html บันทึกเป็น "tank_in_g95" (ไม่ใช่ "in_g95")
+  const in_g95 = d.tank_in_g95 || d.in_g95 || 0;
+  const in_g91 = d.tank_in_g91 || d.in_g91 || 0;
+  const in_d   = d.tank_in_d   || d.in_d   || 0;
 
   return {
     g95_l, g95_sale,
@@ -386,9 +397,10 @@ function computeDay(d) {
 
 function computeCash(d) {
   if (!d.cash) return 0;
-  const denoms = [1000,500,100,50,20,1];
+  // ต้องตรงกับ DENOMS ใน index.html: 1000,500,100,50,20,10,5,2,1
+  const denoms = [1000, 500, 100, 50, 20, 10, 5, 2, 1];
   return denoms.reduce((s, v) => {
-    const qty = d.cash[String(v)] || d.cash[v] || 0;
+    const qty = d.cash[String(v)] ?? d.cash[v] ?? 0;
     return s + qty * v;
   }, 0);
 }
@@ -409,9 +421,16 @@ function getFilteredKeys() {
       if (monthGroupKey(k) !== month) return false;
     }
     if (from || to) {
-      const d = keyToDate(k);
-      if (from && d < new Date(from)) return false;
-      if (to   && d > new Date(to))   return false;
+      const d = keyToDate(k);  // local midnight
+      if (from) {
+        // new Date("yyyy-mm-dd") = UTC midnight → แปลงเป็น local midnight
+        const [fy, fm, fd] = from.split('-').map(Number);
+        if (d < new Date(fy, fm - 1, fd)) return false;
+      }
+      if (to) {
+        const [ty, tm, td] = to.split('-').map(Number);
+        if (d > new Date(ty, tm - 1, td)) return false;
+      }
     }
     return true;
   });
@@ -447,7 +466,13 @@ function render() {
   const body = document.getElementById('report_body');
   const empty = document.getElementById('empty');
 
-  document.getElementById('status_bar').textContent = `แสดง ${keys.length} วัน จาก ${Object.keys(sheetData).length} วัน`;
+  // นับวันจริง (unique d-m-y ไม่นับ shift ซ้ำ)
+  const uniqueDays = new Set(keys.map(k => {
+    const p = parseKey(k); return `${p.day}-${p.month}-${p.year2}`;
+  })).size;
+
+  document.getElementById('status_bar').textContent =
+    `แสดง ${uniqueDays} วัน (${keys.length} กะ) จาก ${Object.keys(sheetData).length} records`;
 
   if (keys.length === 0) {
     body.style.display = 'none';
@@ -457,12 +482,13 @@ function render() {
   empty.style.display = 'none';
   body.style.display  = 'block';
 
-  // เรียงวันจากน้อยไปมาก
+  // เรียงวันจากน้อยไปมาก (รองรับ shift key)
   keys.sort((a, b) => {
     const pa = parseKey(a), pb = parseKey(b);
     if (pa.year2 !== pb.year2) return pa.year2 - pb.year2;
     if (pa.month !== pb.month) return pa.month - pb.month;
-    if (pa.day !== pb.day) return pa.day - pb.day;
+    if (pa.day   !== pb.day)   return pa.day   - pb.day;
+    // กะเช้า (m) ก่อน กะเย็น (e)
     const so = { 'm': 0, 'e': 1, '': 0 };
     return (so[pa.shift]||0) - (so[pb.shift]||0);
   });
@@ -500,7 +526,7 @@ function render() {
     <div class="stat-card blue">
       <div class="stat-label">ยอดส่งรวม (หักทอน)</div>
       <div class="stat-value">${fmt(totSend)}<span class="stat-unit">฿</span></div>
-      <div class="stat-sub">${keys.length} วันทำการ</div>
+      <div class="stat-sub">${uniqueDays} วันทำการ (${keys.length} กะ)</div>
     </div>
     <div class="stat-card ${totDiff >= 0 ? 'green' : 'red'}">
       <div class="stat-label">ผลต่างรวม</div>
@@ -623,7 +649,7 @@ function render() {
       <div>
         <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;">ยอดรวมทั้งหมด</div>
         <div style="font-family:'IBM Plex Mono',monospace;font-size:24px;font-weight:700;color:var(--accent)">${fmt(totFull)} ฿</div>
-        <div style="font-size:12px;color:var(--text-muted);">${fmt(totLiter)} ลิตร · ${keys.length} วัน</div>
+        <div style="font-size:12px;color:var(--text-muted);">${fmt(totLiter)} ลิตร · ${uniqueDays} วัน (${keys.length} กะ)</div>
       </div>
       <div style="width:1px;height:50px;background:var(--border);"></div>
       <div>
@@ -642,12 +668,13 @@ function render() {
 
   // update print subtitle
   document.getElementById('print_subtitle').textContent =
-    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${keys.length} วัน`;
+    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${keys.length} กะ`;
 }
 
 function printReport() {
+  const keys = getFilteredKeys();
   document.getElementById('print_subtitle').textContent =
-    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${getFilteredKeys().length} วัน`;
+    `พิมพ์เมื่อ: ${new Date().toLocaleString('th-TH')} · แสดง ${keys.length} กะ`;
   window.print();
 }
 </script>
@@ -666,7 +693,7 @@ const FIREBASE_CONFIG = {
   appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
 };
 
-const app = initializeApp(FIREBASE_CONFIG, 'report-' + Date.now());
+const app = initializeApp(FIREBASE_CONFIG);
 const db  = getFirestore(app);
 let _unsub = null;
 
@@ -718,30 +745,18 @@ window.reloadFirebase = async function() {
 };
 
 async function initLoad() {
-  // retry up to 3 times with delay
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      mergeData(await loadFromFirebase());
-      document.getElementById('loading').style.display    = 'none';
-      document.getElementById('filter_bar').style.display = 'flex';
-      document.getElementById('report_body').style.display = 'block';
-      document.getElementById('setup_card').style.display  = 'none';
-      if (typeof populateMonthFilter === 'function') populateMonthFilter();
-      if (typeof render === 'function') render();
-      startRealtimeSync();
-      return; // success
-    } catch(e) {
-      if (attempt < 3) {
-        await new Promise(r => setTimeout(r, 1500 * attempt));
-        continue;
-      }
-      document.getElementById('loading').style.display   = 'none';
-      document.getElementById('setup_card').style.display = 'block';
-      const errEl = document.getElementById('setup_error');
-      if (errEl) errEl.innerHTML =
-        '❌ ' + e.message +
-        '<br><small style="color:#8b949e;">ลองใหม่อีกครั้ง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</small>';
-    }
+  try {
+    mergeData(await loadFromFirebase());
+    document.getElementById('loading').style.display   = 'none';
+    document.getElementById('filter_bar').style.display = 'flex';
+    document.getElementById('report_body').style.display = 'block';
+    if (typeof populateMonthFilter === 'function') populateMonthFilter();
+    if (typeof render === 'function') render();
+    startRealtimeSync();
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup_card').style.display = 'block';
+    document.getElementById('setup_error').textContent = '❌ ' + e.message;
   }
 }
 
