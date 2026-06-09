@@ -1469,19 +1469,8 @@ function confirmAddDate() {
   renderAllGroups();
   closeAddDate();
 
-  // 1) ล้างฟอร์มทั้งหมดให้ว่าง
-  clearAll();
-
-  // 2) set default values สำหรับวันใหม่
-  document.getElementById('g_change').value = 3700;
-  document.getElementById('g_discount_per_liter').value = 0.5;
-
-  // 3) mark tab ใหม่ active และ update header
-  document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
-  const newTab = document.querySelector(`.date-tab[data-date="${key}"]`);
-  if (newTab) newTab.classList.add('active');
-  const _cShift = shift === 'm' ? ' ☀️' : shift === 'e' ? ' 🌙' : '';
-  document.getElementById('header-date').textContent = key + _cShift;
+  // โหลดวันใหม่ผ่าน loadDate เหมือนกับการกดวันปกติ (จะ mark active + update header + populate form ครบ)
+  loadDate(key);
 }
 
 // Close modal on backdrop click
