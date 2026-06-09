@@ -522,10 +522,9 @@ function keyToDate(k) {
 }
 
 function fmtKey(k) {
-  const p = parseKey(k);
-  const shiftIcon = p.shift === 'm' ? ' ☀️' : p.shift === 'e' ? ' 🌙' : '';
-  return `${String(p.day).padStart(2,'0')} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}${shiftIcon}`;
-} ${MONTHS_TH[p.month]} 25${String(p.year2).padStart(2,'0')}`;
+  var p = parseKey(k);
+  var si = p.shift === 'm' ? ' ☀️' : p.shift === 'e' ? ' 🌙' : '';
+  return String(p.day).padStart(2,'0') + ' ' + (MONTHS_TH[p.month]||'') + ' 25' + String(p.year2).padStart(2,'0') + si;
 }
 
 function getSortedKeys() {
@@ -964,16 +963,30 @@ function initDate() {
 // ============================================================
 window.reloadFirebase = async function() {
   const btn = document.getElementById('btn_reload');
-  const orig = btn.textContent;
-  btn.textContent = '⏳...'; btn.disabled = true;
+  const orig = btn ? btn.textContent : '🔄 โหลดใหม่';
+  if (btn) { btn.textContent = '⏳...'; btn.disabled = true; }
+  // ซ่อน setup_card และแสดง spinner
+  const setupEl = document.getElementById('setup_card');
+  const loadEl  = document.getElementById('loading');
+  if (setupEl) setupEl.style.display = 'none';
+  if (loadEl)  { loadEl.innerHTML = '<div class="spinner"></div>กำลังโหลด...'; loadEl.style.display = 'block'; }
   try {
     if (window._fbLoadFn) await window._fbLoadFn();
+    if (loadEl)  loadEl.style.display = 'none';
+    const tcEl = document.getElementById('tank_content');
+    if (tcEl) tcEl.style.display = 'block';
     calcAll();
-    btn.textContent = '✅ โหลดแล้ว';
-    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 1500);
+    if (btn) { btn.textContent = '✅ โหลดแล้ว'; }
+    setTimeout(() => { if(btn){btn.textContent = orig; btn.disabled = false;} }, 1500);
   } catch(e) {
-    btn.textContent = '❌ ล้มเหลว'; btn.disabled = false;
-    setTimeout(() => { btn.textContent = orig; btn.disabled = false; }, 2000);
+    if (loadEl) loadEl.style.display = 'none';
+    if (setupEl) {
+      setupEl.style.display = 'block';
+      const errEl = document.getElementById('setup_error');
+      if (errEl) errEl.innerHTML = '❌ ' + e.message + '<br><small style="color:#8b949e;">ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่</small>';
+    }
+    if (btn) { btn.textContent = '❌ ล้มเหลว'; btn.disabled = false; }
+    setTimeout(() => { if(btn){btn.textContent = orig;} }, 2000);
   }
 };
 </script>
@@ -992,7 +1005,7 @@ const FIREBASE_CONFIG = {
   appId: "1:94552958790:web:12b94d4d4d7a1ac6e4a747"
 };
 
-const app = initializeApp(FIREBASE_CONFIG);
+const app = initializeApp(FIREBASE_CONFIG, 'tank-' + Date.now());
 const db  = getFirestore(app);
 let _unsub = null;
 
@@ -1023,19 +1036,32 @@ function startSync() {
 }
 
 async function initLoad() {
-  try {
-    mergeData(await loadFromFirebase());
-    document.getElementById('loading').style.display      = 'none';
-    document.getElementById('tank_content').style.display = 'block';
-    loadCap();
-    loadRefillLog();
-    initDate();
-    calcAll();
-    startSync();
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('setup_card').style.display = 'block';
-    document.getElementById('setup_error').textContent = '❌ ' + e.message;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      mergeData(await loadFromFirebase());
+      document.getElementById('loading').style.display      = 'none';
+      document.getElementById('tank_content').style.display = 'block';
+      document.getElementById('setup_card').style.display   = 'none';
+      loadCap();
+      loadRefillLog();
+      initDate();
+      calcAll();
+      startSync();
+      return;
+    } catch(e) {
+      if (attempt < 3) {
+        document.getElementById('loading').innerHTML =
+          '<div class="spinner"></div>กำลังลองใหม่ (' + attempt + '/3)...';
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+        continue;
+      }
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('setup_card').style.display = 'block';
+      const errEl = document.getElementById('setup_error');
+      if (errEl) errEl.innerHTML =
+        '❌ ' + e.message +
+        '<br><small style="color:#8b949e;">ลองใหม่อีกครั้ง หรือตรวจสอบการเชื่อมต่ออินเทอร์เน็ต</small>';
+    }
   }
 }
 
